@@ -1,0 +1,79 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>sample2</title></head>
+<body>
+<img id="src" src="demo-zombie-src.png">
+<pre id="out"></pre>
+<div id="grid"></div>
+<script>
+const img = document.getElementById('src');
+function kind(r,g,b,a) {
+  if (a < 24) return 'empty';
+  if (r > 242 && g > 242 && b > 242) return 'empty';
+  const max = Math.max(r,g,b), min = Math.min(r,g,b);
+  if (max < 42) return 'dark';
+  if (g > r + 18 && g > b + 8 && g > 70) return 'green';
+  if (b > 90 && g > 90 && r < 120 && b > r && g > r) return 'cyan';
+  if (b > r + 15 && b > g && b > 60) return 'blue';
+  if (max - min < 36 && max < 200) return 'gray';
+  if (max < 80) return 'dark';
+  return 'empty';
+}
+img.onload = () => {
+  const probe = document.createElement('canvas');
+  probe.width = img.naturalWidth;
+  probe.height = img.naturalHeight;
+  const pg = probe.getContext('2d');
+  pg.drawImage(img, 0, 0);
+  const src = pg.getImageData(0, 0, probe.width, probe.height).data;
+  let minX = probe.width, minY = probe.height, maxX = 0, maxY = 0;
+  for (let y = 0; y < probe.height; y++) {
+    for (let x = 0; x < probe.width; x++) {
+      const i = (y * probe.width + x) * 4;
+      if (kind(src[i], src[i+1], src[i+2], src[i+3]) === 'empty') continue;
+      if (x < minX) minX = x;
+      if (y < minY) minY = y;
+      if (x > maxX) maxX = x;
+      if (y > maxY) maxY = y;
+    }
+  }
+  const cols = 12;
+  const cropW = maxX - minX + 1;
+  const cropH = maxY - minY + 1;
+  const rows = Math.round(cols * cropH / cropW);
+  const names = [];
+  const COL = { empty:'#f7f1e6', green:'#5cb030', cyan:'#3ec6d6', blue:'#2a3ea8', gray:'#9a9a9a', dark:'#2a2a2a' };
+  const grid = document.getElementById('grid');
+  grid.style.display = 'grid';
+  grid.style.gridTemplateColumns = `repeat(${cols}, 22px)`;
+  grid.style.gap = '1px';
+  for (let ry = 0; ry < rows; ry++) {
+    for (let rx = 0; rx < cols; rx++) {
+      const x0 = minX + Math.floor(rx * cropW / cols);
+      const x1 = minX + Math.floor((rx + 1) * cropW / cols);
+      const y0 = minY + Math.floor(ry * cropH / rows);
+      const y1 = minY + Math.floor((ry + 1) * cropH / rows);
+      const tally = {};
+      for (let y = y0; y < y1; y++) {
+        for (let x = x0; x < x1; x++) {
+          const i = (y * probe.width + x) * 4;
+          const k = kind(src[i], src[i+1], src[i+2], src[i+3]);
+          tally[k] = (tally[k] || 0) + 1;
+        }
+      }
+      let best = 'empty', n = -1;
+      for (const k in tally) if (tally[k] > n) { n = tally[k]; best = k; }
+      if (best === 'empty' && (tally.green || tally.cyan || tally.blue || tally.gray || tally.dark)) {
+        best = Object.entries(tally).sort((a,b)=>b[1]-a[1]).find(([k])=>k!=='empty')[0];
+      }
+      names.push(best);
+      const cell = document.createElement('div');
+      cell.style.width = '22px';
+      cell.style.height = '22px';
+      cell.style.background = COL[best];
+      grid.appendChild(cell);
+    }
+  }
+  document.getElementById('out').textContent = JSON.stringify({ cols, rows, names });
+};
+</script>
+</body></html>

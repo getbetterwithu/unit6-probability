@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>좀비 칸 그림</title>
+<style>
+  body { margin: 0; background: #1a140f; color: #f0e6d2; font-family: sans-serif; display: flex; gap: 24px; padding: 24px; }
+  canvas { background: #111; image-rendering: pixelated; }
+  #grid { display: grid; gap: 1px; background: #3a2a1c; }
+</style>
+</head>
+<body>
+<img id="src" src="demo-zombie-src.png" alt="">
+<div id="grid"></div>
+<script>
+const img = document.getElementById('src');
+img.onload = () => {
+  const cols = 10;
+  const rows = Math.max(10, Math.round(cols * img.naturalHeight / img.naturalWidth));
+  const c = document.createElement('canvas');
+  c.width = cols; c.height = rows;
+  const g = c.getContext('2d');
+  g.drawImage(img, 0, 0, cols, rows);
+  const data = g.getImageData(0, 0, cols, rows).data;
+  const grid = document.getElementById('grid');
+  grid.style.gridTemplateColumns = `repeat(${cols}, 28px)`;
+  const bits = [];
+  for (let i = 0; i < cols * rows; i++) {
+    const a = data[i * 4 + 3];
+    const r = data[i * 4], gg = data[i * 4 + 1], b = data[i * 4 + 2];
+    const cell = document.createElement('div');
+    cell.style.width = '28px';
+    cell.style.height = '28px';
+    if (a < 40) {
+      cell.style.background = '#f7f1e6';
+      bits.push('0');
+    } else {
+      cell.style.background = `rgb(${r},${gg},${b})`;
+      bits.push('1');
+    }
+    grid.appendChild(cell);
+  }
+  document.title = cols + 'x' + rows;
+  console.log('SIZE', cols, rows);
+  console.log(bits.join(''));
+};
+</script>
+</body>
+</html>

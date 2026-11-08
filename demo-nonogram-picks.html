@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>네모로직 그림 후보</title>
+<style>
+  body { margin: 0; background: #1a140f; color: #f0e6d2; font-family: sans-serif; }
+  h1 { font-size: 18px; margin: 16px; }
+  .row { display: flex; gap: 18px; padding: 8px 16px 24px; }
+  .card { background: #24180f; border: 2px solid #e5a93b; border-radius: 12px; padding: 12px; width: 280px; }
+  .card h2 { margin: 0 0 6px; font-size: 16px; color: #e5a93b; }
+  .card p { margin: 0 0 10px; font-size: 13px; line-height: 1.4; color: #d9cbb8; }
+  .grid { display: grid; grid-template-columns: repeat(10, 18px); gap: 2px; }
+  .on { background: #2a2118; width: 18px; height: 18px; }
+  .off { background: #f7f1e6; width: 18px; height: 18px; }
+  .tag { font-size: 12px; margin-top: 8px; }
+</style>
+</head>
+<body>
+<h1>10×10 네모로직. 맞추면 나오는 그림</h1>
+<div class="row" id="row"></div>
+<script>
+const sets = [
+  {
+    name: 'A. 다이아 테두리',
+    why: '소폴로스 지도. 맞으면 다이아 윤곽이 나온다.',
+    rec: true,
+    g: [
+      [0,0,1,1,1,1,1,1,0,0],
+      [0,1,1,0,0,0,0,1,1,0],
+      [1,1,0,0,0,0,0,0,1,1],
+      [1,0,0,0,0,0,0,0,0,1],
+      [1,0,0,0,0,0,0,0,0,1],
+      [1,0,0,0,0,0,0,0,0,1],
+      [1,0,0,0,0,0,0,0,0,1],
+      [1,1,0,0,0,0,0,0,1,1],
+      [0,1,1,0,0,0,0,1,1,0],
+      [0,0,1,1,1,1,1,1,0,0],
+    ]
+  },
+  {
+    name: 'B. 주사위 다섯 눈',
+    why: '정육면체 승부 앞. 맞으면 눈 다섯이 나온다.',
+    g: [
+      [0,0,0,0,0,0,0,0,0,0],
+      [0,1,1,0,0,0,0,1,1,0],
+      [0,1,1,0,0,0,0,1,1,0],
+      [0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,1,1,0,0,0,0],
+      [0,0,0,0,1,1,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0],
+      [0,1,1,0,0,0,0,1,1,0],
+      [0,1,1,0,0,0,0,1,1,0],
+      [0,0,0,0,0,0,0,0,0,0],
+    ]
+  },
+  {
+    name: 'C. 아래 화살',
+    why: '광맥으로 내려가는 길. 맞으면 화살이다.',
+    g: [
+      [0,0,0,0,1,1,0,0,0,0],
+      [0,0,0,0,1,1,0,0,0,0],
+      [0,0,0,0,1,1,0,0,0,0],
+      [0,0,0,0,1,1,0,0,0,0],
+      [0,0,1,1,1,1,1,1,0,0],
+      [0,0,0,1,1,1,1,0,0,0],
+      [0,0,0,0,1,1,0,0,0,0],
+      [0,0,0,0,1,1,0,0,0,0],
+      [0,0,0,0,1,1,0,0,0,0],
+      [0,0,0,0,1,1,0,0,0,0],
+    ]
+  }
+];
+const row = document.getElementById('row');
+for (const s of sets) {
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.innerHTML = `<h2>${s.name}</h2><p>${s.why}</p>`;
+  const grid = document.createElement('div');
+  grid.className = 'grid';
+  s.g.flat().forEach((bit) => {
+    const c = document.createElement('div');
+    c.className = bit ? 'on' : 'off';
+    grid.appendChild(c);
+  });
+  card.appendChild(grid);
+  if (s.rec) {
+    const tag = document.createElement('div');
+    tag.className = 'tag';
+    tag.textContent = '추천';
+    card.appendChild(tag);
+  }
+  row.appendChild(card);
+}
+</script>
+</body>
+</html>
