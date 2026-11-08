@@ -36,6 +36,7 @@ export function createDialogue({ speakerEl, textEl, hintEl, onWaitWidget, onAdva
     i += 1;
     if (i >= queue.length) return;
     const step = queue[i];
+    if (onAdvance) onAdvance(step, i);
     if (step.type === 'widget') {
       locked = true;
       if (onWaitWidget) onWaitWidget(step, () => { locked = false; next(); });
@@ -43,13 +44,12 @@ export function createDialogue({ speakerEl, textEl, hintEl, onWaitWidget, onAdva
     }
     show(step);
     hint();
-    if (onAdvance) onAdvance(step, i);
   }
 
   function hint() {
     if (!hintEl) return;
     const nxt = queue[i + 1];
-    if (nxt && nxt.type === 'widget') hintEl.textContent = '클릭하여 놀이 시작 ▼';
+    if (nxt && nxt.type === 'widget') hintEl.textContent = '클릭하여 도전 시작 ▼';
     else hintEl.textContent = '엔터, 스페이스, 클릭으로 진행 ▼';
   }
 

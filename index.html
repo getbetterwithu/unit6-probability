@@ -7,16 +7,16 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
   <style>
     :root {
-      --bg-dark: #12141a;
-      --card-bg: rgba(22, 27, 34, 0.92);
+      --bg-dark: #0b0d12;
+      --card-bg: rgba(22, 27, 34, 0.94);
       --accent: #e5a93b;
       --text-main: #f0f6fc;
       --text-dim: #8b949e;
-      --border: rgba(240, 246, 252, 0.12);
+      --border: rgba(240, 246, 252, 0.15);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
     body {
-      background: var(--bg-dark);
+      background: #000;
       color: var(--text-main);
       font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", sans-serif;
       overflow: hidden;
@@ -34,29 +34,71 @@
       border-radius: 8px;
     }
     #tension-wrap {
-      position: absolute; top: 10px; left: 24px; right: 24px; height: 8px;
-      background: rgba(255,255,255,0.08); border-radius: 4px; z-index: 5;
+      position: absolute; top: 12px; left: 24px; right: 24px; height: 8px;
+      background: rgba(255,255,255,0.08); border-radius: 4px; z-index: 10;
     }
     #tension-fill { height: 100%; width: 0; background: var(--accent); border-radius: 4px; transition: width 0.35s; }
-    #stage-layer { position: absolute; inset: 0 0 150px 0; }
-    #stage-layer {
-      background: linear-gradient(180deg, #3a2a1c 0%, #1a120c 55%, #0e0c0a 100%);
+
+    /* ===== 무대 레이어 (배경 및 캐릭터) ===== */
+    #stage-layer { position: absolute; inset: 0; overflow: hidden; }
+    #stage-bg {
+      position: absolute; inset: 0;
+      background-size: cover;
+      background-position: center;
+      transition: background-image 0.6s ease;
     }
-    .actor {
-      position: absolute; bottom: 150px; width: 88px; text-align: center; color: #f0e6d2;
-      font-size: 0.85rem; font-weight: 700;
+    #character-layer {
+      position: absolute; inset: 0 0 130px 0;
+      pointer-events: none;
+      z-index: 2;
+      transition: opacity 0.3s;
     }
-    .actor i {
-      display: block; width: 64px; height: 108px; margin: 0 auto 6px; border-radius: 32px 32px 12px 12px;
+    .character {
+      position: absolute; bottom: 0; height: 86%; max-height: 490px;
+      transition: opacity 0.35s ease, transform 0.35s ease, filter 0.35s ease;
+      pointer-events: none;
     }
-    .actor.theron { left: 18%; }
-    .actor.theron i { background: #c4783a; }
-    .actor.iris { right: 18%; }
-    .actor.iris i { background: #d7c4a3; }
-    #widget-root { background: rgba(6,5,4,0.55); display: flex; align-items: center; justify-content: center; }
+    .character img {
+      height: 100%; width: auto; display: block;
+      filter: drop-shadow(0 10px 24px rgba(0,0,0,0.7));
+    }
+    .character.left { left: 8%; transform-origin: bottom center; }
+    .character.right { right: 8%; transform-origin: bottom center; }
+    .character.active {
+      filter: brightness(1.05) drop-shadow(0 0 20px rgba(229,169,59,0.45));
+      transform: translateY(-8px) scale(1.02);
+      z-index: 3;
+      opacity: 1;
+    }
+    .character.inactive {
+      filter: brightness(0.65);
+      transform: translateY(0) scale(0.98);
+      z-index: 2;
+      opacity: 0.85;
+    }
+    .character.hidden {
+      opacity: 0;
+      transform: translateY(30px);
+      pointer-events: none;
+    }
+    #stage-layer:has(~ #widget-root:not([hidden])) #character-layer {
+      opacity: 0.12;
+    }
+
+    /* ===== 상호작용 및 위젯 ===== */
+    #widget-root {
+      position: absolute; inset: 16px 16px 140px 16px;
+      z-index: 8;
+      background: rgba(6,5,4,0.65);
+      backdrop-filter: blur(8px);
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 12px;
+    }
+    #widget-root[hidden] { display: none !important; }
+
     .popup {
       width: min(980px, 98%); background: #24180f; border: 2px solid #e5a93b;
-      border-radius: 16px; padding: 18px 20px; box-shadow: 0 16px 40px rgba(0,0,0,0.45);
+      border-radius: 16px; padding: 18px 20px; box-shadow: 0 16px 40px rgba(0,0,0,0.65);
     }
     .path-pop { background: #fff; color: #1a1a1a; width: min(980px, 98%); }
     .path-pop svg { width: 100%; height: min(62vh, 520px); }
@@ -76,12 +118,8 @@
     .f5 { transform: rotateX(-90deg) translateZ(42px); }
     .roll-form { display: flex; gap: 8px; align-items: center; margin-top: 8px; }
     .roll-form input { width: 72px; font-size: 1.1rem; padding: 6px 8px; border-radius: 8px; border: 1px solid #e5a93b; }
-    .roll-form button { background: #e5a93b; border: 0; border-radius: 8px; padding: 8px 12px; font-weight: 700; }
+    .roll-form button { background: #e5a93b; border: 0; border-radius: 8px; padding: 8px 12px; font-weight: 700; cursor: pointer; }
 
-    #widget-root { position: absolute; inset: 8px 8px 108px 8px; z-index: 8; }
-    #widget-root[hidden] { display: none !important; }
-    #stage-layer:has(~ #widget-root:not([hidden])) .actor { opacity: 0.18; transition: opacity 0.3s; }
-    .actor { transition: opacity 0.3s; }
     #focus-lines {
       pointer-events: none; position: absolute; inset: 0; opacity: 0; z-index: 7;
       background: repeating-linear-gradient(90deg, transparent, transparent 46%, rgba(229,169,59,0.25) 50%, transparent 54%);
@@ -91,16 +129,19 @@
     #evidence-bag { position: absolute; top: 24px; left: 24px; z-index: 6; min-height: 28px; }
     #evidence-bag .card {
       background: #2b2110; color: var(--accent); border: 1px solid var(--accent);
-      padding: 6px 10px; border-radius: 8px; font-size: 0.85rem;
+      padding: 6px 12px; border-radius: 8px; font-size: 0.9rem; font-weight: 700; box-shadow: 0 4px 12px rgba(0,0,0,0.5);
     }
+
+    /* ===== 대화창 레이어 ===== */
     #dialogue-layer {
-      position: absolute; bottom: 16px; left: 24px; right: 24px; min-height: 140px;
+      position: absolute; bottom: 16px; left: 24px; right: 24px; min-height: 120px;
       background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px;
-      padding: 16px 24px; backdrop-filter: blur(12px);
-      display: flex; flex-direction: column; justify-content: space-between; cursor: pointer; z-index: 4;
+      padding: 16px 24px; backdrop-filter: blur(14px);
+      display: flex; flex-direction: column; justify-content: space-between; cursor: pointer; z-index: 5;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.7);
     }
-    .speaker-name { font-weight: 700; font-size: 1.1rem; color: var(--accent); margin-bottom: 6px; }
-    .dialogue-text { font-size: 1.05rem; line-height: 1.6; min-height: 50px; }
+    .speaker-name { font-weight: 700; font-size: 1.15rem; color: var(--accent); margin-bottom: 6px; }
+    .dialogue-text { font-size: 1.05rem; line-height: 1.6; min-height: 48px; }
     .next-indicator { align-self: flex-end; font-size: 0.85rem; color: var(--text-dim); animation: pulse 1.2s infinite; }
     @keyframes pulse { 0%,100%{opacity:.4} 50%{opacity:1} }
     .screen-shake { animation: shake 400ms linear both; }
@@ -131,47 +172,32 @@
     .f-top { transform: rotateX(90deg) translateZ(40px); }
     .f-bottom { transform: rotateX(-90deg) translateZ(40px); }
     .dice-readout { font-size: 0.95rem; }
-    .quiz { color: var(--text-main); display: flex; flex-direction: column; gap: 12px; padding-top: 12px; }
-    .quiz-prompt { font-size: 1.05rem; line-height: 1.5; }
-    .quiz-choices { display: flex; gap: 10px; flex-wrap: wrap; }
+    .quiz { color: var(--text-main); display: flex; flex-direction: column; gap: 12px; padding: 12px; max-width: 800px; width: 100%; }
+    .quiz-prompt { font-size: 1.1rem; line-height: 1.6; }
+    .quiz-choices { display: flex; gap: 12px; flex-wrap: wrap; }
     .quiz-choice {
       background: #1c2430; color: var(--text-main); border: 1px solid var(--accent);
-      padding: 10px 16px; border-radius: 8px; font-size: 1.1rem; cursor: pointer;
+      padding: 12px 20px; border-radius: 8px; font-size: 1.15rem; cursor: pointer; transition: background 0.2s;
     }
-    .quiz-feedback { color: #ffb4a2; min-height: 1.4em; }
+    .quiz-choice:hover { background: #263342; }
+    .quiz-feedback { color: #ffb4a2; min-height: 1.4em; font-weight: 600; }
     #dice-measure {
       align-self: flex-start; background: var(--accent); color: #1a1408; border: 0;
-      padding: 8px 14px; border-radius: 8px; font-weight: 700; cursor: pointer;
+      padding: 8px 16px; border-radius: 8px; font-weight: 700; cursor: pointer;
     }
-  
-    #path-svg { width: 100%; height: 220px; }
-    #path-svg .stem { stroke: #8d6e63; stroke-width: 4; }
-    #path-svg .branch { stroke: #5c4636; stroke-width: 6; }
-    #path-svg .branch.on { stroke: #e5a93b; stroke-width: 8; }
-    #path-svg .nd circle { fill: #f0e6d2; }
-    #path-svg .nd.hot { cursor: pointer; }
-    #path-svg .nd.hot circle { fill: #e5a93b; }
-    #path-svg text { font-size: 13px; font-weight: 700; fill: #2a1c0c; }
-    .pups { display: flex; gap: 12px; justify-content: center; margin: 16px 0; }
-    .pup {
-      width: 64px; height: 64px; border-radius: 50% 50% 40% 40%; border: 3px solid #3a2a1c;
-      font-size: 22px; font-weight: 800; color: #2a1c0c; cursor: pointer;
-    }
-
-    .nono-grid { display: grid; gap: 4px; justify-content: center; margin-top: 8px; }
-    .nono-grid .clue { font-size: 11px; color: #f0e6d2; display: flex; align-items: center; justify-content: flex-end; white-space: pre; line-height: 1.1; }
-    .nono-grid .clue.top { width: 32px; max-width: 32px; box-sizing: border-box; flex-direction: column; align-items: center; justify-content: end; min-height: 40px; overflow: hidden; }
-    .nono-grid .clue.top span { display: block; height: 16px; line-height: 16px; font-size: 13px; }
-    .nono-grid .cell { width: 32px; height: 32px; background: #f7f1e6; border: 1px solid #6b4a22; border-radius: 2px; cursor: pointer; padding: 0; }
-    #nono-msg { margin-top: 12px; }
-    .nono-grid .cell.on { background: #3a3a3a; }
-</style>
+  </style>
 </head>
 <body>
   <div id="game-container">
     <div id="tension-wrap"><div id="tension-fill"></div></div>
     <div id="evidence-bag"></div>
-    <div id="stage-layer"><div class="actor theron"><i></i>테론</div><div class="actor iris"><i></i>이리스</div></div>
+    <div id="stage-layer">
+      <div id="stage-bg"></div>
+      <div id="character-layer">
+        <div id="char-left" class="character left hidden"><img src="" alt=""></div>
+        <div id="char-right" class="character right hidden"><img src="" alt=""></div>
+      </div>
+    </div>
     <div id="focus-lines"></div>
     <div id="widget-root" hidden></div>
     <div id="dialogue-layer">
@@ -181,6 +207,6 @@
     </div>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
-  <script type="module" src="engine/app.js?v=73"></script>
+  <script type="module" src="engine/app.js?v=75"></script>
 </body>
 </html>
