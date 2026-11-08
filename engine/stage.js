@@ -11,19 +11,21 @@ const CHAR_KEYS = {
   '소폴로스': 'merchant',
   '피타고라스': 'pythagoras',
   '탈레스': 'thales',
-  '피캐스': 'rival',
-  '광부': 'rival',
+  '피캐스': 'pecas',     // 정본 마스코트 굴 생물
+  '광부': 'miner',       // 정본 베테랑 광부
 };
 
 // 배경 매핑
 const BG_MAP = {
   classroom: `${BG_BASE}/classroom.png`,
   merchant_camp: `${BG_BASE}/merchant_camp.png`,
-  temple_site1: `${BG_BASE}/temple_site1.png`,
-  basement: `${BG_BASE}/basement.png`,
+  mine_shaft: `${BG_BASE}/mine_shaft.png`,
+  diamond_cave: `${BG_BASE}/diamond_cave.png`,
+  diamond_vault: `${BG_BASE}/diamond_vault.png`,
   library: `${BG_BASE}/library.png`,
   warehouse: `${BG_BASE}/warehouse.png`,
-  title: `${BG_BASE}/title.png`,
+  title: `${BG_BASE}/title_probability.png`,
+  title_probability: `${BG_BASE}/title_probability.png`,
 };
 
 function getCharSrc(key, emotion = 'neutral') {
@@ -46,7 +48,7 @@ export function createStage(containerEl) {
     const url = BG_MAP[bgKey] || `${BG_BASE}/${bgKey}.png`;
     currentBg = bgKey;
     if (bgEl) {
-      bgEl.style.backgroundImage = `linear-gradient(to top, rgba(11,13,18,0.92) 0%, rgba(11,13,18,0.4) 35%, transparent 65%), url("${url}")`;
+      bgEl.style.backgroundImage = `linear-gradient(to top, rgba(11,13,18,0.92) 0%, rgba(11,13,18,0.38) 35%, transparent 65%), url("${url}")`;
     }
   }
 
@@ -79,7 +81,6 @@ export function createStage(containerEl) {
       setBg(step.bg);
     }
 
-    // 좌/우 캐릭터 결정
     const left = step.left;
     const right = step.right;
     const activeSide = step.activeSide || (step.speaker === (right?.name) ? 'right' : 'left');

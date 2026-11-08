@@ -1,5 +1,6 @@
 import { renderMath } from '../engine/math.js';
 import { PROBLEMS } from '../data/problems.js?v=73';
+import { playSfx } from '../engine/sound.js?v=1';
 
 export function mountQuiz(root, problemId, { onSolved }) {
   const problem = PROBLEMS[problemId];
@@ -25,17 +26,17 @@ export function mountQuiz(root, problemId, { onSolved }) {
     btn.innerHTML = choice;
     renderMath(btn);
     btn.addEventListener('click', () => {
-      const picked = btn.textContent.replace(/\s/g, '');
       const want = problem.answer.replace(/\$/g, '').replace(/\s/g, '');
       const got = choice.replace(/\$/g, '').replace(/\s/g, '');
       if (got === want) {
+        playSfx('correct');
         feedback.textContent = '맞다.';
         box.querySelectorAll('button').forEach((b) => { b.disabled = true; });
         if (onSolved) onSolved(problem);
       } else {
+        playSfx('wrong');
         feedback.innerHTML = problem.wrong;
         renderMath(feedback);
-        void picked;
       }
     });
     box.appendChild(btn);

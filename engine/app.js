@@ -1,9 +1,10 @@
-import { STEPS } from '../data/scenario.js?v=75';
+import { STEPS } from '../data/scenario.js?v=76';
 import { createDialogue } from './dialogue.js?v=4';
 import { setTension, refute } from './director.js?v=12';
-import { createStage } from './stage.js?v=1';
+import { createStage } from './stage.js?v=2';
+import { playBgm, playSfx, toggleMute, isMuted } from './sound.js?v=1';
 import { mountDiceInspector } from '../widgets/dice-inspector.js';
-import { mountQuiz } from '../widgets/quiz.js?v=73';
+import { mountQuiz } from '../widgets/quiz.js?v=74';
 import { mountDiceRoll } from '../widgets/dice-roll.js';
 import { mountPathLink } from '../widgets/path-link.js?v=19';
 import { mountPecasPick } from '../widgets/pecas-pick.js?v=14';
@@ -16,14 +17,36 @@ const widgetRoot = document.getElementById('widget-root');
 const bag = document.getElementById('evidence-bag');
 const stageContainer = document.getElementById('game-container');
 const dialogue = document.getElementById('dialogue-layer');
+const soundBtn = document.getElementById('btn-sound');
 
 const stage = createStage(stageContainer);
 let hasCuboid = false;
+
+// 음소거 버튼 UI 초기화
+function updateSoundBtn() {
+  if (!soundBtn) return;
+  if (isMuted()) {
+    soundBtn.classList.add('muted');
+  } else {
+    soundBtn.classList.remove('muted');
+  }
+}
+updateSoundBtn();
+
+if (soundBtn) {
+  soundBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const muted = toggleMute();
+    updateSoundBtn();
+    if (!muted) playSfx('click');
+  });
+}
 
 function addCard(card) {
   hasCuboid = true;
   bag.innerHTML = `<button type="button" class="card" data-id="${card.id}">${card.label}</button>`;
   setTension(85);
+  playSfx('evidence');
   refute(stageContainer, bag);
 }
 
@@ -33,6 +56,7 @@ const dlg = createDialogue({
   hintEl: document.querySelector('.next-indicator'),
   onWaitWidget(step, done) {
     stage.update(step);
+    if (step.bgm) playBgm(step.bgm);
     widgetRoot.hidden = false;
     widgetRoot.innerHTML = '';
     if (step.widget === 'dice-inspector') {
@@ -85,50 +109,39 @@ const dlg = createDialogue({
   },
   onAdvance(step) {
     stage.update(step);
+    if (step.bgm) {
+      playBgm(step.bgm);
+    }
     if (step.refute) {
+      playSfx('evidence');
       refute(stageContainer, bag);
     }
     if (step.speaker === '테론' && step.text?.includes('다시 겨루자')) setTension(60);
   },
 });
 
-dialogue.addEventListener('click', () => dlg.click());
+dialogue.addEventListener('click', () => {
+  playSfx('click');
+  dlg.click();
+});
+
 window.addEventListener('keydown', (ev) => {
   if (ev.key !== 'Enter' && ev.key !== ' ' && ev.code !== 'Space') return;
   const tag = ev.target && ev.target.tagName;
   if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'BUTTON') return;
   ev.preventDefault();
+  playSfx('click');
   dlg.key();
 }, true);
 
 document.getElementById('game-container').tabIndex = 0;
 document.getElementById('game-container').focus();
-document.body.dataset.engine = 'v75';
+document.body.dataset.engine = 'v76';
 
-const demo = new URLSearchParams(location.search).get('demo');
-const samples = {
-  '1': [
-    { bg: 'classroom', speaker: '테론', text: '치우친 주사위는 접었다. 이 정육면체를 실제로 굴려 보자.', left: { name: '테론' }, right: { name: '이리스' } },
-    { type: 'widget', widget: 'dice-roll', bg: 'classroom' },
-  ],
-  path: [
-    { bg: 'library', speaker: '이리스', text: '다섯 고리를 한 번에 그리시오. 같은 선은 두 번 지나지 마시오.', left: { name: '폴리곤' }, right: { name: '이리스' } },
-    { type: 'widget', widget: 'path-link', bg: 'library' },
-  ],
-  pecas: [
-    { bg: 'basement', speaker: '폴리곤', text: '다섯 마리다. 색이 다른 한 마리를 집으시오.', left: { name: '피캐스' }, right: { name: '폴리곤' } },
-    { type: 'widget', widget: 'pecas-pick', bg: 'basement' },
-  ],
-  nonogram: [
-    { bg: 'merchant_camp', speaker: '소폴로스', text: '지도는 말로 안 준다. 칸을 칠하면 해골이 나온다.', left: { name: '소폴로스' }, right: { name: '폴리곤' } },
-    { type: 'widget', widget: 'nonogram', bg: 'merchant_camp' },
-  ],
-  gugu: [
-    { bg: 'classroom', speaker: '이리스', text: '구구단이 빠르게 나온다. 답을 입력하고 엔터를 누르시오.', left: { name: '이리스' }, right: { name: '폴리곤' } },
-    { type: 'widget', widget: 'gugu-speed', bg: 'classroom' },
-  ],
-};
-
-dlg.start(samples[demo] || STEPS);
-if (demo === 'path' || demo === 'pecas' || demo === 'nonogram' || demo === 'gugu') dlg.click();
+const stepParam = parseInt(new URLSearchParams(location.search).get('step') || '0', 10);
+if (stepParam > 0 && stepParam < STEPS.length) {
+  dlg.start(STEPS.slice(stepParam));
+} else {
+  dlg.start(STEPS);
+}
 setTension(12);
