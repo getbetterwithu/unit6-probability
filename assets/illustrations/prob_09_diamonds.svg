@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 380" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1e1711"/>
+      <stop offset="50%" stop-color="#2a2016"/>
+      <stop offset="100%" stop-color="#16100b"/>
+    </linearGradient>
+    <linearGradient id="parchment" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f5e8cc"/>
+      <stop offset="100%" stop-color="#deb887"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ffeaa7"/>
+      <stop offset="50%" stop-color="#d4af37"/>
+      <stop offset="100%" stop-color="#996515"/>
+    </linearGradient>
+    <linearGradient id="bronze" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#d4a373"/>
+      <stop offset="50%" stop-color="#a67c52"/>
+      <stop offset="100%" stop-color="#6f4e37"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="2" dy="4" stdDeviation="4" flood-color="#000" flood-opacity="0.6"/>
+    </filter>
+  </defs>
+  <rect width="600" height="380" rx="12" fill="url(#bgGrad)"/>
+  <rect x="12" y="12" width="576" height="356" rx="8" fill="none" stroke="url(#gold)" stroke-width="2" opacity="0.8"/>
+  <rect x="18" y="18" width="564" height="344" rx="6" fill="none" stroke="#5c4324" stroke-width="1" stroke-dasharray="6,4"/>
+  
+  <!-- Header Title Banner -->
+  <path d="M 160 22 L 440 22 L 420 54 L 180 54 Z" fill="url(#gold)" filter="url(#shadow)"/>
+  <text x="300" y="44" text-anchor="middle" font-family="serif" font-weight="bold" font-size="16" fill="#1c1308">5장 피캐스의 보석함 · 순수 다이아몬드</text>
+  
+  
+  <g transform="translate(300, 205)" filter="url(#shadow)">
+    <rect x="-200" y="-110" width="400" height="220" rx="16" fill="#34495e" stroke="url(#gold)" stroke-width="3"/>
+    
+    <text x="0" y="-60" text-anchor="middle" font-weight="bold" font-size="18" fill="#ecf0f1">주머니 속 순수 다이아몬드 원석</text>
+    <g transform="translate(-120, 10)">
+      <polygon points="0,-30 24,0 0,30 -24,0" fill="#00d2d3" stroke="#fff" stroke-width="2"/>
+    </g>
+    <g transform="translate(-60, 10)">
+      <polygon points="0,-30 24,0 0,30 -24,0" fill="#00d2d3" stroke="#fff" stroke-width="2"/>
+    </g>
+    <g transform="translate(0, 10)">
+      <polygon points="0,-30 24,0 0,30 -24,0" fill="#00d2d3" stroke="#fff" stroke-width="2"/>
+    </g>
+    <g transform="translate(60, 10)">
+      <polygon points="0,-30 24,0 0,30 -24,0" fill="#00d2d3" stroke="#fff" stroke-width="2"/>
+    </g>
+    <g transform="translate(120, 10)">
+      <polygon points="0,-30 24,0 0,30 -24,0" fill="#00d2d3" stroke="#fff" stroke-width="2"/>
+    </g>
+    <text x="0" y="70" text-anchor="middle" font-size="14" fill="#bdc3c7">오직 순수한 다이아몬드 5개만 보관 중</text>
+  </g>
+
+</svg>

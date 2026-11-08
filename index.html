@@ -7,18 +7,21 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
   <style>
     :root {
-      --bg-dark: #0b0d12;
-      --card-bg: rgba(22, 27, 34, 0.94);
-      --accent: #e5a93b;
-      --text-main: #f0f6fc;
-      --text-dim: #8b949e;
-      --border: rgba(240, 246, 252, 0.15);
+      --bg-dark: #080a0f;
+      --card-bg: rgba(14, 18, 26, 0.96);
+      --accent: #f5b041;
+      --accent-glow: rgba(245, 176, 65, 0.45);
+      --text-main: #f4f6f8;
+      --text-dim: #9aa5b1;
+      --border: rgba(245, 176, 65, 0.28);
+      --parchment-bg: #f5eedb;
+      --parchment-dark: #2a1f14;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
     body {
       background: #000;
       color: var(--text-main);
-      font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Noto Sans KR", sans-serif;
       overflow: hidden;
       width: 100vw; height: 100vh;
       display: flex; justify-content: center; align-items: center;
@@ -26,29 +29,61 @@
     #game-container {
       position: relative;
       width: 100%; height: 100%;
-      max-width: 1200px; max-height: 720px;
+      max-width: 1280px; max-height: 760px;
       aspect-ratio: 16 / 9;
-      background: #0b0d12;
+      background: var(--bg-dark);
       overflow: hidden;
-      box-shadow: 0 12px 48px rgba(0,0,0,0.8);
+      box-shadow: 0 16px 64px rgba(0,0,0,0.85);
       border-radius: 8px;
     }
+
+    /* ===== 최상단 헤더 HUD 바 ===== */
+    #top-hud {
+      position: absolute; top: 0; left: 0; right: 0; height: 46px;
+      background: linear-gradient(180deg, rgba(12, 10, 8, 0.88) 0%, rgba(12, 10, 8, 0.6) 80%, transparent 100%);
+      border-bottom: 1px solid rgba(245, 176, 65, 0.2);
+      backdrop-filter: blur(8px);
+      z-index: 10;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 20px;
+    }
+    .hud-left {
+      display: flex; align-items: center; gap: 10px;
+    }
+    .hud-game-title {
+      font-family: "Cinzel", serif; font-size: 1.05rem; font-weight: 800;
+      color: #ffeaa7; letter-spacing: 0.5px;
+      display: flex; align-items: center; gap: 6px;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+    }
+    .hud-center {
+      position: absolute; left: 50%; transform: translateX(-50%);
+    }
+    .hud-chapter-badge {
+      background: rgba(245, 176, 65, 0.18); border: 1.5px solid var(--accent);
+      color: #ffd152; font-weight: 800; font-size: 0.95rem;
+      padding: 3px 18px; border-radius: 20px;
+      letter-spacing: 0.5px; box-shadow: 0 0 14px rgba(245, 176, 65, 0.25);
+      transition: all 0.3s ease;
+    }
+    .hud-right {
+      display: flex; align-items: center; gap: 14px;
+    }
     #tension-wrap {
-      position: absolute; top: 12px; left: 24px; right: 70px; height: 8px;
-      background: rgba(255,255,255,0.08); border-radius: 4px; z-index: 10;
+      width: 140px; height: 8px;
+      background: rgba(255,255,255,0.12); border-radius: 4px; overflow: hidden;
     }
     #tension-fill { height: 100%; width: 0; background: var(--accent); border-radius: 4px; transition: width 0.35s; }
 
-    /* ===== 상단 음소거 토글 버튼 ===== */
+    /* 소리 토글 버튼 */
     #btn-sound {
-      position: absolute; top: 8px; right: 20px; z-index: 12;
-      background: rgba(22, 27, 34, 0.75); border: 1px solid var(--border);
+      background: rgba(22, 27, 34, 0.85); border: 1px solid var(--border);
       color: var(--text-dim); border-radius: 50%; width: 32px; height: 32px;
       display: flex; align-items: center; justify-content: center; cursor: pointer;
-      transition: all 0.2s; backdrop-filter: blur(4px);
+      transition: all 0.2s; backdrop-filter: blur(6px);
     }
-    #btn-sound:hover { color: var(--accent); border-color: var(--accent); transform: scale(1.05); }
-    #btn-sound.muted { opacity: 0.6; }
+    #btn-sound:hover { color: var(--accent); border-color: var(--accent); transform: scale(1.08); }
+    #btn-sound.muted { opacity: 0.55; }
     #btn-sound.muted .vol-wave { display: none; }
     #btn-sound.muted .vol-mute { display: block !important; }
 
@@ -61,101 +96,93 @@
       transition: background-image 0.6s ease;
     }
     #character-layer {
-      position: absolute; inset: 0 0 130px 0;
+      position: absolute; inset: 40px 0 130px 0;
       pointer-events: none;
       z-index: 2;
       transition: opacity 0.3s;
+      overflow: hidden; /* 하반신은 대사창 아래로 자연스럽게 커팅 */
     }
+
+    /* 캐릭터 스프라이트: 화자 1.65배 상반신 줌인 */
     .character {
-      position: absolute; bottom: 0; height: 86%; max-height: 490px;
-      transition: opacity 0.35s ease, transform 0.35s ease, filter 0.35s ease;
+      position: absolute; bottom: -30px; height: 110%; max-height: 720px;
+      transition: opacity 0.35s ease, transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.35s ease;
       pointer-events: none;
+      transform-origin: 50% 18%; /* 얼굴 및 상반신 기준 줌인 */
     }
     .character img {
       height: 100%; width: auto; display: block;
-      filter: drop-shadow(0 10px 24px rgba(0,0,0,0.7));
+      filter: drop-shadow(0 14px 32px rgba(0,0,0,0.85));
     }
-    .character.left { left: 8%; transform-origin: bottom center; }
-    .character.right { right: 8%; transform-origin: bottom center; }
+    .character.left { left: 5%; }
+    .character.right { right: 5%; }
+
+    /* 화자: 상반신 1.6배 줌인 및 스포트라이트 돌출 */
     .character.active {
-      filter: brightness(1.05) drop-shadow(0 0 20px rgba(229,169,59,0.45));
-      transform: translateY(-8px) scale(1.02);
-      z-index: 3;
+      filter: brightness(1.1) drop-shadow(0 0 32px var(--accent-glow));
+      transform: scale(1.6) translateY(24px);
+      z-index: 4;
       opacity: 1;
     }
+    /* 비화자: 뒤로 물러나며 톤다운 */
     .character.inactive {
-      filter: brightness(0.65);
-      transform: translateY(0) scale(0.98);
+      filter: brightness(0.55) grayscale(0.3);
+      transform: scale(1.05) translateY(55px);
       z-index: 2;
-      opacity: 0.85;
+      opacity: 0.72;
     }
     .character.hidden {
       opacity: 0;
-      transform: translateY(30px);
+      transform: translateY(60px) scale(0.9);
       pointer-events: none;
     }
     #stage-layer:has(~ #widget-root:not([hidden])) #character-layer {
-      opacity: 0.12;
+      opacity: 0.08;
     }
 
-    /* ===== 상호작용 및 위젯 ===== */
-    #widget-root {
-      position: absolute; inset: 16px 16px 140px 16px;
-      z-index: 8;
-      background: rgba(6,5,4,0.65);
-      backdrop-filter: blur(8px);
-      display: flex; align-items: center; justify-content: center;
-      border-radius: 12px;
-    }
-    #widget-root[hidden] { display: none !important; }
-
-    .popup {
-      width: min(980px, 98%); background: #24180f; border: 2px solid #e5a93b;
-      border-radius: 16px; padding: 18px 20px; box-shadow: 0 16px 40px rgba(0,0,0,0.65);
-    }
-    .path-pop { background: #fff; color: #1a1a1a; width: min(980px, 98%); }
-    .path-pop svg { width: 100%; height: min(62vh, 520px); }
-    .path-pop .dice-hint, .path-pop .dice-readout { color: #1a1a1a; }
-    .roll-scene { height: 200px; display: flex; align-items: center; justify-content: center; perspective: 700px; }
-    .cube { width: 84px; height: 84px; position: relative; transform-style: preserve-3d; }
-    .cube .face {
-      position: absolute; width: 84px; height: 84px; display: flex; align-items: center; justify-content: center;
-      background: #f3e2bc; color: #2a1c0c; border: 2px solid #6b4a22; font-size: 32px; font-weight: 800;
-      backface-visibility: hidden;
-    }
-    .f1 { transform: translateZ(42px); }
-    .f6 { transform: rotateY(180deg) translateZ(42px); }
-    .f3 { transform: rotateY(90deg) translateZ(42px); }
-    .f4 { transform: rotateY(-90deg) translateZ(42px); }
-    .f2 { transform: rotateX(90deg) translateZ(42px); }
-    .f5 { transform: rotateX(-90deg) translateZ(42px); }
-    .roll-form { display: flex; gap: 8px; align-items: center; margin-top: 8px; }
-    .roll-form input { width: 72px; font-size: 1.1rem; padding: 6px 8px; border-radius: 8px; border: 1px solid #e5a93b; }
-    .roll-form button { background: #e5a93b; border: 0; border-radius: 8px; padding: 8px 12px; font-weight: 700; cursor: pointer; }
-
-    #focus-lines {
-      pointer-events: none; position: absolute; inset: 0; opacity: 0; z-index: 7;
-      background: repeating-linear-gradient(90deg, transparent, transparent 46%, rgba(229,169,59,0.25) 50%, transparent 54%);
-      transition: opacity 0.2s;
-    }
-    #focus-lines.on { opacity: 1; }
-    #evidence-bag { position: absolute; top: 24px; left: 24px; z-index: 6; min-height: 28px; }
-    #evidence-bag .card {
-      background: #2b2110; color: var(--accent); border: 1px solid var(--accent);
-      padding: 6px 12px; border-radius: 8px; font-size: 0.9rem; font-weight: 700; box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-    }
-
-    /* ===== 대화창 레이어 ===== */
+    /* ===== 대화창 레이어 (크롬북 최적화 대형화) ===== */
     #dialogue-layer {
-      position: absolute; bottom: 16px; left: 24px; right: 24px; min-height: 120px;
-      background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px;
-      padding: 16px 24px; backdrop-filter: blur(14px);
+      position: absolute; bottom: 16px; left: 24px; right: 24px; min-height: 136px;
+      background: var(--card-bg); border: 1.5px solid var(--border); border-radius: 14px;
+      padding: 18px 26px; backdrop-filter: blur(16px);
       display: flex; flex-direction: column; justify-content: space-between; cursor: pointer; z-index: 5;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.7);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.75);
     }
-    .speaker-name { font-weight: 700; font-size: 1.15rem; color: var(--accent); margin-bottom: 6px; }
-    .dialogue-text { font-size: 1.05rem; line-height: 1.6; min-height: 48px; }
-    .next-indicator { align-self: flex-end; font-size: 0.85rem; color: var(--text-dim); animation: pulse 1.2s infinite; }
+    .dialogue-top-bar {
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;
+    }
+    .speaker-name {
+      font-weight: 800; font-size: 1.3rem; color: var(--accent);
+      background: rgba(245, 176, 65, 0.15); border: 1px solid rgba(245, 176, 65, 0.35);
+      padding: 3px 14px; border-radius: 8px; display: inline-block;
+      letter-spacing: 0.5px;
+    }
+    .dialogue-text {
+      font-size: 1.35rem; line-height: 1.65; min-height: 52px;
+      color: var(--text-main); font-weight: 500; word-break: keep-all;
+    }
+    .dialogue-text .dialogue-math {
+      display: inline-block; margin: 0 4px; vertical-align: baseline;
+    }
+    .dialogue-bottom-bar {
+      display: flex; justify-content: space-between; align-items: center; margin-top: 8px;
+    }
+    .next-indicator { font-size: 0.95rem; color: var(--text-dim); animation: pulse 1.2s infinite; }
+    
+    /* 대화창 좌우 이동 내비게이션 버튼 */
+    .dialogue-nav-buttons {
+      display: flex; gap: 8px;
+    }
+    .btn-nav-prev, .btn-nav-next {
+      background: rgba(245, 176, 65, 0.15); border: 1px solid var(--border);
+      color: var(--accent); font-size: 0.95rem; font-weight: 700;
+      padding: 6px 14px; border-radius: 6px; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-nav-prev:hover, .btn-nav-next:hover {
+      background: var(--accent); color: #1c1308;
+    }
+
     @keyframes pulse { 0%,100%{opacity:.4} 50%{opacity:1} }
     .screen-shake { animation: shake 400ms linear both; }
     @keyframes shake {
@@ -164,54 +191,307 @@
       30%,50%,70%{transform:translate3d(-6px,0,0)}
       40%,60%{transform:translate3d(6px,0,0)}
     }
-    .dice-ui { color: var(--text-main); height: 100%; display: flex; flex-direction: column; gap: 8px; }
-    .dice-hint { color: var(--text-dim); font-size: 0.95rem; }
-    .dice-svg { width: 100%; height: 240px; touch-action: none; }
-    .dice-stage { flex: 1; perspective: 700px; display: flex; align-items: center; justify-content: center; touch-action: none; }
-    .dice-box { width: 80px; height: 80px; position: relative; transform-style: preserve-3d; }
-    .face {
-      position: absolute; left: 50%; top: 50%;
+
+    #focus-lines {
+      pointer-events: none; position: absolute; inset: 0; opacity: 0; z-index: 7;
+      background: repeating-linear-gradient(90deg, transparent, transparent 46%, rgba(229,169,59,0.25) 50%, transparent 54%);
+      transition: opacity 0.2s;
+    }
+    #focus-lines.on { opacity: 1; }
+    #evidence-bag { position: absolute; top: 56px; left: 24px; z-index: 6; min-height: 28px; }
+    #evidence-bag .card {
+      background: #2b2110; color: var(--accent); border: 1px solid var(--accent);
+      padding: 6px 14px; border-radius: 8px; font-size: 0.95rem; font-weight: 700; box-shadow: 0 4px 14px rgba(0,0,0,0.5);
+    }
+
+    /* ===== 상호작용 및 위젯 공통 루트 ===== */
+    #widget-root {
+      position: absolute; top: 50px; left: 10px; right: 10px; bottom: 10px;
+      z-index: 8;
+      background: rgba(6, 7, 10, 0.94);
+      backdrop-filter: blur(14px);
       display: flex; align-items: center; justify-content: center;
-      background: #c9a36a; border: 2px solid #5c4324; font-weight: 700; color: #2a1c0c;
-      backface-visibility: hidden;
+      border-radius: 12px;
+      padding: 0;
     }
-    .f-front,.f-back { width: 80px; height: 80px; margin: -40px 0 0 -40px; }
-    .f-right,.f-left { width: 200px; height: 80px; margin: -40px 0 0 -100px; }
-    .f-top,.f-bottom { width: 80px; height: 200px; margin: -100px 0 0 -40px; }
-    .f-front { transform: translateZ(100px); }
-    .f-back { transform: rotateY(180deg) translateZ(100px); }
-    .f-right { transform: rotateY(90deg) translateZ(40px); }
-    .f-left { transform: rotateY(-90deg) translateZ(40px); }
-    .f-top { transform: rotateX(90deg) translateZ(40px); }
-    .f-bottom { transform: rotateX(-90deg) translateZ(40px); }
-    .dice-readout { font-size: 0.95rem; }
-    .quiz { color: var(--text-main); display: flex; flex-direction: column; gap: 12px; padding: 12px; max-width: 800px; width: 100%; }
-    .quiz-prompt { font-size: 1.1rem; line-height: 1.6; }
-    .quiz-choices { display: flex; gap: 12px; flex-wrap: wrap; }
-    .quiz-choice {
-      background: #1c2430; color: var(--text-main); border: 1px solid var(--accent);
-      padding: 12px 20px; border-radius: 8px; font-size: 1.15rem; cursor: pointer; transition: background 0.2s;
+    #widget-root[hidden] { display: none !important; }
+
+    /* ===== 4단원 스타일 전면 문제 풀이 보드 (Problem Board) ===== */
+    .full-problem-board {
+      width: 100%; height: 100%;
+      background: #1a140e; border: 2.5px solid #d4af37;
+      border-radius: 14px; box-shadow: 0 16px 48px rgba(0,0,0,0.9);
+      display: flex; flex-direction: column; overflow: hidden;
+      color: #f5eedb;
     }
-    .quiz-choice:hover { background: #263342; }
-    .quiz-feedback { color: #ffb4a2; min-height: 1.4em; font-weight: 600; }
-    #dice-measure {
-      align-self: flex-start; background: var(--accent); color: #1a1408; border: 0;
-      padding: 8px 16px; border-radius: 8px; font-weight: 700; cursor: pointer;
+
+    /* 상단 전용 툴바 (4단원 완벽 구현) */
+    .board-top-toolbar {
+      height: 52px; background: #261c13; border-bottom: 2px solid #5c4324;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 16px; gap: 12px; flex-shrink: 0;
     }
+    .toolbar-group {
+      display: flex; align-items: center; gap: 8px;
+    }
+    .problem-tag-badge {
+      background: #8b5a2b; color: #fff; font-weight: 800; font-size: 0.9rem;
+      padding: 4px 12px; border-radius: 6px; letter-spacing: 0.5px;
+    }
+    .tool-btn {
+      background: #3d2b1a; color: #f5eedb; border: 1.5px solid #6b4a28;
+      border-radius: 6px; padding: 6px 12px; font-size: 0.9rem; font-weight: 700;
+      cursor: pointer; display: flex; align-items: center; gap: 6px;
+      transition: all 0.15s;
+    }
+    .tool-btn.active {
+      background: #d4af37; color: #1c1308; border-color: #ffd152;
+      box-shadow: 0 0 10px rgba(212,175,55,0.4);
+    }
+    .color-swatch-group {
+      display: flex; align-items: center; gap: 6px; margin: 0 4px;
+    }
+    .color-btn {
+      width: 26px; height: 26px; border-radius: 50%; border: 2px solid #fff;
+      cursor: pointer; transition: transform 0.15s;
+    }
+    .color-btn.active {
+      transform: scale(1.22); box-shadow: 0 0 8px #fff;
+    }
+    .btn-undo {
+      background: #3d2b1a; color: #f5eedb; border: 1.5px solid #6b4a28;
+      border-radius: 6px; padding: 6px 10px; font-size: 0.9rem; cursor: pointer;
+    }
+    .btn-clear-all {
+      background: #78281f; color: #fff; border: none; border-radius: 6px;
+      padding: 6px 12px; font-size: 0.88rem; font-weight: 700; cursor: pointer;
+      display: flex; align-items: center; gap: 4px;
+    }
+    .btn-clear-all:hover { background: #962d22; }
+
+    /* 본문 2열 레이아웃: 좌측 문제/입력, 우측 광활한 모눈 풀이 캔버스 */
+    .board-main-container {
+      display: grid; grid-template-columns: 460px 1fr; flex: 1; min-height: 0;
+      background: #140f0a;
+    }
+
+    /* 좌측 문제 패널 */
+    .board-left-panel {
+      padding: 14px 16px; border-right: 2px solid #3d2b1a;
+      display: flex; flex-direction: column; gap: 10px; overflow-y: auto;
+      background: rgba(22, 16, 11, 0.95);
+    }
+    .board-problem-card {
+      background: rgba(42, 31, 20, 0.6); border: 1.5px solid rgba(212,175,55,0.3);
+      border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 8px;
+    }
+    .problem-header-row {
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .board-chapter-name {
+      font-size: 0.9rem; font-weight: 700; color: #d4af37;
+    }
+    .board-prompt-text {
+      font-size: 1.15rem; line-height: 1.65; color: #fdf6e2; font-weight: 500; word-break: keep-all;
+    }
+    .board-illustration-frame {
+      width: 100%; height: 180px; background: #000; border-radius: 8px; overflow: hidden;
+      display: flex; align-items: center; justify-content: center; border: 1px solid #5c4324;
+    }
+    .board-illustration-img {
+      width: 100%; height: 100%; object-fit: contain;
+    }
+
+    /* 단답형 입력 폼 */
+    .board-answer-section {
+      background: rgba(30, 22, 14, 0.8); border: 1px solid rgba(212,175,55,0.25);
+      border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 8px;
+    }
+    .answer-input-row {
+      display: flex; align-items: center; gap: 8px; position: relative;
+    }
+    .math-input-wrapper {
+      position: relative; flex: 1; display: flex; align-items: center;
+    }
+    .katex-live-display {
+      position: absolute; right: 10px; background: rgba(18, 14, 10, 0.92);
+      border: 1px solid #d4af37; border-radius: 6px; padding: 2px 10px;
+      font-size: 1.15rem; color: #ffd152; box-shadow: 0 2px 8px rgba(0,0,0,0.6);
+      pointer-events: none;
+    }
+
+    /* 10번 문제 3중 인터랙티브 밸브 */
+    .interactive-valves-box {
+      width: 100%; height: 100%; display: flex; justify-content: space-around; align-items: center;
+      background: #18120b; border-radius: 8px; padding: 10px;
+    }
+    .valve-unit {
+      display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer;
+      user-select: none; transition: transform 0.15s;
+    }
+    .valve-unit:hover { transform: scale(1.06); }
+    .valve-dial {
+      width: 66px; height: 66px; border-radius: 50%; background: #f5e8cc;
+      border: 3.5px solid #d4af37; display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.6); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .valve-dial.open { transform: rotate(90deg); }
+    .dial-red .valve-line { width: 42px; height: 7px; background: #c0392b; border-radius: 4px; }
+    .dial-green .valve-line { width: 42px; height: 7px; background: #27ae60; border-radius: 4px; transform: rotate(45deg); }
+    .dial-blue .valve-line { width: 42px; height: 7px; background: #2980b9; border-radius: 4px; transform: rotate(-45deg); }
+    .valve-label { font-size: 0.92rem; font-weight: 700; color: #ffeaa7; }
+    .valve-status { font-size: 0.85rem; font-weight: 800; color: #e74c3c; transition: color 0.2s; }
+    .answer-input-label {
+      font-weight: 700; font-size: 1.05rem; color: #ffeaa7;
+    }
+    .board-text-input {
+      flex: 1; background: #0b0805; border: 2px solid #d4af37; border-radius: 6px;
+      color: #ffeaa7; font-size: 1.25rem; font-weight: 700; padding: 8px 12px;
+      outline: none;
+    }
+    .board-text-input:focus {
+      border-color: #ffd152; box-shadow: 0 0 10px rgba(255,209,82,0.4);
+    }
+    .board-answer-unit {
+      font-weight: 700; font-size: 1.05rem; color: #d4af37;
+    }
+    .btn-board-submit {
+      background: linear-gradient(135deg, #f5b041, #d4af37); color: #1c1308;
+      border: none; border-radius: 6px; padding: 10px 16px; font-size: 1.05rem; font-weight: 800;
+      cursor: pointer; transition: transform 0.15s;
+    }
+    .btn-board-submit:hover { transform: scale(1.03); }
+
+    /* 가상 키패드 */
+    .board-keypad {
+      display: flex; flex-direction: column; gap: 4px;
+    }
+    .keypad-row {
+      display: flex; gap: 4px;
+    }
+    .k-btn {
+      flex: 1; background: #2e2114; border: 1px solid rgba(212,175,55,0.3);
+      color: #ffeaa7; font-size: 1.15rem; font-weight: 700; padding: 6px 2px;
+      border-radius: 4px; cursor: pointer;
+    }
+    .k-btn:hover { background: #4a3520; }
+    .k-btn:active { background: #d4af37; color: #1c1308; }
+    .k-slash { background: #3d2b1a; border-color: #d4af37; }
+    .k-back { background: #5c2018; border-color: #e74c3c; color: #ff7675; }
+
+    /* 피드백 박스 */
+    .board-feedback {
+      border-radius: 6px; padding: 8px 12px; font-size: 1rem; line-height: 1.5;
+    }
+    .board-feedback.correct {
+      background: rgba(39, 174, 96, 0.25); border: 1.5px solid #2ecc71; color: #2ecc71;
+    }
+    .board-feedback.wrong {
+      background: rgba(192, 57, 43, 0.25); border: 1.5px solid #e74c3c; color: #ff7675;
+    }
+    .board-btn-hint {
+      margin-top: 6px; background: rgba(245,176,65,0.2); border: 1px solid #f5b041;
+      color: #f5b041; padding: 4px 10px; border-radius: 4px; font-size: 0.9rem; font-weight: 700; cursor: pointer;
+    }
+    .board-hint-box {
+      margin-top: 6px; background: rgba(0,0,0,0.4); border-left: 3px solid #d4af37;
+      padding: 8px 10px; font-size: 0.95rem; line-height: 1.5; color: #fdf6e2;
+    }
+    .btn-board-next {
+      width: 100%; background: linear-gradient(135deg, #27ae60, #2ecc71);
+      color: #fff; border: none; border-radius: 6px; padding: 12px;
+      font-size: 1.2rem; font-weight: 800; cursor: pointer; margin-top: 6px;
+      box-shadow: 0 4px 14px rgba(46,204,113,0.4);
+    }
+
+    /* 우측 광활한 모눈 풀이 캔버스 */
+    .board-right-panel {
+      position: relative; width: 100%; height: 100%;
+      background-color: #fdf9ee;
+      /* 수학 방안지 모눈 그리드 텍스처 (4단원 느낌 완벽 재현) */
+      background-image:
+        linear-gradient(rgba(180, 150, 110, 0.22) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(180, 150, 110, 0.22) 1px, transparent 1px);
+      background-size: 32px 32px;
+      overflow: hidden;
+      cursor: crosshair;
+    }
+    #full-drawing-canvas {
+      position: absolute; inset: 0; width: 100%; height: 100%; display: block;
+      touch-action: none;
+    }
+    .canvas-watermark {
+      position: absolute; bottom: 12px; right: 16px;
+      color: rgba(140, 100, 60, 0.35); font-weight: 700; font-size: 0.9rem; pointer-events: none;
+    }
+
+    /* ===== 3D 직육면체 검증기 UI ===== */
+    .dice-inspector-container {
+      width: 100%; max-width: 680px; background: #1c140c; border: 2px solid #d4af37;
+      border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 12px;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.8); color: #f5eedb;
+    }
+    .dice-inspector-header { display: flex; flex-direction: column; gap: 6px; }
+    .inspector-badge {
+      align-self: flex-start; background: #d4af37; color: #1c1308;
+      padding: 3px 10px; border-radius: 5px; font-weight: 800; font-size: 0.85rem;
+    }
+    .dice-hint { color: #bdc3c7; font-size: 0.95rem; }
+    .dice-canvas-wrapper {
+      width: 100%; height: 260px; background: #0c0805; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center; border: 1px solid #5c4324;
+      touch-action: none;
+    }
+    .dice-controls {
+      display: flex; justify-content: space-between; align-items: center;
+      background: rgba(0,0,0,0.4); padding: 10px 16px; border-radius: 8px; border: 1px solid rgba(212,175,55,0.3);
+    }
+    .dice-readout { font-size: 1.05rem; font-weight: 600; color: #ffeaa7; }
+    .dice-readout.measured .highlight-ratio { color: #f1c40f; font-weight: 800; font-size: 1.15rem; }
+    .dice-readout.measured .ratio-verdict { color: #e74c3c; font-size: 0.95rem; margin-left: 6px; }
+    .dice-measure-btn {
+      background: #d4af37; color: #1c1308; border: none; border-radius: 6px;
+      padding: 8px 16px; font-weight: 800; font-size: 1rem; cursor: pointer;
+      display: flex; align-items: center; gap: 6px; transition: transform 0.15s;
+    }
+    .dice-measure-btn:hover { transform: scale(1.05); }
+
+    /* 미니게임 팝업 공통 */
+    .popup {
+      width: min(980px, 98%); background: #24180f; border: 2px solid #e5a93b;
+      border-radius: 16px; padding: 18px 20px; box-shadow: 0 16px 40px rgba(0,0,0,0.65);
+    }
+    .path-pop { background: #fff; color: #1a1a1a; width: min(980px, 98%); }
+    .path-pop svg { width: 100%; height: min(62vh, 520px); }
+    .path-pop .dice-hint, .path-pop .dice-readout { color: #1a1a1a; }
   </style>
 </head>
 <body>
   <div id="game-container">
-    <div id="tension-wrap"><div id="tension-fill"></div></div>
-    <button type="button" id="btn-sound" title="소리 켜기/끄기" aria-label="음소거 토글">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-        <path class="vol-wave" d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-        <line class="vol-mute" x1="23" y1="9" x2="17" y2="15" stroke="red" style="display:none"></line>
-        <line class="vol-mute" x1="17" y1="9" x2="23" y2="15" stroke="red" style="display:none"></line>
-      </svg>
-    </button>
+    <!-- 최상단 헤더 HUD 바 -->
+    <header id="top-hud">
+      <div class="hud-left">
+        <span class="hud-game-title">🎲 폴리곤과 운명의 주사위</span>
+      </div>
+      <div class="hud-center">
+        <span class="hud-chapter-badge" id="hud-chapter">1장 · 피타고라스 학당</span>
+      </div>
+      <div class="hud-right">
+        <div id="tension-wrap"><div id="tension-fill"></div></div>
+        <button type="button" id="btn-sound" title="소리 켜기/끄기" aria-label="음소거 토글">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <path class="vol-wave" d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+            <line class="vol-mute" x1="23" y1="9" x2="17" y2="15" stroke="red" style="display:none"></line>
+            <line class="vol-mute" x1="17" y1="9" x2="23" y2="15" stroke="red" style="display:none"></line>
+          </svg>
+        </button>
+      </div>
+    </header>
+
     <div id="evidence-bag"></div>
+
+    <!-- 무대 레이어 (배경 & 캐릭터) -->
     <div id="stage-layer">
       <div id="stage-bg"></div>
       <div id="character-layer">
@@ -219,15 +499,29 @@
         <div id="char-right" class="character right hidden"><img src="" alt=""></div>
       </div>
     </div>
+
     <div id="focus-lines"></div>
+
+    <!-- 인터랙티브 위젯 루트 -->
     <div id="widget-root" hidden></div>
+
+    <!-- 대화창 레이어 -->
     <div id="dialogue-layer">
-      <div class="speaker-name" id="speaker-box">피타고라스 학당</div>
+      <div class="dialogue-top-bar">
+        <div class="speaker-name" id="speaker-box">피타고라스 학당</div>
+        <div class="dialogue-nav-buttons">
+          <button type="button" class="btn-nav-prev" id="btn-nav-prev" title="이전 대사">◀ 이전</button>
+          <button type="button" class="btn-nav-next" id="btn-nav-next" title="다음 대사">다음 ▶</button>
+        </div>
+      </div>
       <div class="dialogue-text" id="text-box"></div>
-      <div class="next-indicator">엔터, 스페이스, 클릭으로 진행 ▼</div>
+      <div class="dialogue-bottom-bar">
+        <div class="next-indicator">◀ 이전 / 다음 ▶ (엔터, 스페이스, 터치)</div>
+      </div>
     </div>
   </div>
+
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
-  <script type="module" src="engine/app.js?v=76"></script>
+  <script type="module" src="engine/app.js?v=80"></script>
 </body>
 </html>

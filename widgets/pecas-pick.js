@@ -1,167 +1,205 @@
-export function mountPecasPick(root, { onDone }) {
+import { playSfx } from '../engine/sound.js';
+
+export function mountPecasPick(root, { onDone, onClose }) {
   root.innerHTML = `
-    <div class="popup path-pop">
-      <p class="dice-hint" id="pup-hint">움직이는 다섯 마리 중 주황을 클릭하시오.</p>
-      <div id="pup-yard" style="position:relative;height:320px;background:#f7f1e6;border-radius:12px;overflow:hidden;"></div>
-      <p class="dice-readout"><span id="pup-msg">집기 전</span> <button type="button" id="pup-btn" style="margin-left:8px;background:#3a2a1c;color:#f0e6d2;border:1px solid #e5a93b;border-radius:8px;padding:2px 8px;">다시</button></p>
+    <div class="popup pecas-popup" style="position:relative; width:min(900px, 98%); background:#1a140d; border:2.5px solid #d4af37; border-radius:14px; padding:18px 24px; color:#f5eedb;">
+      <!-- 우측 상단 닫기 (잠시 접기) 버튼 -->
+      <button type="button" id="pup-btn-close" style="position:absolute; top:12px; right:14px; background:rgba(0,0,0,0.5); border:1px solid #d4af37; color:#ffeaa7; border-radius:6px; padding:4px 10px; font-size:0.85rem; cursor:pointer;" title="잠시 접어두기">
+        ✕ 닫기
+      </button>
+
+      <div style="margin-bottom: 12px;">
+        <span style="background:#d4af37; color:#1c1308; font-weight:800; font-size:0.85rem; padding:3px 10px; border-radius:4px;">✨ 피캐스의 신비한 정령 잡기</span>
+        <p class="dice-hint" id="pup-hint" style="color:#bdc3c7; font-size:0.95rem; margin-top:6px;">움직이는 정령들 중 색이 다른 한 마리를 찾아 클릭하시오.</p>
+      </div>
+
+      <div id="pup-yard" style="position:relative; height:340px; background:#f7f1e6; border-radius:10px; overflow:hidden; border:2px solid #5c4324;"></div>
+
+      <div style="margin-top: 14px; display:flex; justify-content:space-between; align-items:center;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span id="pup-msg" style="font-weight:700; color:#ffeaa7; font-size:1.05rem;">움직이는 주황 정령을 찾아보시오.</span>
+          <button type="button" id="pup-btn" style="background:#3a2a1c; color:#ffeaa7; border:1px solid #d4af37; border-radius:6px; padding:4px 12px; font-weight:700; cursor:pointer;">
+            다시 시도
+          </button>
+        </div>
+        <button type="button" id="pup-complete-btn" style="display:none; background:linear-gradient(135deg, #27ae60, #2ecc71); color:#fff; border:none; border-radius:6px; padding:10px 20px; font-size:1.1rem; font-weight:800; cursor:pointer; box-shadow:0 4px 14px rgba(46,204,113,0.4);">
+          ✨ 정령 포획 완료 · 다음으로 ▶
+        </button>
+      </div>
     </div>`;
+
+  // 닫기 버튼
+  root.querySelector('#pup-btn-close').addEventListener('click', () => {
+    if (onClose) onClose();
+  });
+
   const yard = root.querySelector('#pup-yard');
+  const msgEl = root.querySelector('#pup-msg');
+  const retryBtn = root.querySelector('#pup-btn');
+  const completeBtn = root.querySelector('#pup-complete-btn');
+
   const stages = [
-    { count: 5, speed: 2.4, hint: '움직이는 다섯 마리 중 주황을 클릭하시오.' },
-    { count: 7, speed: 4.2, hint: '일곱 마리다. 더 빠르다. 주황을 클릭하시오.' },
-    { count: 9, speed: 4.6, hint: '아홉 마리다. 아주 조금만 더 빠르다. 주황을 클릭하시오.' },
+    { count: 5, speed: 2.2, hint: '1단계: 다섯 마리 중 색이 다른 주황 정령을 클릭하시오.' },
+    { count: 7, speed: 3.5, hint: '2단계: 일곱 마리로 늘어났소! 더 빠르게 유영하오.' },
+    { count: 9, speed: 4.2, hint: '최종 단계: 아홉 마리의 정령 중 진짜 주황 정령을 낚아채시오!' },
   ];
-  let stage = 0;
-  let odd = 0;
-  let done = false;
-  let wander = 0;
+
+  let currentStage = 0;
+  let oddIndex = 0;
+  let stageCleared = false;
+  let animId = null;
   const movers = [];
+
+  const PUP_W = 50;
+  const PUP_H = 60;
+
   function pupSvg(color) {
-    return `<svg viewBox="0 0 80 90" width="48" height="56">
-      <path d="M40 28 L40 8" stroke="#6d6d6d" stroke-width="3" stroke-linecap="round"/>
-      <path d="M24 12 Q32 4 40 10 Q48 4 56 12" fill="none" stroke="#9a9a9a" stroke-width="4" stroke-linecap="round"/>
-      <circle cx="40" cy="46" r="22" fill="${color}"/>
-      <circle cx="32" cy="42" r="3" fill="#1a1a1a"/>
-      <circle cx="48" cy="42" r="3" fill="#1a1a1a"/>
-      <path d="M32 54 Q40 60 48 54" fill="none" stroke="#1a1a1a" stroke-width="2"/>
+    return `<svg viewBox="0 0 80 90" width="${PUP_W}" height="${PUP_H}">
+      <path d="M40 28 L40 8" stroke="#5c4324" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M24 12 Q32 4 40 10 Q48 4 56 12" fill="none" stroke="#d4af37" stroke-width="4" stroke-linecap="round"/>
+      <circle cx="40" cy="48" r="24" fill="${color}" stroke="#3d2b1a" stroke-width="2"/>
+      <circle cx="32" cy="44" r="3.5" fill="#1a1a1a"/>
+      <circle cx="48" cy="44" r="3.5" fill="#1a1a1a"/>
+      <path d="M32 56 Q40 64 48 56" fill="none" stroke="#1a1a1a" stroke-width="2.5" stroke-linecap="round"/>
     </svg>`;
   }
-  function place() {
-    if (wander) cancelAnimationFrame(wander);
+
+  // 안전 영역 계산: 바닥에 쏠리거나 잘리는 것 원천 방지
+  function getSafeBounds() {
+    const w = yard.clientWidth || 800;
+    const h = yard.clientHeight || 340;
+    return {
+      minX: 16,
+      maxX: Math.max(30, w - PUP_W - 20),
+      minY: 16,
+      maxY: Math.max(30, h - PUP_H - 24), // 아래쪽 24px 이상 여유 공간 확보
+    };
+  }
+
+  function randCoord() {
+    const b = getSafeBounds();
+    return {
+      x: b.minX + Math.random() * (b.maxX - b.minX),
+      y: b.minY + Math.random() * (b.maxY - b.minY),
+    };
+  }
+
+  function startStage() {
+    if (animId) cancelAnimationFrame(animId);
     yard.innerHTML = '';
-    const n = stages[stage].count;
-    odd = Math.floor(Math.random() * n);
-    for (let i = 0; i < n; i++) {
-      const b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'pup';
-      const span = bounds();
-      const cols = Math.max(3, Math.min(n, Math.floor(span.w / 88)));
-      const col = i % cols;
-      const row = Math.floor(i / cols);
-      const x = Math.min(span.w, 8 + col * 88);
-      const y = Math.min(span.h, 8 + row * 80);
-      b.style.cssText = `position:absolute;left:${x}px;top:${y}px;width:48px;height:56px;line-height:0;overflow:visible;border:0;background:transparent;padding:0;cursor:pointer;`;
-      b.dataset.x = x;
-      b.dataset.y = y;
-      b.innerHTML = pupSvg(i === odd ? '#E65100' : '#8d6e63');
-      b.addEventListener('pointerdown', (ev) => {
-        if (ev.pointerType === 'touch') {
-          ev.preventDefault();
-          ev.stopPropagation();
-          b.dataset.touch = '1';
-        }
-      });
-      b.addEventListener('click', (ev) => {
-        if (ev.pointerType === 'touch' || b.dataset.touch === '1') {
-          b.dataset.touch = '';
-          ev.preventDefault();
-          ev.stopPropagation();
-          return;
-        }
-        catchPup(i);
-      });
-      yard.appendChild(b);
-    }
-    root.querySelector('#pup-hint').textContent = stages[stage].hint;
-  }
-  function setBtn(label, orange) {
-    const btn = root.querySelector('#pup-btn');
-    btn.textContent = label;
-    btn.style.background = orange ? '#E65100' : '#3a2a1c';
-    btn.style.color = orange ? '#fff' : '#f0e6d2';
-    btn.style.borderColor = orange ? '#E65100' : '#e5a93b';
-  }
-  function catchPup(i) {
-    if (done) return;
-    const msg = root.querySelector('#pup-msg');
-    if (i !== odd) {
-      msg.textContent = '같은 색이다. 주황을 집으시오.';
-      return;
-    }
-    done = true;
-    if (wander) cancelAnimationFrame(wander);
-    if (stage < 2) {
-      msg.textContent = '놓쳤다.';
-      setBtn('다음단계', true);
-      return;
-    }
-    msg.textContent = '그 한 마리다.';
-    setBtn('성공', true);
-    if (onDone) onDone();
-  }
-  const PUP_W = 48;
-  const PUP_H = 56;
-  function bounds() {
-    const w = yard.clientWidth || 400;
-    const h = yard.clientHeight || 300;
-    return { w: Math.max(8, w - PUP_W - 8), h: Math.max(8, h - PUP_H - 8) };
-  }
-  function randTarget() {
-    const span = bounds();
-    return { x: 4 + Math.random() * span.w, y: 4 + Math.random() * span.h };
-  }
-  function startWander() {
-    if (wander) cancelAnimationFrame(wander);
     movers.length = 0;
-    yard.querySelectorAll('.pup').forEach((b) => {
-      movers.push({ el: b, x: Number(b.dataset.x), y: Number(b.dataset.y), tx: randTarget().x, ty: randTarget().y });
-    });
-    const speed = stages[stage].speed;
-    const step = () => {
-      if (done) return;
+    stageCleared = false;
+
+    const n = stages[currentStage].count;
+    oddIndex = Math.floor(Math.random() * n);
+    root.querySelector('#pup-hint').textContent = stages[currentStage].hint;
+    msgEl.textContent = `정령들이 흩어졌습니다! 주황 정령을 찾으시오. (${currentStage + 1} / 3단계)`;
+    retryBtn.textContent = '다시 시도';
+
+    // 전 영역에 고르게 분산 배치
+    for (let i = 0; i < n; i++) {
+      const b = document.createElement('div');
+      b.className = 'pup-token';
+      const pos = randCoord();
+      b.style.cssText = `position:absolute; left:${pos.x}px; top:${pos.y}px; width:${PUP_W}px; height:${PUP_H}px; cursor:pointer; user-select:none; z-index:2;`;
+      b.innerHTML = pupSvg(i === oddIndex ? '#e65100' : '#8d6e63');
+
+      b.addEventListener('pointerdown', (ev) => {
+        ev.preventDefault();
+        onCatch(i);
+      });
+
+      yard.appendChild(b);
+
+      const target = randCoord();
+      movers.push({
+        el: b,
+        x: pos.x,
+        y: pos.y,
+        tx: target.x,
+        ty: target.y,
+      });
+    }
+
+    startWander();
+  }
+
+  function startWander() {
+    const speed = stages[currentStage].speed;
+    const bounds = getSafeBounds();
+
+    function step() {
+      if (stageCleared) return;
+
       movers.forEach((m) => {
         const dx = m.tx - m.x;
         const dy = m.ty - m.y;
         const dist = Math.hypot(dx, dy) || 1;
+
         if (dist < speed) {
-          const next = randTarget();
+          const next = randCoord();
           m.tx = next.x;
           m.ty = next.y;
         } else {
           m.x += (dx / dist) * speed;
           m.y += (dy / dist) * speed;
+
+          // 절대 경계선 Clamping (화면 밖이나 바닥으로 절대 이탈 불가)
+          m.x = Math.max(bounds.minX, Math.min(bounds.maxX, m.x));
+          m.y = Math.max(bounds.minY, Math.min(bounds.maxY, m.y));
+
+          m.el.style.left = `${m.x}px`;
+          m.el.style.top = `${m.y}px`;
         }
-        const span = bounds();
-        m.x = Math.max(8, Math.min(span.w, m.x));
-        m.y = Math.max(8, Math.min(span.h, m.y));
-        m.tx = Math.max(8, Math.min(span.w, m.tx));
-        m.ty = Math.max(8, Math.min(span.h, m.ty));
-        m.el.style.left = m.x + 'px';
-        m.el.style.top = m.y + 'px';
       });
-      wander = requestAnimationFrame(step);
-    };
-    wander = requestAnimationFrame(step);
+
+      animId = requestAnimationFrame(step);
+    }
+
+    animId = requestAnimationFrame(step);
   }
-  function begin() {
-    done = false;
-    root.querySelector('#pup-msg').textContent = '집기 전';
-    setBtn('다시', false);
-    place();
-    requestAnimationFrame(() => {
-      const span = bounds();
-      yard.querySelectorAll('.pup').forEach((b, i) => {
-        const x = Math.min(span.w, 12 + (i % 5) * 70);
-        const y = Math.min(span.h, 12 + Math.floor(i / 5) * 72);
-        b.style.left = x + 'px';
-        b.style.top = y + 'px';
-        b.dataset.x = x;
-        b.dataset.y = y;
-      });
-      startWander();
-    });
-  }
-  begin();
-  root.querySelector('#pup-btn').addEventListener('click', (ev) => {
-    ev.stopPropagation();
-    const label = ev.currentTarget.textContent;
-    if (label === '다음단계') {
-      stage += 1;
-      begin();
+
+  function onCatch(i) {
+    if (stageCleared) return;
+
+    if (i !== oddIndex) {
+      playSfx('wrong');
+      msgEl.textContent = '❌ 그 정령은 갈색 정령이오! 주황 정령을 노리시오.';
       return;
     }
-    if (label === '성공') return;
-    begin();
+
+    // 성공!
+    stageCleared = true;
+    if (animId) cancelAnimationFrame(animId);
+    playSfx('correct');
+
+    if (currentStage < 2) {
+      msgEl.innerHTML = `🎉 <strong>${currentStage + 1}단계 성공!</strong> 더 빠른 정령들이 나타납니다.`;
+      retryBtn.textContent = '다음 단계 도전 ▶';
+      retryBtn.style.background = '#e65100';
+      retryBtn.style.borderColor = '#ffd152';
+    } else {
+      // 3단계 최종 완료
+      msgEl.innerHTML = '🎉 <strong>모든 정령을 완벽히 포획했습니다!</strong>';
+      retryBtn.style.display = 'none';
+      completeBtn.style.display = 'block';
+      completeBtn.focus();
+    }
+  }
+
+  retryBtn.addEventListener('click', () => {
+    if (stageCleared && currentStage < 2) {
+      currentStage += 1;
+      startStage();
+    } else {
+      startStage();
+    }
   });
+
+  completeBtn.addEventListener('click', () => {
+    if (onDone) onDone();
+  });
+
+  // 시작
+  setTimeout(startStage, 50);
 }
