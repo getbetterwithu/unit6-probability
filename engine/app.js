@@ -1,8 +1,8 @@
-import { STEPS } from '../data/scenario.js';
+import { STEPS } from '../data/scenario.js?v=73';
 import { createDialogue } from './dialogue.js?v=3';
 import { setTension, refute } from './director.js?v=12';
 import { mountDiceInspector } from '../widgets/dice-inspector.js';
-import { mountQuiz } from '../widgets/quiz.js';
+import { mountQuiz } from '../widgets/quiz.js?v=73';
 import { mountDiceRoll } from '../widgets/dice-roll.js';
 import { mountPathLink } from '../widgets/path-link.js?v=19';
 import { mountPecasPick } from '../widgets/pecas-pick.js?v=14';

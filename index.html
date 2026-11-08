@@ -80,6 +80,8 @@
 
     #widget-root { position: absolute; inset: 8px 8px 108px 8px; z-index: 8; }
     #widget-root[hidden] { display: none !important; }
+    #stage-layer:has(~ #widget-root:not([hidden])) .actor { opacity: 0.18; transition: opacity 0.3s; }
+    .actor { transition: opacity 0.3s; }
     #focus-lines {
       pointer-events: none; position: absolute; inset: 0; opacity: 0; z-index: 7;
       background: repeating-linear-gradient(90deg, transparent, transparent 46%, rgba(229,169,59,0.25) 50%, transparent 54%);
@@ -179,6 +181,6 @@
     </div>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
-  <script type="module" src="engine/app.js?v=70"></script>
+  <script type="module" src="engine/app.js?v=73"></script>
 </body>
 </html>

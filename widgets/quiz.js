@@ -1,5 +1,5 @@
 import { renderMath } from '../engine/math.js';
-import { PROBLEMS } from '../data/problems.js';
+import { PROBLEMS } from '../data/problems.js?v=73';
 
 export function mountQuiz(root, problemId, { onSolved }) {
   const problem = PROBLEMS[problemId];
