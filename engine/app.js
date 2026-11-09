@@ -934,7 +934,7 @@ function showCinematicIntro(onStart) {
         중학교 2학년 수학 · 경우의 수와 확률
       </div>
       <div style="display:inline-block; border:1.5px solid #d4af37; background:rgba(212,175,55,0.18); color:#ffeaa7; padding:12px 34px; border-radius:30px; font-size:1.15rem; font-weight:800; letter-spacing:1px; box-shadow:0 0 24px rgba(245,176,65,0.35);">
-        ⚔️ 화면을 터치하거나 클릭하여 모험 시작 (전체화면 자동 전환)
+        ⚔️ 화면을 터치하거나 클릭하여 모험 시작
       </div>
     </div>
   `;
