@@ -9,10 +9,12 @@
       <stop offset="50%" stop-color="#261a10"/>
       <stop offset="100%" stop-color="#181008"/>
     </linearGradient>
-    <filter id="goldGlow" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="4" result="blur"/>
-      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
-    </filter>
+    <marker id="arrowGold" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#f39c12"/>
+    </marker>
+    <marker id="arrowGoldRev" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto-start-reverse">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#f39c12"/>
+    </marker>
   </defs>
 
   <!-- 배경 캔버스 -->
@@ -24,43 +26,70 @@
     테론의 편향 가공 직육면체 주사위 · 실측 확률표
   </text>
 
-  <!-- 좌측: 3D 편향 직육면체 주사위 겨냥도 (1:1:2.5 비율) -->
-  <g transform="translate(110, 195)">
-    <!-- 베이스 그림자 -->
-    <ellipse cx="0" cy="95" rx="75" ry="18" fill="rgba(0,0,0,0.6)" filter="blur(6px)"/>
+  <!-- ============================================================== -->
+  <!-- 좌측: 솔리드 3면 3D 직육면체 주사위 (보이는 3개 면만 표현)         -->
+  <!-- ============================================================== -->
+  <g id="solid-cuboid-dice">
+    <!-- 바닥 베이스 그림자 -->
+    <ellipse cx="115" cy="265" rx="70" ry="16" fill="rgba(0,0,0,0.65)" filter="blur(5px)"/>
 
-    <!-- 정면 (좁은 면: 2의 눈) -->
-    <polygon points="-45,-60 45,-60 45,80 -45,80" fill="#2c1e14" stroke="#d4af37" stroke-width="2.5"/>
-    <circle cx="-20" cy="5" r="5" fill="#f5eedb"/>
-    <circle cx="20" cy="15" r="5" fill="#f5eedb"/>
-    <text x="0" y="70" text-anchor="middle" fill="#bdc3c7" font-size="11" font-weight="bold">옆면 [2의 눈]</text>
-
-    <!-- 윗면 (넓은 면: 6의 눈 - 정사각형 1x1) -->
-    <polygon points="-45,-60 15,-105 105,-105 45,-60" fill="#3d2b1a" stroke="#d4af37" stroke-width="2.5"/>
-    <!-- 6의 눈 점 6개 -->
+    <!-- 1. 윗면 (Top: 6의 눈 - 가장 밝은 조명 톤) -->
+    <polygon points="65,115 125,115 165,85 105,85" fill="#4e3822" stroke="#d4af37" stroke-width="2.2" stroke-linejoin="round"/>
+    <!-- 윗면 6의 눈 (투영 각도에 맞게 2열 3행 정렬) -->
     <g fill="#ffd152">
-      <circle cx="-15" cy="-80" r="4.5"/>
-      <circle cx="15" cy="-80" r="4.5"/>
-      <circle cx="45" cy="-80" r="4.5"/>
-      <circle cx="15" cy="-88" r="4.5"/>
-      <circle cx="45" cy="-88" r="4.5"/>
-      <circle cx="75" cy="-88" r="4.5"/>
+      <circle cx="83" cy="107" r="4.2"/>
+      <circle cx="98" cy="99" r="4.2"/>
+      <circle cx="113" cy="91" r="4.2"/>
+      <circle cx="113" cy="107" r="4.2"/>
+      <circle cx="128" cy="99" r="4.2"/>
+      <circle cx="143" cy="91" r="4.2"/>
     </g>
-    <text x="30" y="-66" text-anchor="middle" fill="#ffd152" font-size="11" font-weight="900">윗면 [6의 눈]</text>
+    <text x="115" y="75" text-anchor="middle" fill="#ffd152" font-size="11" font-weight="900">윗면 [6의 눈]</text>
 
-    <!-- 우측면 (좁은 옆면: 3의 눈) -->
-    <polygon points="45,-60 105,-105 105,35 45,80" fill="#20150d" stroke="#d4af37" stroke-width="2.5"/>
-    <circle cx="75" cy="-35" r="4.5" fill="#f5eedb"/>
-    <circle cx="75" cy="-10" r="4.5" fill="#f5eedb"/>
-    <circle cx="75" cy="15" r="4.5" fill="#f5eedb"/>
-    <text x="75" y="60" text-anchor="middle" fill="#bdc3c7" font-size="10" font-weight="bold">옆면 [3]</text>
+    <!-- 2. 앞면 (Front: 2의 눈 - 중간 조명 톤) -->
+    <polygon points="65,115 125,115 125,255 65,255" fill="#322214" stroke="#d4af37" stroke-width="2.2" stroke-linejoin="round"/>
+    <!-- 앞면 2의 눈 (대각선 배치) -->
+    <g fill="#fffdf8">
+      <circle cx="85" cy="155" r="5"/>
+      <circle cx="105" cy="215" r="5"/>
+    </g>
+    <text x="95" y="244" text-anchor="middle" fill="#bdc3c7" font-size="11" font-weight="bold">앞면 [2의 눈]</text>
 
-    <!-- 치수 라벨 -->
-    <text x="-58" y="15" fill="#f39c12" font-size="11" font-weight="bold" text-anchor="end">높이 2.5</text>
-    <text x="0" y="100" fill="#f39c12" font-size="11" font-weight="bold" text-anchor="middle">가로 1</text>
+    <!-- 3. 우측면 (Right: 3의 눈 - 깊은 음영 톤) -->
+    <polygon points="125,115 165,85 165,225 125,255" fill="#20150b" stroke="#d4af37" stroke-width="2.2" stroke-linejoin="round"/>
+    <!-- 우측면 3의 눈 (대각선 배치) -->
+    <g fill="#fffdf8">
+      <circle cx="138" cy="135" r="4.5"/>
+      <circle cx="145" cy="170" r="4.5"/>
+      <circle cx="152" cy="205" r="4.5"/>
+    </g>
+    <text x="145" y="222" text-anchor="middle" fill="#bdc3c7" font-size="10" font-weight="bold">옆면 [3]</text>
+
+    <!-- ============================================================ -->
+    <!-- 3대 치수선 (가로 1, 세로 1, 높이 2.5)                         -->
+    <!-- ============================================================ -->
+    <!-- [가로 1 치수선] 앞면 밑변 아래 -->
+    <line x1="65" y1="272" x2="125" y2="272" stroke="#f39c12" stroke-width="1.8" marker-start="url(#arrowGoldRev)" marker-end="url(#arrowGold)"/>
+    <line x1="65" y1="262" x2="65" y2="278" stroke="#f39c12" stroke-width="1"/>
+    <line x1="125" y1="262" x2="125" y2="278" stroke="#f39c12" stroke-width="1"/>
+    <text x="95" y="290" text-anchor="middle" fill="#f39c12" font-size="12" font-weight="900">가로 1</text>
+
+    <!-- [세로 1 치수선] 우측면 밑변 사선 아래 -->
+    <line x1="130" y1="270" x2="170" y2="240" stroke="#f39c12" stroke-width="1.8" marker-start="url(#arrowGoldRev)" marker-end="url(#arrowGold)"/>
+    <line x1="127" y1="264" x2="133" y2="274" stroke="#f39c12" stroke-width="1"/>
+    <line x1="167" y1="234" x2="173" y2="244" stroke="#f39c12" stroke-width="1"/>
+    <text x="160" y="268" text-anchor="start" fill="#f39c12" font-size="12" font-weight="900">세로 1</text>
+
+    <!-- [높이 2.5 치수선] 좌측 수직 모서리 바깥 -->
+    <line x1="48" y1="115" x2="48" y2="255" stroke="#f39c12" stroke-width="1.8" marker-start="url(#arrowGoldRev)" marker-end="url(#arrowGold)"/>
+    <line x1="42" y1="115" x2="54" y2="115" stroke="#f39c12" stroke-width="1"/>
+    <line x1="42" y1="255" x2="54" y2="255" stroke="#f39c12" stroke-width="1"/>
+    <text x="40" y="190" text-anchor="end" fill="#f39c12" font-size="12" font-weight="900">높이 2.5</text>
   </g>
 
-  <!-- 우측: 고대 청동 실측 확률표 -->
+  <!-- ============================================================== -->
+  <!-- 우측: 고대 청동 실측 확률표                                    -->
+  <!-- ============================================================== -->
   <g transform="translate(265, 75)">
     <!-- 표 외곽 카드 -->
     <rect width="320" height="260" rx="10" fill="url(#bronzePlate)" stroke="#d4af37" stroke-width="2"/>

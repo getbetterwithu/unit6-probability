@@ -1,12 +1,12 @@
 /**
  * widgets/ending-journal.js
- * 피타고라스 학당 수학 모험 완결 수료증 (A4 상장 규격)
- * - A4 세로 1장 완벽 출력용 상장 디자인 (@media print, print-color-adjust: exact)
- * - 이미지(PNG) 저장 (Canvas 기반 1200x820 초고화질 상장 렌더링)
- * - PDF 저장 / 인쇄 (A4 단 1장 완벽 상장 레이아웃)
- * - 내 이메일로 수료증 사본 받기 (GAS clasp 연동)
+ * 피타고라스 학당 공식 수료증
+ * - PDF / 인쇄: 브라우저 기본값에 맞춘 대한민국 정통 A4 세로(Portrait) 1장 완벽 상장
+ * - 이미지(PNG) 저장: 스마트폰/PC 가로 뷰어용 황금 카드(1200x850 Landscape) 다운로드
+ * - 내 이메일로 수료증 받기: clasp GAS 웹앱 연동
  * - '여사건' 고교 용어 영구 삭제, TMI 분수(7/36 등) 완전 배제
  * - 하단 재접속 QR코드, 접속 주소, BetterwithU 공식 푸터, 문의 링크 마스킹
+ * - PDF 저장 시 학생 이름이 포함된 자동 파일명(document.title) 적용
  * - 선행 저장/발송 시 '처음부터 다시 하기' 잠금 해제 & 완전 초기화
  */
 
@@ -16,7 +16,7 @@ import { playSfx } from '../engine/sound.js';
 const GAS_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbxT5_FPxPV-9dzGtXhaV3VIp8Nhv_XwKEla6ixOtU9CMjD2gfMi-9CBQe6SgnkUwMEmcw/exec';
 
 /**
- * 순수 HTML5 Canvas를 이용해 1200x850 해상도의 고화질 황금 상장 이미지를 실시간 렌더링하여 다운로드합니다.
+ * 순수 HTML5 Canvas를 이용해 1200x850 해상도의 고화질 가로형 황금 상장 이미지를 실시간 렌더링하여 다운로드합니다.
  */
 function downloadCertificateImage(studentName, clearDate, certNumber, siteUrl) {
   const canvas = document.createElement('canvas');
@@ -24,7 +24,7 @@ function downloadCertificateImage(studentName, clearDate, certNumber, siteUrl) {
   canvas.height = 850;
   const ctx = canvas.getContext('2d');
 
-  // 1. 배경: 고급 아이보리/고문서 양장지 텍스처
+  // 1. 배경
   const bgGrad = ctx.createLinearGradient(0, 0, 1200, 850);
   bgGrad.addColorStop(0, '#0d1117');
   bgGrad.addColorStop(0.5, '#161d27');
@@ -32,7 +32,7 @@ function downloadCertificateImage(studentName, clearDate, certNumber, siteUrl) {
   ctx.fillStyle = bgGrad;
   ctx.fillRect(0, 0, 1200, 850);
 
-  // 2. 2중 황금 상장 테두리 (Golden Diploma Frame)
+  // 2. 2중 황금 상장 테두리
   ctx.strokeStyle = '#d4af37';
   ctx.lineWidth = 6;
   ctx.strokeRect(36, 36, 1128, 778);
@@ -50,7 +50,7 @@ function downloadCertificateImage(studentName, clearDate, certNumber, siteUrl) {
     ctx.fill();
   });
 
-  // 3. 상단 헤더 문양 및 공식 상장 타이틀
+  // 3. 상단 헤더 문양 및 상장 타이틀
   ctx.textAlign = 'center';
   ctx.fillStyle = '#d4af37';
   ctx.font = 'bold 15px sans-serif';
@@ -76,7 +76,7 @@ function downloadCertificateImage(studentName, clearDate, certNumber, siteUrl) {
   ctx.fillText(`발급 인증 번호: ${certNumber}`, 600, 212);
 
   // 상단 구분선
-  const lineGrad = ctx.createLinearGradient(220, 225, 980, 225);
+  const lineGrad = ctx.createLinearGradient(220, 228, 980, 228);
   lineGrad.addColorStop(0, 'rgba(212, 175, 55, 0)');
   lineGrad.addColorStop(0.5, 'rgba(212, 175, 55, 0.8)');
   lineGrad.addColorStop(1, 'rgba(212, 175, 55, 0)');
@@ -103,7 +103,7 @@ function downloadCertificateImage(studentName, clearDate, certNumber, siteUrl) {
   ctx.fillText('모든 모험 시련을 우수한 수학적 탐구력과 논리적 추론으로 완수하였기에', 600, 400);
   ctx.fillText('피타고라스 학당의 명예 대원으로 공인하며 본 수료증을 수여합니다.', 600, 430);
 
-  // 6. 단원별 해결 과제 (여사건 X, TMI 분수 X)
+  // 6. 단원별 해결 과제
   ctx.fillStyle = 'rgba(22, 27, 34, 0.85)';
   ctx.strokeStyle = 'rgba(212, 175, 55, 0.35)';
   ctx.lineWidth = 1;
@@ -205,10 +205,10 @@ export function mountEndingJournal(container, onRestart, onGoMinigames) {
   root.innerHTML = `
     <style>
       /* ============================================================== */
-      /* A4 가로 1장 완벽 상장 인쇄 스타일 (@media print)                */
+      /* 대한민국 표준 A4 세로 1장 완벽 상장 인쇄 스타일 (@media print) */
       /* ============================================================== */
       @page {
-        size: A4 landscape;
+        size: A4 portrait;
         margin: 0;
       }
       @media print {
@@ -217,14 +217,14 @@ export function mountEndingJournal(container, onRestart, onGoMinigames) {
           background: #0d1117 !important;
           -webkit-print-color-adjust: exact !important;
           print-color-adjust: exact !important;
-          width: 297mm !important; height: 210mm !important;
+          width: 210mm !important; height: 297mm !important;
           overflow: hidden !important;
         }
         body * { visibility: hidden !important; }
         #ending-journal-root, #ending-journal-root * { visibility: visible !important; }
         #ending-journal-root {
           position: absolute !important; left: 0 !important; top: 0 !important;
-          width: 297mm !important; height: 210mm !important;
+          width: 210mm !important; height: 297mm !important;
           background: #0d1117 !important; color: #f0f6fc !important;
           padding: 8mm 10mm !important; margin: 0 !important;
           box-sizing: border-box !important;
@@ -232,13 +232,13 @@ export function mountEndingJournal(container, onRestart, onGoMinigames) {
           overflow: hidden !important;
         }
         .diploma-card {
-          width: 100% !important; max-width: calc(297mm - 20mm) !important;
-          height: calc(210mm - 16mm) !important; max-height: calc(210mm - 16mm) !important;
+          width: 100% !important; max-width: calc(210mm - 20mm) !important;
+          height: calc(297mm - 16mm) !important; max-height: calc(297mm - 16mm) !important;
           box-sizing: border-box !important;
           border: 3.5px solid #d4af37 !important;
           background: #0d1117 !important; color: #f0f6fc !important;
           box-shadow: none !important;
-          padding: 16px 26px 14px !important;
+          padding: 24px 24px 18px !important;
           page-break-inside: avoid !important;
           break-inside: avoid !important;
           display: flex !important; flex-direction: column !important; justify-content: space-between !important;
@@ -258,15 +258,15 @@ export function mountEndingJournal(container, onRestart, onGoMinigames) {
       }
     </style>
 
-    <!-- [황금 상장 본체 (화면 및 PDF 인쇄 공용 - 가로형 상장 비율)] -->
-    <div style="max-width: 940px; width: 100%; display: flex; flex-direction: column; align-items: center;">
+    <!-- [황금 상장 본체 (A4 세로형 상장 규격)] -->
+    <div style="max-width: 680px; width: 100%; display: flex; flex-direction: column; align-items: center;">
 
       <div class="diploma-card" style="
         width: 100%; box-sizing: border-box;
-        background: linear-gradient(150deg, #131922, #0a0d13 95%);
+        background: linear-gradient(160deg, #131922, #0a0d13 95%);
         border: 3.5px solid #d4af37; border-radius: 12px;
         box-shadow: 0 16px 50px rgba(0,0,0,0.85), 0 0 35px rgba(212,175,55,0.25);
-        padding: 26px 32px 20px; color: #f0f6fc; position: relative;
+        padding: 32px 30px 24px; color: #f0f6fc; position: relative;
       ">
         <!-- 안쪽 보조 황금 테두리 -->
         <div style="
@@ -281,15 +281,15 @@ export function mountEndingJournal(container, onRestart, onGoMinigames) {
         <div style="position:absolute; bottom:12px; right:12px; width:8px; height:8px; background:#ffd152; border-radius:50%;"></div>
 
         <!-- 1. 상단 공식 헤더 및 상장 타이틀 -->
-        <div style="text-align:center; margin-bottom: 20px;">
-          <div style="font-size: 0.8rem; letter-spacing: 5px; color: #d4af37; font-weight: bold; margin-bottom: 6px;">
+        <div style="text-align:center; margin-bottom: 16px;">
+          <div style="font-size: 0.82rem; letter-spacing: 5px; color: #d4af37; font-weight: bold; margin-bottom: 6px;">
             ✦ ACADEMIA PYTHAGORICA ✦
           </div>
           <h1 style="
-            margin: 0; font-size: 2.25rem; font-weight: 900; letter-spacing: 6px; color: #ffd152;
+            margin: 0; font-size: 2.3rem; font-weight: 900; letter-spacing: 8px; color: #ffd152;
             text-shadow: 0 0 16px rgba(245,176,65,0.5);
           ">
-            수 료 증
+            수  료  증
           </h1>
           <div style="font-size: 0.78rem; letter-spacing: 3px; color: #c9d1d9; font-weight: bold; margin-top: 4px;">
             CERTIFICATE OF ACHIEVEMENT
@@ -300,34 +300,34 @@ export function mountEndingJournal(container, onRestart, onGoMinigames) {
         </div>
 
         <!-- 황금 구분선 -->
-        <div style="height: 1.5px; background: linear-gradient(90deg, transparent, #d4af37 20%, #d4af37 80%, transparent); margin-bottom: 22px;"></div>
+        <div style="height: 1.5px; background: linear-gradient(90deg, transparent, #d4af37 20%, #d4af37 80%, transparent); margin-bottom: 18px;"></div>
 
         <!-- 2. 수여자 정보 -->
-        <div style="text-align: center; margin-bottom: 22px;">
+        <div style="text-align: center; margin-bottom: 18px;">
           <div style="font-size: 1.05rem; color: #ffd152; font-weight: bold; margin-bottom: 4px;">
             명 예 수 학 대 원
           </div>
-          <div style="font-size: 1.85rem; color: #58a6ff; font-weight: 900; letter-spacing: 1px;">
+          <div style="font-size: 2rem; color: #58a6ff; font-weight: 900; letter-spacing: 1px;">
             ${studentName}
           </div>
         </div>
 
         <!-- 3. 공인 수여 본문 문구 -->
-        <div style="text-align: center; margin-bottom: 24px; line-height: 1.8; color: #f0f6fc; font-size: 0.98rem;">
+        <div style="text-align: center; margin-bottom: 20px; line-height: 1.8; color: #f0f6fc; font-size: 0.96rem;">
           위 사람은 중학교 2학년 수학 제6단원 <strong>「경우의 수와 확률」</strong>의<br>
           모든 모험 시련을 뛰어난 수학적 탐구력과 논리적 추론으로 완수하였기에<br>
           피타고라스 학당의 명예 대원으로 공인하며 본 수료증을 수여합니다.
         </div>
 
-        <!-- 4. 단원별 해결 과제 (여사건 X, TMI 분수 X) -->
+        <!-- 4. 단원별 해결 과제 (세로형에 최적화된 4개 박스 체계) -->
         <div style="
           background: rgba(22, 27, 34, 0.75); border: 1.2px solid rgba(212,175,55,0.35);
-          border-radius: 8px; padding: 14px 18px; margin-bottom: 22px;
-          display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px; font-size: 0.86rem;
+          border-radius: 8px; padding: 14px 18px; margin-bottom: 18px;
+          display: flex; flex-direction: column; gap: 8px; font-size: 0.88rem;
         ">
           <div>
             <span style="color:#e74c3c; font-weight:800;">• 제1·2장 (경우의 수):</span>
-            <span style="color:#c9d1d9;"> 사막 갈림길 경로, 비밀번호 해독</span>
+            <span style="color:#c9d1d9;"> 사막 갈림길 경로 선택, 비밀번호 암호 해독</span>
           </div>
           <div>
             <span style="color:#3498db; font-weight:800;">• 제3·4장 (순서와 대표):</span>
@@ -335,11 +335,11 @@ export function mountEndingJournal(container, onRestart, onGoMinigames) {
           </div>
           <div>
             <span style="color:#f1c40f; font-weight:800;">• 제5장 (확률의 뜻과 성질):</span>
-            <span style="color:#c9d1d9;"> 과녁 적중 확률, 특수 전개도 주사위</span>
+            <span style="color:#c9d1d9;"> 과녁 적중 확률, 특수 전개도 주사위의 곱</span>
           </div>
           <div>
             <span style="color:#2ecc71; font-weight:800;">• 제6장 (확률의 계산):</span>
-            <span style="color:#c9d1d9;"> 편향 주사위 검증, 다중 빗장 잠금</span>
+            <span style="color:#c9d1d9;"> 편향 주사위 복합 확률, 다중 빗장 핀 잠금</span>
           </div>
         </div>
 
@@ -347,7 +347,7 @@ export function mountEndingJournal(container, onRestart, onGoMinigames) {
         <div style="
           display: flex; justify-content: space-between; align-items: center;
           padding: 12px 16px; background: rgba(0,0,0,0.35); border-left: 3px solid #d4af37;
-          border-radius: 0 8px 8px 0; margin-bottom: 22px;
+          border-radius: 0 8px 8px 0; margin-bottom: 18px;
         ">
           <div style="flex: 1; padding-right: 12px;">
             <div style="font-size: 0.88rem; font-style: italic; color: #ffeaa7; line-height: 1.5;">
@@ -426,11 +426,11 @@ export function mountEndingJournal(container, onRestart, onGoMinigames) {
           <span style="font-size: 0.78rem; font-weight: normal; color: #8b949e;">(아래 중 하나를 완료하면 다시 하기가 활성화됩니다)</span>
         </div>
         <div style="font-size: 0.84rem; color: #8b949e; margin-bottom: 14px;">
-          A4 규격 상장 PDF 저장, 고화질 이미지(PNG) 다운로드, 또는 학생 본인 이메일로 수료증 사본을 발송하세요.
+          A4 세로 규격 상장 PDF 저장, 고화질 이미지(PNG) 다운로드, 또는 학생 본인 이메일로 수료증 사본을 발송하세요.
         </div>
 
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px;">
-          <!-- 1. 이미지(PNG) 저장 버튼 -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
+          <!-- 1. 이미지(PNG) 저장 버튼 (가로형 카드) -->
           <button type="button" id="journal-btn-img" class="action-btn" style="
             background: linear-gradient(135deg, #e67e22, #d35400); color: #fff;
             border: 1px solid #f39c12; border-radius: 8px; padding: 11px 14px; font-size: 0.92rem;
@@ -440,7 +440,7 @@ export function mountEndingJournal(container, onRestart, onGoMinigames) {
             🖼️ 수료증 이미지(PNG) 저장
           </button>
 
-          <!-- 2. PDF 저장 / 인쇄 버튼 -->
+          <!-- 2. PDF 저장 / 인쇄 버튼 (세로형 상장) -->
           <button type="button" id="journal-btn-print" class="action-btn" style="
             background: linear-gradient(135deg, #d4af37, #f39c12); color: #1c1308;
             border: 1px solid #ffd152; border-radius: 8px; padding: 11px 14px; font-size: 0.92rem;
@@ -569,22 +569,21 @@ export function mountEndingJournal(container, onRestart, onGoMinigames) {
     }
   }
 
-  // 1. 수료증 이미지(PNG) 저장
+  // 1. 수료증 이미지(PNG) 저장 (가로형 황금 카드)
   root.querySelector('#journal-btn-img').addEventListener('click', () => {
     playSfx('click');
     downloadCertificateImage(studentName, clearDate, certNumber, currentUrl);
     enableRestartButton('🖼️ 황금 상장 이미지가 다운로드되었습니다. (소장 완료)');
   });
 
-  // 2. 수료증 PDF 저장 / 인쇄 (A4 가로 1장 규격 & 파일명에 학생 이름 자동 반영)
+  // 2. 수료증 PDF 저장 / 인쇄 (A4 세로 1장 규격 & 파일명에 학생 이름 자동 반영)
   root.querySelector('#journal-btn-print').addEventListener('click', () => {
     playSfx('click');
     const originalTitle = document.title;
     const sanitizedName = studentName.replace(/[^a-zA-Z0-9가-힣]/g, '_') || '대원';
-    // 브라우저 인쇄 다이얼로그의 기본 PDF 파일명으로 document.title이 사용됨
     document.title = `피타고라스_학당_수료증_${sanitizedName}`;
     window.print();
-    enableRestartButton('📄 A4 가로 규격 황금 상장 PDF 저장 및 인쇄가 완료되었습니다.');
+    enableRestartButton('📄 A4 세로 규격 정통 상장 PDF 저장 및 인쇄가 완료되었습니다.');
     setTimeout(() => {
       document.title = originalTitle;
     }, 1500);
