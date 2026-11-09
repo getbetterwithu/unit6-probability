@@ -159,7 +159,7 @@ export function createDialogue({ speakerEl, textEl, hintEl, onWaitWidget, onAdva
   }
 
   function prev() {
-    if (locked) return;
+    locked = false; // 위젯 잠금을 해제하고 이전 대사로 자유롭게 복귀!
     if (typing) {
       finishTyping();
       return;
@@ -180,17 +180,7 @@ export function createDialogue({ speakerEl, textEl, hintEl, onWaitWidget, onAdva
   }
 
   function updateHint() {
-    if (!hintEl) return;
-    if (i >= queue.length - 1) {
-      hintEl.textContent = '클릭하여 다음 단계로 이동 ▶';
-      return;
-    }
-    const nxt = queue[i + 1];
-    if (nxt && nxt.type === 'widget') {
-      hintEl.textContent = '클릭하여 도전 시작 ▼';
-    } else {
-      hintEl.textContent = '◀ 이전 / 다음 ▶ (엔터, 스페이스, 터치)';
-    }
+    // 하단 안내 바 제거됨
   }
 
   function handleKey(e) {
@@ -214,6 +204,14 @@ export function createDialogue({ speakerEl, textEl, hintEl, onWaitWidget, onAdva
     next();
   }
 
+  function showDirect(speaker, text) {
+    if (animId) cancelAnimationFrame(animId);
+    animId = null;
+    typing = false;
+    speakerEl.textContent = speaker || '';
+    textEl.innerHTML = text || '';
+  }
+
   return {
     start,
     next,
@@ -222,5 +220,6 @@ export function createDialogue({ speakerEl, textEl, hintEl, onWaitWidget, onAdva
     click: next,
     unlock: () => { locked = false; },
     getCurrentIndex: () => i,
+    showDirect,
   };
 }

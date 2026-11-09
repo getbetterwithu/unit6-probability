@@ -23,12 +23,8 @@ export function mountWorldMap(root, { worldState, onSelectLocation, onClose }) {
           to { stroke-dashoffset: -40; }
         }
         @keyframes vaultGlow {
-          0%, 100% { filter: drop-shadow(0 0 10px #ffd152); transform: scale(1); }
-          50% { filter: drop-shadow(0 0 22px #f39c12); transform: scale(1.04); }
-        }
-        @keyframes pinBounce {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-6px); }
+          0%, 100% { filter: drop-shadow(0 0 8px #ffd152); }
+          50% { filter: drop-shadow(0 0 20px #f39c12); }
         }
         .map-route-line {
           stroke: #8c6d46; stroke-width: 2.5; stroke-dasharray: 6 5;
@@ -39,10 +35,11 @@ export function mountWorldMap(root, { worldState, onSelectLocation, onClose }) {
           animation: dashMove 1.8s linear infinite;
         }
         .map-pin {
-          cursor: pointer; transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+          cursor: pointer;
+          transition: filter 0.15s ease;
         }
         .map-pin:hover {
-          transform: scale(1.12);
+          filter: drop-shadow(0 0 12px #ffd152) !important;
         }
         .vault-unlocked-glow {
           animation: vaultGlow 2s infinite ease-in-out;
@@ -262,8 +259,9 @@ export function mountWorldMap(root, { worldState, onSelectLocation, onClose }) {
         <!-- 하단 거점 안내 툴팁 카드 바 -->
         <div id="map-tooltip" style="
           position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%);
+          width: max-content; max-width: 90%; text-align: center; line-height: 1.4;
           background: rgba(24, 18, 11, 0.94); border: 2px solid #d4af37; border-radius: 30px;
-          padding: 8px 24px; color: #ffeaa7; font-size: 0.95rem; font-weight: 700;
+          padding: 8px 22px; color: #ffeaa7; font-size: 0.95rem; font-weight: 700;
           box-shadow: 0 4px 20px rgba(0,0,0,0.8); pointer-events: none; transition: opacity 0.2s;
         ">
           🗺️ 지도의 깃발 거점을 터치하여 모험을 시작하시오.

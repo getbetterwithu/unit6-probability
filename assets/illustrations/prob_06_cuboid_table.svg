@@ -1,59 +1,111 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 380" width="100%" height="100%">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 380" width="100%" height="100%">
   <defs>
-    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#1e1711"/>
-      <stop offset="50%" stop-color="#2a2016"/>
-      <stop offset="100%" stop-color="#16100b"/>
+    <radialGradient id="vaultBg" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#241a10"/>
+      <stop offset="100%" stop-color="#0a0704"/>
+    </radialGradient>
+    <linearGradient id="bronzePlate" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3a2a1a"/>
+      <stop offset="50%" stop-color="#261a10"/>
+      <stop offset="100%" stop-color="#181008"/>
     </linearGradient>
-    <linearGradient id="parchment" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#f5e8cc"/>
-      <stop offset="100%" stop-color="#deb887"/>
-    </linearGradient>
-    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#ffeaa7"/>
-      <stop offset="50%" stop-color="#d4af37"/>
-      <stop offset="100%" stop-color="#996515"/>
-    </linearGradient>
-    <linearGradient id="bronze" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#d4a373"/>
-      <stop offset="50%" stop-color="#a67c52"/>
-      <stop offset="100%" stop-color="#6f4e37"/>
-    </linearGradient>
-    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
-      <feDropShadow dx="2" dy="4" stdDeviation="4" flood-color="#000" flood-opacity="0.6"/>
+    <filter id="goldGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
     </filter>
   </defs>
-  <rect width="600" height="380" rx="12" fill="url(#bgGrad)"/>
-  <rect x="12" y="12" width="576" height="356" rx="8" fill="none" stroke="url(#gold)" stroke-width="2" opacity="0.8"/>
-  <rect x="18" y="18" width="564" height="344" rx="6" fill="none" stroke="#5c4324" stroke-width="1" stroke-dasharray="6,4"/>
-  
-  <!-- Header Title Banner -->
-  <path d="M 160 22 L 440 22 L 420 54 L 180 54 Z" fill="url(#gold)" filter="url(#shadow)"/>
-  <text x="300" y="44" text-anchor="middle" font-family="serif" font-weight="bold" font-size="16" fill="#1c1308">6장 다이아 금고 · 500회 시행 실측 기록</text>
-  
-  
-  <g transform="translate(300, 205)" filter="url(#shadow)">
-    <rect x="-220" y="-115" width="440" height="210" rx="10" fill="url(#parchment)" stroke="#5c4324" stroke-width="2"/>
-    
-    <!-- Header Row -->
-    <rect x="-215" y="-110" width="430" height="42" fill="#8b5a2b"/>
-    <text x="-120" y="-83" text-anchor="middle" font-weight="bold" font-size="16" fill="#fff">던진 횟수 (전체 시행)</text>
-    <text x="120" y="-83" text-anchor="middle" font-weight="bold" font-size="16" fill="#fff">6의 눈이 나온 횟수</text>
 
-    <!-- Data Row 1 -->
-    <text x="-120" y="-35" text-anchor="middle" font-size="17" fill="#333">100회</text>
-    <text x="120" y="-35" text-anchor="middle" font-size="17" fill="#333">26회</text>
-    <line x1="-215" y1="-18" x2="215" y2="-18" stroke="#c4a47c"/>
+  <!-- 배경 캔버스 -->
+  <rect width="620" height="380" rx="14" fill="url(#vaultBg)" stroke="#5c4324" stroke-width="2.5"/>
 
-    <!-- Data Row 2 -->
-    <text x="-120" y="10" text-anchor="middle" font-size="17" fill="#333">300회</text>
-    <text x="120" y="10" text-anchor="middle" font-size="17" fill="#333">74회</text>
-    <line x1="-215" y1="28" x2="215" y2="28" stroke="#c4a47c"/>
+  <!-- 타이틀 배너 -->
+  <rect x="130" y="16" width="360" height="30" rx="6" fill="rgba(0,0,0,0.6)" stroke="#d4af37" stroke-width="1.2"/>
+  <text x="310" y="36" text-anchor="middle" fill="#ffd152" font-size="13" font-weight="bold" letter-spacing="1">
+    테론의 편향 가공 직육면체 주사위 · 실측 확률표
+  </text>
 
-    <!-- Data Row 3 (Final) -->
-    <rect x="-215" y="32" width="430" height="55" fill="#fff3cd"/>
-    <text x="-120" y="68" text-anchor="middle" font-weight="bold" font-size="22" fill="#856404">총 500회</text>
-    <text x="120" y="68" text-anchor="middle" font-weight="bold" font-size="22" fill="#e74c3c">125회 관측</text>
+  <!-- 좌측: 3D 편향 직육면체 주사위 겨냥도 (1:1:2.5 비율) -->
+  <g transform="translate(110, 195)">
+    <!-- 베이스 그림자 -->
+    <ellipse cx="0" cy="95" rx="75" ry="18" fill="rgba(0,0,0,0.6)" filter="blur(6px)"/>
+
+    <!-- 정면 (좁은 면: 2의 눈) -->
+    <polygon points="-45,-60 45,-60 45,80 -45,80" fill="#2c1e14" stroke="#d4af37" stroke-width="2.5"/>
+    <circle cx="-20" cy="5" r="5" fill="#f5eedb"/>
+    <circle cx="20" cy="15" r="5" fill="#f5eedb"/>
+    <text x="0" y="70" text-anchor="middle" fill="#bdc3c7" font-size="11" font-weight="bold">옆면 [2의 눈]</text>
+
+    <!-- 윗면 (넓은 면: 6의 눈 - 정사각형 1x1) -->
+    <polygon points="-45,-60 15,-105 105,-105 45,-60" fill="#3d2b1a" stroke="#d4af37" stroke-width="2.5"/>
+    <!-- 6의 눈 점 6개 -->
+    <g fill="#ffd152">
+      <circle cx="-15" cy="-80" r="4.5"/>
+      <circle cx="15" cy="-80" r="4.5"/>
+      <circle cx="45" cy="-80" r="4.5"/>
+      <circle cx="15" cy="-88" r="4.5"/>
+      <circle cx="45" cy="-88" r="4.5"/>
+      <circle cx="75" cy="-88" r="4.5"/>
+    </g>
+    <text x="30" y="-66" text-anchor="middle" fill="#ffd152" font-size="11" font-weight="900">윗면 [6의 눈]</text>
+
+    <!-- 우측면 (좁은 옆면: 3의 눈) -->
+    <polygon points="45,-60 105,-105 105,35 45,80" fill="#20150d" stroke="#d4af37" stroke-width="2.5"/>
+    <circle cx="75" cy="-35" r="4.5" fill="#f5eedb"/>
+    <circle cx="75" cy="-10" r="4.5" fill="#f5eedb"/>
+    <circle cx="75" cy="15" r="4.5" fill="#f5eedb"/>
+    <text x="75" y="60" text-anchor="middle" fill="#bdc3c7" font-size="10" font-weight="bold">옆면 [3]</text>
+
+    <!-- 치수 라벨 -->
+    <text x="-58" y="15" fill="#f39c12" font-size="11" font-weight="bold" text-anchor="end">높이 2.5</text>
+    <text x="0" y="100" fill="#f39c12" font-size="11" font-weight="bold" text-anchor="middle">가로 1</text>
   </g>
 
+  <!-- 우측: 고대 청동 실측 확률표 -->
+  <g transform="translate(265, 75)">
+    <!-- 표 외곽 카드 -->
+    <rect width="320" height="260" rx="10" fill="url(#bronzePlate)" stroke="#d4af37" stroke-width="2"/>
+
+    <!-- 표 헤더 -->
+    <rect width="320" height="38" rx="10" fill="rgba(212,175,55,0.25)"/>
+    <line x1="0" y1="38" x2="320" y2="38" stroke="#d4af37" stroke-width="1.5"/>
+    <line x1="120" y1="0" x2="120" y2="260" stroke="#5c4324" stroke-width="1.2"/>
+
+    <text x="60" y="24" text-anchor="middle" fill="#ffd152" font-size="13" font-weight="900">주사위 눈</text>
+    <text x="220" y="24" text-anchor="middle" fill="#ffd152" font-size="13" font-weight="900">실측 확률</text>
+
+    <!-- 1행: 1의 눈 (정사각 아랫면) -->
+    <line x1="0" y1="75" x2="320" y2="75" stroke="#3d2b1a" stroke-width="1"/>
+    <text x="60" y="60" text-anchor="middle" fill="#ffeaa7" font-size="12" font-weight="800">1 (정사각 아랫면)</text>
+    <text x="220" y="62" text-anchor="middle" fill="#2ecc71" font-size="15" font-weight="900">1 / 4</text>
+
+    <!-- 2행: 2의 눈 (직사각 옆면) -->
+    <line x1="0" y1="112" x2="320" y2="112" stroke="#3d2b1a" stroke-width="1"/>
+    <text x="60" y="97" text-anchor="middle" fill="#bdc3c7" font-size="12">2 (직사각 옆면)</text>
+    <text x="220" y="99" text-anchor="middle" fill="#ffeaa7" font-size="14" font-weight="700">1 / 8</text>
+
+    <!-- 3행: 3의 눈 (직사각 옆면) -->
+    <line x1="0" y1="149" x2="320" y2="149" stroke="#3d2b1a" stroke-width="1"/>
+    <text x="60" y="134" text-anchor="middle" fill="#bdc3c7" font-size="12">3 (직사각 옆면)</text>
+    <text x="220" y="136" text-anchor="middle" fill="#ffeaa7" font-size="14" font-weight="700">1 / 8</text>
+
+    <!-- 4행: 4의 눈 (직사각 옆면) -->
+    <line x1="0" y1="186" x2="320" y2="186" stroke="#3d2b1a" stroke-width="1"/>
+    <text x="60" y="171" text-anchor="middle" fill="#bdc3c7" font-size="12">4 (직사각 옆면)</text>
+    <text x="220" y="173" text-anchor="middle" fill="#ffeaa7" font-size="14" font-weight="700">1 / 8</text>
+
+    <!-- 5행: 5의 눈 (직사각 옆면) -->
+    <line x1="0" y1="223" x2="320" y2="223" stroke="#3d2b1a" stroke-width="1"/>
+    <text x="60" y="208" text-anchor="middle" fill="#bdc3c7" font-size="12">5 (직사각 옆면)</text>
+    <text x="220" y="210" text-anchor="middle" fill="#ffeaa7" font-size="14" font-weight="700">1 / 8</text>
+
+    <!-- 6행: 6의 눈 (정사각 윗면) -->
+    <text x="60" y="245" text-anchor="middle" fill="#ffd152" font-size="12" font-weight="900">✨ 6 (정사각 윗면)</text>
+    <text x="220" y="247" text-anchor="middle" fill="#ffd152" font-size="16" font-weight="900">1 / 4</text>
+  </g>
+
+  <!-- 하단 안내 박스 -->
+  <rect x="50" y="344" width="520" height="24" rx="4" fill="rgba(0,0,0,0.5)" stroke="#5c4324" stroke-width="1"/>
+  <text x="310" y="360" text-anchor="middle" fill="#bdc3c7" font-size="11">
+    ※ 주사위 2개를 동시에 던질 때, 두 눈의 수의 합이 12가 될 확률을 계산하시오.
+  </text>
 </svg>

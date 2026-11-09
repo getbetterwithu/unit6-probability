@@ -9,15 +9,14 @@ export function mountPathLink(root, { onDone, onClose }) {
           50% { stroke: #f39c12; stroke-width: 3.5px; opacity: 0.4; filter: none; }
         }
         @keyframes startNodeGlow {
-          0%, 100% { transform: scale(1); filter: drop-shadow(0 0 4px #ffd152); }
-          50% { transform: scale(1.25); filter: drop-shadow(0 0 8px #f1c40f); }
+          0%, 100% { filter: drop-shadow(0 0 5px #ffd152); opacity: 1; }
+          50% { filter: drop-shadow(0 0 10px #f1c40f); opacity: 0.4; }
         }
         .last-edge-blink {
           animation: lastEdgePulse 0.9s infinite ease-in-out;
         }
         .start-node-pulse {
           animation: startNodeGlow 1.2s infinite ease-in-out;
-          transform-origin: center;
         }
       </style>
 
@@ -182,12 +181,18 @@ export function mountPathLink(root, { onDone, onClose }) {
         out += `<path d="${arcPath(e)}" fill="none" stroke="#636e72" stroke-width="3.5" opacity="0.85"/>`;
       }
 
-      // 4단계: 지나온 모든 선에 방향 화살표 마커 표시!
+      // 4단계: 지나온 모든 선에 방향 화살표 및 순서 번호(1, 2, 3...) 배지 표시!
       const arr = getArrowData(t);
       const arrFill = isLast ? '#ffd152' : '#ffffff';
+      const badgeFill = isLast ? '#ffd152' : '#1e1610';
+      const textFill = isLast ? '#1c1308' : '#ffeaa7';
       out += `
         <g transform="translate(${arr.x}, ${arr.y}) rotate(${arr.deg})">
-          <polygon points="-5,-4 6,0 -5,4 -2,0" fill="${arrFill}" stroke="#1c1308" stroke-width="1"/>
+          <polygon points="-8,-4 6,0 -8,4 -4,0" fill="${arrFill}" stroke="#1c1308" stroke-width="1"/>
+        </g>
+        <g transform="translate(${arr.x}, ${arr.y})">
+          <circle cx="0" cy="0" r="6.5" fill="${badgeFill}" stroke="#d4af37" stroke-width="1.2"/>
+          <text x="0" y="3" text-anchor="middle" fill="${textFill}" font-size="8" font-weight="900">${idx + 1}</text>
         </g>
       `;
     });
@@ -276,13 +281,13 @@ export function mountPathLink(root, { onDone, onClose }) {
   draw();
 
   root.querySelector('#path-reset').addEventListener('click', () => {
-    if (done) return;
     playSfx('click');
     edges.forEach((e) => { e.used = false; });
     tip = null;
     trail = [];
     used = 0;
     done = false;
+    completeBtn.style.display = 'none';
     countEl.textContent = '📍 출발할 시작 점(원)을 클릭하시오.';
     draw();
   });

@@ -14,58 +14,41 @@
   <rect width="600" height="360" rx="12" fill="url(#caveBlueBg)" stroke="#1e90ff" stroke-width="1.8"/>
 
   <!-- 타이틀 배너 -->
-  <rect x="160" y="14" width="280" height="26" rx="5" fill="rgba(0,0,0,0.5)" stroke="#1e90ff" stroke-width="1.2"/>
-  <text x="300" y="32" text-anchor="middle" fill="#70a1ff" font-size="13" font-weight="bold" letter-spacing="1">
-    빛나는 다이아 동굴 · 피캐스의 짝수 곱셈 마법
+  <rect x="160" y="16" width="280" height="28" rx="6" fill="rgba(0,0,0,0.5)" stroke="#1e90ff" stroke-width="1.2"/>
+  <text x="300" y="35" text-anchor="middle" fill="#70a1ff" font-size="13" font-weight="bold" letter-spacing="1">
+    빛나는 다이아 동굴 · 피캐스의 마법 주사위
   </text>
 
   <!-- 좌측 주사위 A (청옥빛) -->
-  <g transform="translate(100, 75)">
-    <rect width="110" height="110" rx="16" fill="#1e272e" stroke="#70a1ff" stroke-width="3" filter="url(#blueGlow)"/>
-    <circle cx="35" cy="35" r="9" fill="#70a1ff"/>
-    <circle cx="75" cy="75" r="9" fill="#70a1ff"/>
-    <circle cx="55" cy="55" r="9" fill="#ffd152"/>
-    <text x="55" y="136" text-anchor="middle" fill="#d2dae2" font-size="13" font-weight="bold">주사위 A</text>
+  <g transform="translate(100, 105)">
+    <rect width="130" height="130" rx="18" fill="#1e272e" stroke="#70a1ff" stroke-width="3" filter="url(#blueGlow)"/>
+    <circle cx="40" cy="40" r="10" fill="#70a1ff"/>
+    <circle cx="90" cy="90" r="10" fill="#70a1ff"/>
+    <circle cx="65" cy="65" r="10" fill="#ffd152"/>
+    <text x="65" y="160" text-anchor="middle" fill="#d2dae2" font-size="15" font-weight="bold">첫 번째 주사위</text>
   </g>
 
   <!-- 중앙 곱셈 연산 기호 -->
-  <g transform="translate(270, 100)">
-    <circle cx="30" cy="30" r="28" fill="#0f1923" stroke="#ffd152" stroke-width="2"/>
-    <text x="30" y="40" text-anchor="middle" fill="#ffd152" font-size="34" font-weight="900">×</text>
+  <g transform="translate(265, 135)">
+    <circle cx="35" cy="35" r="32" fill="#0f1923" stroke="#ffd152" stroke-width="2.5"/>
+    <text x="35" y="47" text-anchor="middle" fill="#ffd152" font-size="40" font-weight="900">×</text>
   </g>
 
   <!-- 우측 주사위 B (청옥빛) -->
-  <g transform="translate(390, 75)">
-    <rect width="110" height="110" rx="16" fill="#1e272e" stroke="#70a1ff" stroke-width="3" filter="url(#blueGlow)"/>
-    <circle cx="35" cy="35" r="9" fill="#70a1ff"/>
-    <circle cx="75" cy="35" r="9" fill="#70a1ff"/>
-    <circle cx="35" cy="75" r="9" fill="#70a1ff"/>
-    <circle cx="75" cy="75" r="9" fill="#70a1ff"/>
-    <text x="55" y="136" text-anchor="middle" fill="#d2dae2" font-size="13" font-weight="bold">주사위 B</text>
+  <g transform="translate(370, 105)">
+    <rect width="130" height="130" rx="18" fill="#1e272e" stroke="#70a1ff" stroke-width="3" filter="url(#blueGlow)"/>
+    <circle cx="40" cy="40" r="10" fill="#70a1ff"/>
+    <circle cx="90" cy="40" r="10" fill="#70a1ff"/>
+    <circle cx="40" cy="90" r="10" fill="#70a1ff"/>
+    <circle cx="90" cy="90" r="10" fill="#70a1ff"/>
+    <text x="65" y="160" text-anchor="middle" fill="#d2dae2" font-size="15" font-weight="bold">두 번째 주사위</text>
   </g>
 
-  <!-- 중앙 결과 목표 배너 -->
-  <g transform="translate(150, 215)">
-    <rect width="300" height="38" rx="8" fill="rgba(30, 144, 255, 0.15)" stroke="#70a1ff" stroke-width="1.5"/>
-    <text x="150" y="24" text-anchor="middle" fill="#ffd152" font-size="16" font-weight="bold">
-      두 눈의 수의 곱 = <tspan fill="#2ed573">짝수 (Even)</tspan> 가 될 확률은?
-    </text>
-  </g>
-
-  <!-- 하단 원리 비교 카드 -->
-  <g transform="translate(50, 275)">
-    <!-- 짝수 조건 -->
-    <rect x="0" y="0" width="240" height="65" rx="6" fill="rgba(0,0,0,0.5)" stroke="#5c4324" stroke-width="1"/>
-    <text x="120" y="22" text-anchor="middle" fill="#ffd152" font-size="12" font-weight="bold">곱이 짝수가 되는 조합</text>
-    <text x="120" y="44" text-anchor="middle" fill="#bdc3c7" font-size="11">
-      짝수×짝수, 짝수×홀수, 홀수×짝수 (3가지 유형)
-    </text>
-
-    <!-- 반대(홀수) 조건 - 핵심 열쇠 -->
-    <rect x="260" y="0" width="240" height="65" rx="6" fill="rgba(46, 204, 113, 0.1)" stroke="#2ecc71" stroke-width="1.5"/>
-    <text x="380" y="22" text-anchor="middle" fill="#2ecc71" font-size="12" font-weight="bold">💡 반대되는 경우 (전체에서 빼기)</text>
-    <text x="380" y="44" text-anchor="middle" fill="#ffeaa7" font-size="11">
-      곱이 홀수가 되는 유일한 경우 = <tspan fill="#fff" font-weight="bold">홀수 × 홀수</tspan>
+  <!-- 하단 순수 상황 배너 -->
+  <g transform="translate(140, 305)">
+    <rect width="320" height="34" rx="6" fill="rgba(0,0,0,0.6)" stroke="#5c4324" stroke-width="1"/>
+    <text x="160" y="22" text-anchor="middle" fill="#ffeaa7" font-size="13" font-weight="bold">
+      두 주사위를 동시에 던져 나온 두 눈의 수의 곱
     </text>
   </g>
 </svg>

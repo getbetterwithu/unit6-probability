@@ -17,58 +17,53 @@
   <rect width="600" height="360" rx="12" fill="url(#bgGrad)" stroke="#5c4324" stroke-width="2"/>
 
   <!-- 타이틀 배너 -->
-  <rect x="180" y="16" width="240" height="28" rx="6" fill="rgba(0,0,0,0.5)" stroke="#d4af37" stroke-width="1.2"/>
+  <rect x="170" y="16" width="260" height="28" rx="6" fill="rgba(0,0,0,0.5)" stroke="#d4af37" stroke-width="1.2"/>
   <text x="300" y="35" text-anchor="middle" fill="#ffd152" font-size="13" font-weight="bold" letter-spacing="1">
-    소폴로스 상단 · 정오각형 제단 암호
+    소폴로스 상단 · 정오각형 제단 룬
   </text>
 
   <!-- 시계방향 회전 가이드 원호 -->
   <path d="M 300 70 A 130 130 0 1 1 200 100" fill="none" stroke="#f5b041" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arrow)" opacity="0.6"/>
   <text x="440" y="100" fill="#f5b041" font-size="12" font-weight="bold">시계 방향 이동 ▶</text>
 
-  <!-- 정오각형 기하학 (중심: 300, 195, 반지름 R=105) -->
-  <!-- A (위): 300, 90 -->
-  <!-- B (우상): 400, 163 -->
-  <!-- C (우하): 362, 280 -->
-  <!-- D (좌하): 238, 280 -->
-  <!-- E (좌상): 200, 163 -->
-  <polygon points="300,90 400,163 362,280 238,280 200,163"
+  <!-- 정오각형 기하학 (중심: 300, 205, 반지름 R=110) -->
+  <polygon points="300,95 405,171 365,295 235,295 195,171"
            fill="rgba(212, 175, 55, 0.08)" stroke="#d4af37" stroke-width="3" filter="url(#goldGlow)"/>
 
   <!-- 내부 대각선 별 룬 장식 -->
-  <polygon points="300,90 362,280 200,163 400,163 238,280"
+  <polygon points="300,95 365,295 195,171 405,171 235,295"
            fill="none" stroke="#5c4324" stroke-width="1.2" stroke-dasharray="3 3"/>
 
   <!-- 꼭짓점 룬 노드들 -->
   <!-- 꼭짓점 A (출발점) -->
-  <circle cx="300" cy="90" r="16" fill="#c0392b" stroke="#ffd152" stroke-width="2.5" filter="url(#goldGlow)"/>
-  <text x="300" y="95" text-anchor="middle" fill="#fff" font-size="15" font-weight="900">A</text>
-  <rect x="250" y="52" width="100" height="20" rx="4" fill="#c0392b" stroke="#ffd152" stroke-width="1"/>
-  <text x="300" y="66" text-anchor="middle" fill="#fff" font-size="11" font-weight="bold">출발점 (루비 말)</text>
+  <circle cx="300" cy="95" r="16" fill="#c0392b" stroke="#ffd152" stroke-width="2.5" filter="url(#goldGlow)"/>
+  <text x="300" y="100" text-anchor="middle" fill="#fff" font-size="15" font-weight="900">A</text>
+  <rect x="250" y="56" width="100" height="20" rx="4" fill="#c0392b" stroke="#ffd152" stroke-width="1"/>
+  <text x="300" y="70" text-anchor="middle" fill="#fff" font-size="11" font-weight="bold">출발점 (말)</text>
 
   <!-- 꼭짓점 B -->
-  <circle cx="400" cy="163" r="14" fill="#2a1f14" stroke="#d4af37" stroke-width="2"/>
-  <text x="400" y="168" text-anchor="middle" fill="#ffeaa7" font-size="14" font-weight="bold">B</text>
+  <circle cx="405" cy="171" r="14" fill="#2a1f14" stroke="#d4af37" stroke-width="2"/>
+  <text x="405" y="176" text-anchor="middle" fill="#ffeaa7" font-size="14" font-weight="bold">B</text>
 
   <!-- 꼭짓점 C -->
-  <circle cx="362" cy="280" r="14" fill="#2a1f14" stroke="#d4af37" stroke-width="2"/>
-  <text x="362" y="285" text-anchor="middle" fill="#ffeaa7" font-size="14" font-weight="bold">C</text>
+  <circle cx="365" cy="295" r="14" fill="#2a1f14" stroke="#d4af37" stroke-width="2"/>
+  <text x="365" y="300" text-anchor="middle" fill="#ffeaa7" font-size="14" font-weight="bold">C</text>
 
   <!-- 꼭짓점 D -->
-  <circle cx="238" cy="280" r="14" fill="#2a1f14" stroke="#d4af37" stroke-width="2"/>
-  <text x="238" y="285" text-anchor="middle" fill="#ffeaa7" font-size="14" font-weight="bold">D</text>
+  <circle cx="235" cy="295" r="14" fill="#2a1f14" stroke="#d4af37" stroke-width="2"/>
+  <text x="235" y="300" text-anchor="middle" fill="#ffeaa7" font-size="14" font-weight="bold">D</text>
 
   <!-- 꼭짓점 E (목표점) -->
-  <circle cx="200" cy="163" r="17" fill="#27ae60" stroke="#ffd152" stroke-width="2.5" filter="url(#goldGlow)"/>
-  <text x="200" y="169" text-anchor="middle" fill="#fff" font-size="15" font-weight="900">E</text>
-  <rect x="150" y="125" width="100" height="20" rx="4" fill="#27ae60" stroke="#ffd152" stroke-width="1"/>
-  <text x="200" y="139" text-anchor="middle" fill="#fff" font-size="11" font-weight="bold">✨ 목표 지점 (E)</text>
+  <circle cx="195" cy="171" r="17" fill="#27ae60" stroke="#ffd152" stroke-width="2.5" filter="url(#goldGlow)"/>
+  <text x="195" y="177" text-anchor="middle" fill="#fff" font-size="15" font-weight="900">E</text>
+  <rect x="145" y="132" width="100" height="20" rx="4" fill="#27ae60" stroke="#ffd152" stroke-width="1"/>
+  <text x="195" y="146" text-anchor="middle" fill="#fff" font-size="11" font-weight="bold">✨ 목표 지점 (E)</text>
 
-  <!-- 하단 설명 배너 -->
-  <g transform="translate(60, 318)">
-    <rect width="480" height="28" rx="6" fill="rgba(0,0,0,0.6)" stroke="#5c4324" stroke-width="1"/>
-    <text x="240" y="19" text-anchor="middle" fill="#bdc3c7" font-size="12">
-      주사위 2개의 눈의 합 = <tspan fill="#ffd152" font-weight="bold">이동 칸수</tspan> (합 4칸 이동 시 E, 합 9칸 이동 시 E)
+  <!-- 하단 순수 상황 안내 -->
+  <g transform="translate(100, 324)">
+    <rect width="400" height="24" rx="4" fill="rgba(0,0,0,0.5)" stroke="#5c4324" stroke-width="1"/>
+    <text x="200" y="16" text-anchor="middle" fill="#bdc3c7" font-size="11">
+      주사위 2개를 굴려 나온 두 눈의 수의 합만큼 꼭짓점 변을 따라 이동
     </text>
   </g>
 </svg>

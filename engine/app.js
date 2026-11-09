@@ -138,6 +138,36 @@ try {
   clearedSteps = new Set(saved);
 } catch (e) {}
 
+// 현재 활성화된 위젯 과제의 패스/완료/재오픈 상태 추적
+let currentActiveDoneFn = null;
+let currentActiveReopenLabel = '';
+let currentActiveMountFn = null;
+
+// 토스트 메시지 알림 함수
+function showToast(message, isGold = true) {
+  const existing = document.getElementById('u6-toast-msg');
+  if (existing) existing.remove();
+
+  const toast = document.createElement('div');
+  toast.id = 'u6-toast-msg';
+  toast.style.cssText = `
+    position: absolute; top: 72px; left: 50%; transform: translateX(-50%);
+    background: ${isGold ? 'linear-gradient(135deg, #2a1f14, #1c140c)' : 'rgba(20,15,10,0.95)'};
+    border: 2px solid ${isGold ? '#ffd152' : '#e74c3c'};
+    color: ${isGold ? '#ffd152' : '#ff7675'};
+    padding: 10px 24px; border-radius: 30px; font-weight: 800; font-size: 0.95rem;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.85); z-index: 999;
+    animation: fadeIn 0.25s ease; pointer-events: none; text-align: center;
+  `;
+  toast.innerHTML = message;
+  stageContainer.appendChild(toast);
+  setTimeout(() => {
+    toast.style.transition = 'opacity 0.4s ease';
+    toast.style.opacity = '0';
+    setTimeout(() => toast.remove(), 400);
+  }, 2400);
+}
+
 function markStepCleared(key) {
   clearedSteps.add(key);
   try {
@@ -239,27 +269,40 @@ const dlg = createDialogue({
 
     // 완료 콜백 (클리어 기록 누적)
     const handleDone = () => {
+      currentActiveDoneFn = null;
+      currentActiveMountFn = null;
+      currentActiveReopenLabel = '';
       markStepCleared(stepKey);
       widgetRoot.hidden = true;
       widgetRoot.innerHTML = '';
       reopenBtn.style.display = 'none';
       done();
     };
+    currentActiveDoneFn = handleDone;
 
     // 닫기(접기) 공통 핸들러
     const handleClose = (btnLabel = '🧩 도전 과제 다시 열기') => {
+      currentActiveReopenLabel = btnLabel;
+      currentActiveMountFn = mountCurrentWidget;
       widgetRoot.hidden = true;
       reopenBtn.style.display = 'block';
       reopenBtn.innerHTML = btnLabel;
       reopenBtn.onclick = () => {
         mountCurrentWidget();
       };
+
+      // 대화창에 미션 대기 안내 메시지 즉시 렌더링
+      dlg.showDirect(
+        '미션 안내',
+        `<strong style="color:#ffd152;">[도전 과제 대기 중]</strong> 우측 상단의 <strong style="color:#ffeaa7;">[${btnLabel}]</strong> 버튼을 눌러 과제를 완료해야 다음 이야기로 나아갈 수 있습니다.<br><span style="font-size:0.9rem; color:#bdc3c7;">(◀ 이전 버튼을 누르면 언제든 앞선 대사들을 다시 확인할 수 있습니다.)</span>`
+      );
     };
 
     function mountCurrentWidget() {
       widgetRoot.hidden = false;
       widgetRoot.innerHTML = '';
       reopenBtn.style.display = 'none';
+      currentActiveMountFn = mountCurrentWidget;
 
       if (step.widget === 'dice-inspector') {
         mountDiceInspector(widgetRoot, {
@@ -433,13 +476,8 @@ function showEndingJournal() {
   mountEndingJournal(widgetRoot, {
     playerName: localStorage.getItem('u6_player_name') || '용감한 탐험가',
     onRestart() {
-      localStorage.removeItem('u6_world_state');
-      localStorage.removeItem('u6_current_location');
-      localStorage.removeItem('u6_location_step');
-      localStorage.removeItem('u6_cleared_steps');
-      worldState = { ruby: false, emerald: false, sapphire: false };
-      clearedSteps.clear();
-      startLocation('intro', 0);
+      localStorage.clear();
+      window.location.reload();
     },
     onGoMinigames() {
       location.href = 'games.html';
@@ -490,6 +528,15 @@ if (btnNext) {
 dialogue.addEventListener('click', (e) => {
   if (backlog.isOpen() || isMapOpen) return;
   if (e.target.closest('button')) return;
+  if (currentActiveDoneFn && widgetRoot.hidden) {
+    playSfx('error');
+    showToast(`⚠️ 우측 상단의 <strong style="color:#ffeaa7;">[${currentActiveReopenLabel || '과제 다시 열기'}]</strong> 버튼을 눌러 과제를 완료해야 합니다!`, false);
+    if (reopenBtn) {
+      reopenBtn.style.transform = 'scale(1.1)';
+      setTimeout(() => { if (reopenBtn) reopenBtn.style.transform = 'none'; }, 200);
+    }
+    return;
+  }
   playSfx('click');
   dlg.click();
 });
@@ -499,12 +546,17 @@ stageContainer.addEventListener('click', (e) => {
   if (backlog.isOpen() || isMapOpen) return;
   if (!widgetRoot.hidden) return;
   if (e.target.closest('#dialogue-layer') || e.target.closest('#btn-sound') || e.target.closest('#btn-backlog') || e.target.closest('#btn-world-map') || e.target.closest('#evidence-bag') || e.target.closest('#top-hud') || e.target.closest('#btn-reopen-widget')) return;
+  if (currentActiveDoneFn && widgetRoot.hidden) {
+    playSfx('error');
+    showToast(`⚠️ 우측 상단의 <strong style="color:#ffeaa7;">[${currentActiveReopenLabel || '과제 다시 열기'}]</strong> 버튼을 눌러 과제를 완료해야 합니다!`, false);
+    return;
+  }
   playSfx('click');
   dlg.click();
 });
 
 // ==========================================
-// 백틱( ` ) 5회 연속 연타 감지기 (관리자 치트 모달)
+// 백틱( ` ) 5회 연속 연타 감지기 (관리자 치트 모달 / 현재 단계 정답 처리)
 // ==========================================
 let backtickTimes = [];
 window.addEventListener('keydown', (ev) => {
@@ -517,6 +569,22 @@ window.addEventListener('keydown', (ev) => {
     if (backtickTimes.length >= 5) {
       backtickTimes = [];
       ev.preventDefault();
+
+      // [핵심 기능] 현재 풀고 있는 스테이지나 미니게임이 있다면 즉시 정답 처리(Pass)!
+      if (currentActiveDoneFn) {
+        const passFn = currentActiveDoneFn;
+        currentActiveDoneFn = null;
+        currentActiveMountFn = null;
+        currentActiveReopenLabel = '';
+        playSfx('correct');
+        showToast('⚡ [치트 발동] 현재 진행 중인 과제를 즉시 정답 처리하고 통과합니다!', true);
+        const adminModal = document.getElementById('admin-cheat-modal');
+        if (adminModal) adminModal.remove();
+        passFn();
+        return;
+      }
+
+      // 진행 중인 과제가 없는 일반 대사 구간인 경우: 관리자 챕터 워프 모달 열기
       openAdminModal();
       return;
     }
@@ -569,6 +637,11 @@ window.addEventListener('keydown', (ev) => {
 
   if (ev.key === 'Enter' || ev.key === ' ' || ev.code === 'Space' || ev.key === 'ArrowRight') {
     ev.preventDefault();
+    if (currentActiveDoneFn && widgetRoot.hidden) {
+      playSfx('error');
+      showToast(`⚠️ 우측 상단의 <strong style="color:#ffeaa7;">[${currentActiveReopenLabel || '과제 다시 열기'}]</strong> 버튼을 눌러 과제를 완료해야 합니다!`, false);
+      return;
+    }
     playSfx('click');
     dlg.next();
   } else if (ev.key === 'ArrowLeft') {
@@ -579,7 +652,7 @@ window.addEventListener('keydown', (ev) => {
 }, true);
 
 // ==========================================
-// 관리자 / 치트 패널 모달 (백틱 5회 활성화)
+// 관리자 / 치트 패널 모달
 // ==========================================
 function openAdminModal() {
   playSfx('evidence');
@@ -608,10 +681,18 @@ function openAdminModal() {
       </div>
 
       <p style="font-size:0.9rem; color:#bdc3c7; margin:0 0 16px;">
-        빠른 검증을 위한 챕터 워프 및 문제 프리패스 도구입니다. 원하는 기능을 선택하세요.
+        빠른 검증을 위한 챕터 워프 및 문제 프리패스 도구입니다. 백틱( \` ) 5회 연타 시 현재 풀고 있는 과제를 즉시 통과할 수 있습니다.
       </p>
 
-      <!-- 1. 거점 / 챕터 바로 가기 -->
+      <!-- 1. 현재 과제 즉시 정답 처리 -->
+      <div style="margin-bottom:20px; background:rgba(0,0,0,0.3); padding:12px; border-radius:8px; border:1px dashed #ffd152;">
+        <div style="font-size:0.95rem; font-weight:800; color:#ffd152; margin-bottom:8px;">⚡ 현재 과제 원터치 패스</div>
+        <button type="button" id="admin-pass-current" style="width:100%; background:linear-gradient(135deg, #e67e22, #d35400); color:#fff; border:none; padding:10px 14px; border-radius:6px; font-weight:800; font-size:1rem; cursor:pointer; box-shadow:0 4px 12px rgba(230,126,34,0.4);">
+          ⚡ [치트] 현재 진행 중인 과제/미니게임 즉시 정답 처리 (Pass)
+        </button>
+      </div>
+
+      <!-- 2. 거점 / 챕터 바로 가기 -->
       <div style="margin-bottom:20px;">
         <div style="font-size:0.95rem; font-weight:800; color:#ffeaa7; margin-bottom:8px;">📍 챕터 / 거점 즉시 이동</div>
         <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:8px;">
@@ -624,9 +705,9 @@ function openAdminModal() {
         </div>
       </div>
 
-      <!-- 2. 치트 및 결과 점프 -->
+      <!-- 3. 치트 및 결과 점프 -->
       <div style="margin-bottom:20px;">
-        <div style="font-size:0.95rem; font-weight:800; color:#ffeaa7; margin-bottom:8px;">⚡ 원터치 치트 & 결과 점프</div>
+        <div style="font-size:0.95rem; font-weight:800; color:#ffeaa7; margin-bottom:8px;">✨ 원석 치트 & 수료증 점프</div>
         <div style="display:flex; flex-direction:column; gap:8px;">
           <button type="button" id="admin-cheat-all-gems" style="background:linear-gradient(135deg, #27ae60, #2ecc71); color:#fff; border:none; padding:10px 14px; border-radius:6px; font-weight:800; font-size:0.95rem; cursor:pointer;">
             ✨ 치트: 3대 원석 즉시 획득 & 금고 봉인 해제
@@ -646,6 +727,21 @@ function openAdminModal() {
 
   modal.querySelector('#admin-close-btn').addEventListener('click', () => {
     modal.remove();
+  });
+
+  modal.querySelector('#admin-pass-current').addEventListener('click', () => {
+    if (currentActiveDoneFn) {
+      const passFn = currentActiveDoneFn;
+      currentActiveDoneFn = null;
+      currentActiveMountFn = null;
+      currentActiveReopenLabel = '';
+      playSfx('correct');
+      showToast('⚡ [치트 발동] 현재 진행 중인 과제를 즉시 통과했습니다!', true);
+      modal.remove();
+      passFn();
+    } else {
+      alert('현재 활성화된(풀고 있는) 과제나 미니게임이 없습니다.');
+    }
   });
 
   modal.querySelectorAll('.admin-warp-btn').forEach((btn) => {

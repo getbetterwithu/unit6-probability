@@ -25,49 +25,35 @@
   </text>
 
   <!-- 거대한 석문 구조체 -->
-  <!-- 외곽 아치 -->
-  <path d="M 120 330 L 120 130 Q 300 40 480 130 L 480 330 Z"
+  <path d="M 120 340 L 120 130 Q 300 40 480 130 L 480 340 Z"
         fill="url(#doorGrad)" stroke="#6b5335" stroke-width="4"/>
 
   <!-- 석문 좌우 빗장 틈새 -->
-  <line x1="300" y1="90" x2="300" y2="330" stroke="#0a0805" stroke-width="5"/>
+  <line x1="300" y1="90" x2="300" y2="340" stroke="#0a0805" stroke-width="5"/>
 
   <!-- 석문 중심 마법진 원형 판 -->
-  <circle cx="300" cy="180" r="85" fill="#18120b" stroke="#d4af37" stroke-width="3" filter="url(#emeraldGlow)"/>
-  <circle cx="300" cy="180" r="76" fill="none" stroke="#2ed573" stroke-width="1.5" stroke-dasharray="4 3"/>
+  <circle cx="300" cy="195" r="95" fill="#18120b" stroke="#d4af37" stroke-width="3" filter="url(#emeraldGlow)"/>
+  <circle cx="300" cy="195" r="86" fill="none" stroke="#2ed573" stroke-width="1.5" stroke-dasharray="4 3"/>
 
-  <!-- 중앙 일차방정식 수식 -->
-  <text x="300" y="172" text-anchor="middle" fill="#ffd152" font-size="28" font-family="'Courier New', monospace" font-weight="900" letter-spacing="2">
+  <!-- 중앙 일차방정식 수식 (순수 문제 수식만!) -->
+  <text x="300" y="205" text-anchor="middle" fill="#ffd152" font-size="34" font-family="'Courier New', monospace" font-weight="900" letter-spacing="2">
     ax - b = 0
-  </text>
-  <text x="300" y="200" text-anchor="middle" fill="#2ecc71" font-size="15" font-weight="bold">
-    해: x = 2 또는 x = 3
   </text>
 
   <!-- 좌측 첫 번째 주사위 a 슬롯 -->
-  <g transform="translate(60, 150)">
-    <rect width="80" height="80" rx="10" fill="#2c1e14" stroke="#d4af37" stroke-width="2"/>
+  <g transform="translate(65, 155)">
+    <rect width="80" height="85" rx="10" fill="#2c1e14" stroke="#d4af37" stroke-width="2"/>
     <text x="40" y="26" text-anchor="middle" fill="#bdc3c7" font-size="11" font-weight="bold">첫 번째 주사위</text>
-    <text x="40" y="60" text-anchor="middle" fill="#ffd152" font-size="32" font-weight="900">a</text>
-    <text x="40" y="100" text-anchor="middle" fill="#ffeaa7" font-size="12">1 ~ 6의 눈</text>
+    <text x="40" y="64" text-anchor="middle" fill="#ffd152" font-size="36" font-weight="900">a</text>
   </g>
 
   <!-- 우측 두 번째 주사위 b 슬롯 -->
-  <g transform="translate(460, 150)">
-    <rect width="80" height="80" rx="10" fill="#2c1e14" stroke="#d4af37" stroke-width="2"/>
+  <g transform="translate(455, 155)">
+    <rect width="80" height="85" rx="10" fill="#2c1e14" stroke="#d4af37" stroke-width="2"/>
     <text x="40" y="26" text-anchor="middle" fill="#bdc3c7" font-size="11" font-weight="bold">두 번째 주사위</text>
-    <text x="40" y="60" text-anchor="middle" fill="#ffd152" font-size="32" font-weight="900">b</text>
-    <text x="40" y="100" text-anchor="middle" fill="#ffeaa7" font-size="12">1 ~ 6의 눈</text>
+    <text x="40" y="64" text-anchor="middle" fill="#ffd152" font-size="36" font-weight="900">b</text>
   </g>
 
   <!-- 에메랄드 원석 장식 (석문 상단 쐐기돌) -->
   <polygon points="300,55 315,75 300,95 285,75" fill="#2ed573" stroke="#fff" stroke-width="1.5" filter="url(#emeraldGlow)"/>
-
-  <!-- 하단 해제 조건 안내 배너 -->
-  <g transform="translate(80, 316)">
-    <rect width="440" height="30" rx="6" fill="rgba(0,0,0,0.6)" stroke="#5c4324" stroke-width="1"/>
-    <text x="220" y="20" text-anchor="middle" fill="#bdc3c7" font-size="12">
-      석문 해제 조건: <tspan fill="#ffd152" font-weight="bold">b = 2a</tspan> 또는 <tspan fill="#ffd152" font-weight="bold">b = 3a</tspan> 를 만족하는 순서쌍 (a, b)
-    </text>
-  </g>
 </svg>

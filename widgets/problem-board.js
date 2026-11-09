@@ -73,7 +73,7 @@ export function mountProblemBoard(root, problemId, { onSolved, onClose }) {
             </div>
             
             <!-- 상황 영역: 10번 문제일 때는 인터랙티브 밸브, 그 외는 고화질 상황 삽화 -->
-            <div class="board-illustration-frame" id="illustration-container">
+            <div class="board-illustration-frame" id="illustration-container" style="position:relative;">
               ${problem.type === 'interactive-valve' ? `
                 <div class="interactive-valves-box" id="valves-box">
                   <div class="valve-unit" data-idx="0">
@@ -99,7 +99,10 @@ export function mountProblemBoard(root, problemId, { onSolved, onClose }) {
                   </div>
                 </div>
               ` : `
-                <img src="${problem.image}" alt="${problem.title}" class="board-illustration-img" onerror="this.style.display='none'"/>
+                <img src="${problem.image ? problem.image + '?v=20261109_9' : ''}" alt="${problem.title}" class="board-illustration-img" id="board-zoomable-img" style="cursor:zoom-in; transition:transform 0.15s;" title="클릭하여 크게 보기" onerror="this.style.display='none'"/>
+                <div style="position:absolute; bottom:6px; right:8px; background:rgba(0,0,0,0.65); border:1px solid #d4af37; border-radius:4px; padding:2px 8px; font-size:0.75rem; color:#ffd152; pointer-events:none;">
+                  🔍 클릭하여 확대
+                </div>
               `}
             </div>
             
@@ -242,6 +245,43 @@ export function mountProblemBoard(root, problemId, { onSolved, onClose }) {
     });
   });
 
+  // 이미지 확대 라이트박스 (클릭하여 크게 보기)
+  const zoomableImg = root.querySelector('#board-zoomable-img');
+  if (zoomableImg) {
+    zoomableImg.addEventListener('click', () => {
+      playSfx('click');
+      const lightbox = document.createElement('div');
+      lightbox.id = 'board-img-lightbox';
+      lightbox.style.cssText = `
+        position: fixed; inset: 0; z-index: 999;
+        background: rgba(8, 6, 4, 0.88); backdrop-filter: blur(10px);
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        cursor: zoom-out; animation: fadeIn 0.2s ease; padding: 20px;
+      `;
+      lightbox.innerHTML = `
+        <div style="position:relative; width:min(1140px, 96vw); max-height:94vh; display:flex; flex-direction:column; align-items:center;">
+          <img src="${problem.image ? problem.image + '?v=20261109_9' : ''}" alt="${problem.title}" style="max-width:95vw; max-height:86vh; width:auto; height:auto; object-fit:contain; border:2.5px solid #d4af37; border-radius:12px; box-shadow:0 20px 80px rgba(0,0,0,0.95); background:#181008;"/>
+          <div style="margin-top:10px; color:#ffeaa7; font-size:0.95rem; font-weight:700; background:rgba(0,0,0,0.85); padding:6px 20px; border-radius:20px; border:1px solid #d4af37;">
+            ✕ 화면 아무 곳이나 클릭하거나 ESC를 누르면 닫힙니다.
+          </div>
+        </div>
+      `;
+      document.body.appendChild(lightbox);
+
+      const closeLightbox = () => {
+        lightbox.remove();
+        window.removeEventListener('keydown', handleEsc);
+      };
+
+      const handleEsc = (e) => {
+        if (e.key === 'Escape') closeLightbox();
+      };
+
+      lightbox.addEventListener('click', closeLightbox);
+      window.addEventListener('keydown', handleEsc);
+    });
+  }
+
   // 동치 분수 수치 파서 (6/10 == 3/5 == 0.6)
   function parseVal(str) {
     if (!str) return NaN;
@@ -303,9 +343,9 @@ export function mountProblemBoard(root, problemId, { onSolved, onClose }) {
       feedbackBox.className = 'board-feedback correct';
       feedbackMsg.innerHTML = '🎉 <strong>정답입니다!</strong> 완벽하게 해결했습니다.';
 
-      // 풀이 해설 공개
+      // 풀이 해설 공개 (완전한 정답 풀이 explanation 우선 표출!)
       hintBox.style.display = 'block';
-      hintBox.innerHTML = `<strong>[풀이 및 원리]</strong> ${renderMathString(problem.hint || '')}`;
+      hintBox.innerHTML = `<strong>[명쾌한 풀이 및 정답 해설]</strong><br>${renderMathString(problem.explanation || problem.hint || '')}`;
       hintBtn.style.display = 'none';
 
       inputEl.disabled = true;

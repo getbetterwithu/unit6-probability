@@ -174,10 +174,6 @@
     .dialogue-text .dialogue-math {
       display: inline-block; margin: 0 4px; vertical-align: baseline;
     }
-    .dialogue-bottom-bar {
-      display: flex; justify-content: space-between; align-items: center; margin-top: 8px;
-    }
-    .next-indicator { font-size: 0.95rem; color: var(--text-dim); animation: pulse 1.2s infinite; }
     
     /* 대화창 좌우 이동 내비게이션 버튼 */
     .dialogue-nav-buttons {
@@ -531,13 +527,10 @@
         </div>
       </div>
       <div class="dialogue-text" id="text-box"></div>
-      <div class="dialogue-bottom-bar">
-        <div class="next-indicator">◀ 이전 / 다음 ▶ (엔터, 스페이스, 터치)</div>
-      </div>
     </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
-  <script type="module" src="engine/app.js?v=80"></script>
+  <script type="module" src="engine/app.js?v=88"></script>
 </body>
 </html>
