@@ -2,21 +2,47 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<title>6편 미니게임 4종</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>폴리곤과 운명의 주사위 · 미니게임 4종</title>
 <style>
-  body { margin: 0; background: #1a140f; color: #f0e6d2; font-family: sans-serif; }
-  main { max-width: 720px; margin: 40px auto; padding: 0 16px; }
-  h1 { font-size: 22px; }
-  a { display: block; margin: 12px 0; padding: 16px; background: #24180f; color: #f0e6d2; text-decoration: none; border: 2px solid #e5a93b; border-radius: 12px; font-size: 18px; }
+  body { margin: 0; background: #1a140f; color: #f0e6d2; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 680px; margin: 40px auto; padding: 0 20px; }
+  h1 { font-size: 26px; color: #ffd152; border-bottom: 2px solid #5c4324; padding-bottom: 12px; margin-bottom: 24px; }
+  .desc { color: #bdc3c7; font-size: 15px; margin-bottom: 24px; line-height: 1.6; }
+  .game-card { display: block; margin: 14px 0; padding: 18px 20px; background: #24180f; color: #f0e6d2; text-decoration: none; border: 2px solid #d4af37; border-radius: 12px; font-size: 18px; font-weight: 700; transition: transform 0.15s, background 0.15s; box-shadow: 0 4px 14px rgba(0,0,0,0.4); }
+  .game-card:hover { transform: translateY(-2px); background: #322215; border-color: #ffd152; }
+  .game-card span { display: block; font-size: 13px; font-weight: normal; color: #bdc3c7; margin-top: 6px; }
+  .btn-story { display: inline-block; margin-top: 24px; padding: 12px 24px; background: linear-gradient(135deg, #27ae60, #2ecc71); color: #fff; text-decoration: none; border-radius: 8px; font-weight: 800; font-size: 16px; }
 </style>
 </head>
 <body>
 <main>
-  <h1>미니게임 4종</h1>
-  <a href="/?demo=nonogram">1. 네모로직. 해골</a>
-  <a href="/?demo=path">2. 오륜 한붓그리기</a>
-  <a href="/?demo=pecas">3. 피캐스 새끼 집기</a>
-  <a href="/?demo=gugu">4. 스피드 구구단. 15초</a>
+  <h1>🎲 6단원 미니게임 4종 단독 체험관</h1>
+  <p class="desc">《폴리곤과 운명의 주사위》 본편에 수록된 4가지 미니게임을 단독으로 체험해 볼 수 있습니다.</p>
+  
+  <a class="game-card" href="index.html?demo=nonogram">
+    🗺️ 1. 네모로직 · 해골 지도 복원
+    <span>가로/세로 숫자 단서를 보고 타일을 칠해 갱도 지도 표식을 복원합니다.</span>
+  </a>
+
+  <a class="game-card" href="index.html?demo=path">
+    🛤️ 2. 오륜 한붓그리기 · 광산 레일 연결
+    <span>손을 떼지 않고 한 번의 붓질로 다섯 고리 레일을 모두 연결합니다.</span>
+  </a>
+
+  <a class="game-card" href="index.html?demo=pecas">
+    ✨ 3. 피캐스 신비한 정령 잡기 (3단계)
+    <span>헤엄치는 정령들 중 색이 다른 단 한 마리의 주황 정령을 낚아챕니다.</span>
+  </a>
+
+  <a class="game-card" href="index.html?demo=gugu">
+    ⚡ 4. 피타고라스 암산 속도 훈련
+    <span>15초 안에 연속으로 구구단 10문제를 신속·정확하게 풀어 통과합니다.</span>
+  </a>
+
+  <div style="text-align: center; margin-top: 32px;">
+    <a class="btn-story" href="index.html">📖 본편 스토리 시작하기 ▶</a>
+  </div>
 </main>
 </body>
 </html>

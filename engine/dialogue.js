@@ -37,6 +37,11 @@ function tokenize(text) {
   return tokens;
 }
 
+export function formatDialogueHtml(text) {
+  const tokens = tokenize(text || '');
+  return tokens.map(t => t.type === 'math' ? `<span class="dialogue-math">${t.html}</span>` : t.value).join('');
+}
+
 export function createDialogue({ speakerEl, textEl, hintEl, onWaitWidget, onAdvance, onPrev }) {
   let queue = [];
   let i = 0;

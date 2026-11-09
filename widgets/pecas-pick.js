@@ -39,9 +39,9 @@ export function mountPecasPick(root, { onDone, onClose }) {
   const completeBtn = root.querySelector('#pup-complete-btn');
 
   const stages = [
-    { count: 5, speed: 2.2, hint: '1단계: 다섯 마리 중 색이 다른 주황 정령을 클릭하시오.' },
-    { count: 7, speed: 3.5, hint: '2단계: 일곱 마리로 늘어났소! 더 빠르게 유영하오.' },
-    { count: 9, speed: 4.2, hint: '최종 단계: 아홉 마리의 정령 중 진짜 주황 정령을 낚아채시오!' },
+    { count: 7, speed: 5.5, hint: '1단계: 일곱 마리의 빠른 정령 중 주황 정령을 낚아채시오!' },
+    { count: 11, speed: 7.8, hint: '2단계: 열한 마리로 급증! 정령들이 초고속으로 유영하오.' },
+    { count: 15, speed: 10.5, hint: '최종 단계: 열다섯 마리의 광란의 유영! 순간을 노려 낚아채시오!' },
   ];
 
   let currentStage = 0;
@@ -164,7 +164,14 @@ export function mountPecasPick(root, { onDone, onClose }) {
 
     if (i !== oddIndex) {
       playSfx('wrong');
-      msgEl.textContent = '❌ 그 정령은 갈색 정령이오! 주황 정령을 노리시오.';
+      msgEl.textContent = '❌ 갈색 정령이오! 정령들이 놀라 일제히 도망칩니다!';
+      msgEl.style.color = '#ff7675';
+      // 모든 정령들이 즉시 새 좌표로 급격히 방향 전환
+      movers.forEach((m) => {
+        const next = randCoord();
+        m.tx = next.x;
+        m.ty = next.y;
+      });
       return;
     }
 
