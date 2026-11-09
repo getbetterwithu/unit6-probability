@@ -17,7 +17,7 @@ function doGet(e) {
  * Apps Script 편집기에서 이 함수를 선택하고 [실행]을 누르면 권한 승인 창이 뜹니다.
  */
 function testSend() {
-  const email = Session.getActiveUser().getEmail() || 'june_wook@snu.ms.kr';
+  const email = 'june_wook@snu.ms.kr';
   GmailApp.sendEmail(
     email,
     '[피타고라스 학당] 권한 승인 및 메일 발송 테스트',
