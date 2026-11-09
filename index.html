@@ -28,13 +28,12 @@
     }
     #game-container {
       position: relative;
-      width: 100%; height: 100%;
-      max-width: 1280px; max-height: 760px;
-      aspect-ratio: 16 / 9;
+      width: 100vw; height: 100vh;
+      max-width: 100vw; max-height: 100vh;
       background: var(--bg-dark);
       overflow: hidden;
-      box-shadow: 0 16px 64px rgba(0,0,0,0.85);
-      border-radius: 8px;
+      box-shadow: none;
+      border-radius: 0;
     }
 
     /* ===== 최상단 헤더 HUD 바 ===== */
@@ -531,6 +530,6 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
-  <script type="module" src="engine/app.js?v=88"></script>
+  <script type="module" src="engine/app.js?v=90"></script>
 </body>
 </html>

@@ -205,11 +205,11 @@ export function mountEndingJournal(container, onRestart, onGoMinigames) {
   root.innerHTML = `
     <style>
       /* ============================================================== */
-      /* A4 세로 1장 완벽 상장 인쇄 스타일 (@media print)                */
+      /* A4 가로 1장 완벽 상장 인쇄 스타일 (@media print)                */
       /* ============================================================== */
       @page {
-        size: A4 portrait;
-        margin: 6mm 8mm;
+        size: A4 landscape;
+        margin: 0;
       }
       @media print {
         html, body {
@@ -217,26 +217,31 @@ export function mountEndingJournal(container, onRestart, onGoMinigames) {
           background: #0d1117 !important;
           -webkit-print-color-adjust: exact !important;
           print-color-adjust: exact !important;
+          width: 297mm !important; height: 210mm !important;
+          overflow: hidden !important;
         }
         body * { visibility: hidden !important; }
         #ending-journal-root, #ending-journal-root * { visibility: visible !important; }
         #ending-journal-root {
           position: absolute !important; left: 0 !important; top: 0 !important;
-          width: 100% !important; height: 100% !important;
+          width: 297mm !important; height: 210mm !important;
           background: #0d1117 !important; color: #f0f6fc !important;
-          padding: 0 !important; margin: 0 !important;
-          display: block !important;
+          padding: 8mm 10mm !important; margin: 0 !important;
+          box-sizing: border-box !important;
+          display: flex !important; justify-content: center !important; align-items: center !important;
+          overflow: hidden !important;
         }
         .diploma-card {
-          width: 100% !important; max-width: 100% !important;
-          height: calc(297mm - 16mm) !important;
+          width: 100% !important; max-width: calc(297mm - 20mm) !important;
+          height: calc(210mm - 16mm) !important; max-height: calc(210mm - 16mm) !important;
           box-sizing: border-box !important;
-          border: 4px solid #d4af37 !important;
+          border: 3.5px solid #d4af37 !important;
           background: #0d1117 !important; color: #f0f6fc !important;
           box-shadow: none !important;
-          padding: 24px 28px !important;
+          padding: 16px 26px 14px !important;
           page-break-inside: avoid !important;
           break-inside: avoid !important;
+          display: flex !important; flex-direction: column !important; justify-content: space-between !important;
         }
         .no-print { display: none !important; }
       }
@@ -253,15 +258,15 @@ export function mountEndingJournal(container, onRestart, onGoMinigames) {
       }
     </style>
 
-    <!-- [황금 상장 본체 (화면 및 PDF 인쇄 공용)] -->
-    <div style="max-width: 760px; width: 100%; display: flex; flex-direction: column; align-items: center;">
+    <!-- [황금 상장 본체 (화면 및 PDF 인쇄 공용 - 가로형 상장 비율)] -->
+    <div style="max-width: 940px; width: 100%; display: flex; flex-direction: column; align-items: center;">
 
       <div class="diploma-card" style="
         width: 100%; box-sizing: border-box;
         background: linear-gradient(150deg, #131922, #0a0d13 95%);
         border: 3.5px solid #d4af37; border-radius: 12px;
         box-shadow: 0 16px 50px rgba(0,0,0,0.85), 0 0 35px rgba(212,175,55,0.25);
-        padding: 34px 36px 26px; color: #f0f6fc; position: relative;
+        padding: 26px 32px 20px; color: #f0f6fc; position: relative;
       ">
         <!-- 안쪽 보조 황금 테두리 -->
         <div style="
@@ -571,11 +576,18 @@ export function mountEndingJournal(container, onRestart, onGoMinigames) {
     enableRestartButton('🖼️ 황금 상장 이미지가 다운로드되었습니다. (소장 완료)');
   });
 
-  // 2. 수료증 PDF 저장 / 인쇄
+  // 2. 수료증 PDF 저장 / 인쇄 (A4 가로 1장 규격 & 파일명에 학생 이름 자동 반영)
   root.querySelector('#journal-btn-print').addEventListener('click', () => {
     playSfx('click');
+    const originalTitle = document.title;
+    const sanitizedName = studentName.replace(/[^a-zA-Z0-9가-힣]/g, '_') || '대원';
+    // 브라우저 인쇄 다이얼로그의 기본 PDF 파일명으로 document.title이 사용됨
+    document.title = `피타고라스_학당_수료증_${sanitizedName}`;
     window.print();
-    enableRestartButton('📄 A4 규격 황금 상장 PDF 저장 및 인쇄가 완료되었습니다.');
+    enableRestartButton('📄 A4 가로 규격 황금 상장 PDF 저장 및 인쇄가 완료되었습니다.');
+    setTimeout(() => {
+      document.title = originalTitle;
+    }, 1500);
   });
 
   // 3. 내 이메일로 수료증 받기 모달 제어

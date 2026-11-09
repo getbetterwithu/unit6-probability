@@ -13,7 +13,7 @@ export function mountWorldMap(root, { worldState, onSelectLocation, onClose }) {
 
   root.innerHTML = `
     <div class="ancient-world-map-wrapper" style="
-      position: relative; width: min(1080px, 98%); height: min(620px, 86vh);
+      position: relative; width: min(1200px, 96vw); height: min(720px, 92vh);
       background: #1c140c; border: 3px solid #d4af37; border-radius: 16px;
       box-shadow: 0 20px 80px rgba(0,0,0,0.95); overflow: hidden;
       display: flex; flex-direction: column; animation: fadeIn 0.4s ease;
