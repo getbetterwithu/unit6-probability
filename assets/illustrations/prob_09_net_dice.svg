@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 360" width="100%" height="100%">
+  <defs>
+    <radialGradient id="parchmentBg" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#2b2014"/>
+      <stop offset="100%" stop-color="#120c07"/>
+    </radialGradient>
+    <filter id="parchGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- 배경 -->
+  <rect width="600" height="360" rx="12" fill="url(#parchmentBg)" stroke="#d4af37" stroke-width="2"/>
+
+  <!-- 타이틀 배너 -->
+  <rect x="150" y="14" width="300" height="26" rx="5" fill="rgba(0,0,0,0.5)" stroke="#d4af37" stroke-width="1.2"/>
+  <text x="300" y="32" text-anchor="middle" fill="#ffd152" font-size="13" font-weight="bold" letter-spacing="1">
+    학당 서고 · 고대 파피루스 정육면체 전개도
+  </text>
+
+  <!-- 정육면체 표준 십자 전개도 (중심 x: 220, y: 55, 칸 크기: 52x52) -->
+  <g transform="translate(130, 52)">
+    <!-- 파피루스 바탕 판 -->
+    <rect x="-15" y="-10" width="240" height="235" rx="8" fill="#f5eedb" stroke="#8c6d46" stroke-width="2" filter="url(#parchGlow)"/>
+
+    <!-- 전개도 격자 면 6개 -->
+    <!-- 윗면 (1) : 열1, 행0 -> (52, 0) -->
+    <rect x="52" y="0" width="52" height="52" fill="#fff9eb" stroke="#5c4324" stroke-width="2"/>
+    <text x="78" y="34" text-anchor="middle" fill="#1c1308" font-size="22" font-weight="bold">1</text>
+
+    <!-- 왼쪽면 (2) : 열0, 행1 -> (0, 52) -->
+    <rect x="0" y="52" width="52" height="52" fill="#fff9eb" stroke="#5c4324" stroke-width="2"/>
+    <text x="26" y="86" text-anchor="middle" fill="#1c1308" font-size="22" font-weight="bold">2</text>
+
+    <!-- 앞면 (3) : 열1, 행1 -> (52, 52) -->
+    <rect x="52" y="52" width="52" height="52" fill="#fff9eb" stroke="#5c4324" stroke-width="2"/>
+    <text x="78" y="86" text-anchor="middle" fill="#1c1308" font-size="22" font-weight="bold">3</text>
+
+    <!-- 오른쪽면 (4) : 열2, 행1 -> (104, 52) -->
+    <rect x="104" y="52" width="52" height="52" fill="#fff9eb" stroke="#5c4324" stroke-width="2"/>
+    <text x="130" y="86" text-anchor="middle" fill="#1c1308" font-size="22" font-weight="bold">4</text>
+
+    <!-- 뒷면 (5) : 열3, 행1 -> (156, 52) -->
+    <rect x="156" y="52" width="52" height="52" fill="#fff9eb" stroke="#5c4324" stroke-width="2"/>
+    <text x="182" y="86" text-anchor="middle" fill="#1c1308" font-size="22" font-weight="bold">5</text>
+
+    <!-- 밑면 (6) : 열1, 행2 -> (52, 104) -->
+    <rect x="52" y="104" width="52" height="52" fill="#fff9eb" stroke="#5c4324" stroke-width="2"/>
+    <text x="78" y="138" text-anchor="middle" fill="#1c1308" font-size="22" font-weight="bold">6</text>
+
+    <!-- 접는 선 (점선 강조) -->
+    <line x1="52" y1="52" x2="104" y2="52" stroke="#e67e22" stroke-width="2" stroke-dasharray="4 2"/>
+    <line x1="52" y1="52" x2="52" y2="104" stroke="#e67e22" stroke-width="2" stroke-dasharray="4 2"/>
+    <line x1="104" y1="52" x2="104" y2="104" stroke="#e67e22" stroke-width="2" stroke-dasharray="4 2"/>
+    <line x1="156" y1="52" x2="156" y2="104" stroke="#e67e22" stroke-width="2" stroke-dasharray="4 2"/>
+    <line x1="52" y1="104" x2="104" y2="104" stroke="#e67e22" stroke-width="2" stroke-dasharray="4 2"/>
+
+    <text x="104" y="190" text-anchor="middle" fill="#5c4324" font-size="12" font-weight="bold">
+      [파피루스 전개도 ➔ 정육면체 주사위 2개 제작]
+    </text>
+  </g>
+
+  <!-- 우측 설명 및 목표 카드 -->
+  <g transform="translate(370, 70)">
+    <rect width="190" height="200" rx="10" fill="rgba(0,0,0,0.55)" stroke="#5c4324" stroke-width="1.5"/>
+
+    <text x="95" y="32" text-anchor="middle" fill="#ffd152" font-size="14" font-weight="bold">🎯 구하는 조건</text>
+    <line x1="20" y1="44" x2="170" y2="44" stroke="#5c4324" stroke-width="1"/>
+
+    <text x="25" y="75" fill="#ffeaa7" font-size="13" font-weight="bold">1. 두 눈의 곱 = 2</text>
+    <text x="35" y="98" fill="#bdc3c7" font-size="12">순서쌍: (1,2), (2,1)</text>
+
+    <text x="25" y="132" fill="#ffeaa7" font-size="13" font-weight="bold">2. 두 눈의 곱 = 4</text>
+    <text x="35" y="155" fill="#bdc3c7" font-size="12">순서쌍: (1,4), (2,2), (4,1)</text>
+
+    <rect x="15" y="168" width="160" height="24" rx="4" fill="rgba(245,176,65,0.15)" stroke="#ffd152" stroke-width="1"/>
+    <text x="95" y="184" text-anchor="middle" fill="#ffd152" font-size="11" font-weight="bold">
+      동시에 일어날 수 없는 두 사건
+    </text>
+  </g>
+
+  <!-- 하단 전체 경우 안내 -->
+  <g transform="translate(80, 318)">
+    <rect width="440" height="28" rx="6" fill="rgba(0,0,0,0.6)" stroke="#5c4324" stroke-width="1"/>
+    <text x="220" y="18" text-anchor="middle" fill="#bdc3c7" font-size="12">
+      주사위 2개를 동시에 던질 때 일어날 수 있는 모든 경우의 수 = <tspan fill="#ffd152" font-weight="bold">36가지</tspan>
+    </text>
+  </g>
+</svg>

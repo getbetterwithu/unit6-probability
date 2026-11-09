@@ -10,7 +10,7 @@ import { playSfx } from '../engine/sound.js';
  * - 동치 분수 복수 정답 채점 엔진 (6/10 == 3/5, 5/10 == 1/2 완벽 정답 인정)
  * - KaTeX Live Math Display (2/5 입력 시 실시간 분수 렌더링)
  */
-export function mountProblemBoard(root, problemId, { onSolved }) {
+export function mountProblemBoard(root, problemId, { onSolved, onClose }) {
   const problem = PROBLEMS[problemId];
   if (!problem) {
     root.innerHTML = `<div class="board-error">문제를 찾을 수 없습니다.</div>`;
@@ -52,6 +52,11 @@ export function mountProblemBoard(root, problemId, { onSolved }) {
         </div>
 
         <div class="toolbar-group">
+          ${onClose ? `
+          <button type="button" class="btn-board-close" id="btn-board-close" title="잠시 문제 접어두기" style="background:#2a1f14; border:1px solid #d4af37; color:#ffd152; border-radius:6px; padding:6px 12px; font-weight:800; font-size:0.9rem; cursor:pointer; margin-right:8px;">
+            ✕ 잠시 닫기
+          </button>
+          ` : ''}
           <button type="button" class="btn-board-submit" id="top-btn-submit">
             ✨ 정답 확인
           </button>
@@ -505,6 +510,14 @@ export function mountProblemBoard(root, problemId, { onSolved }) {
     const rect = container.getBoundingClientRect();
     ctx.clearRect(0, 0, rect.width, rect.height);
   });
+
+  const btnClose = root.querySelector('#btn-board-close');
+  if (btnClose) {
+    btnClose.addEventListener('click', () => {
+      playSfx('click');
+      if (onClose) onClose();
+    });
+  }
 
   setTimeout(() => {
     resizeCanvas();

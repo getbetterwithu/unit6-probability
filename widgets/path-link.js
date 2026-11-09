@@ -3,6 +3,24 @@ import { playSfx } from '../engine/sound.js';
 export function mountPathLink(root, { onDone, onClose }) {
   root.innerHTML = `
     <div class="popup path-pop" style="position:relative; width:min(920px, 98%); background:#18120b; border:2.5px solid #d4af37; border-radius:14px; padding:18px 24px; color:#f5eedb;">
+      <style>
+        @keyframes lastEdgePulse {
+          0%, 100% { stroke: #ffd152; stroke-width: 5.5px; opacity: 1; filter: drop-shadow(0 0 6px #ffd152); }
+          50% { stroke: #f39c12; stroke-width: 3.5px; opacity: 0.4; filter: none; }
+        }
+        @keyframes startNodeGlow {
+          0%, 100% { transform: scale(1); filter: drop-shadow(0 0 4px #ffd152); }
+          50% { transform: scale(1.25); filter: drop-shadow(0 0 8px #f1c40f); }
+        }
+        .last-edge-blink {
+          animation: lastEdgePulse 0.9s infinite ease-in-out;
+        }
+        .start-node-pulse {
+          animation: startNodeGlow 1.2s infinite ease-in-out;
+          transform-origin: center;
+        }
+      </style>
+
       <!-- 우측 상단 닫기 (잠시 접기) 버튼 -->
       <button type="button" id="path-btn-close" style="position:absolute; top:12px; right:14px; background:rgba(0,0,0,0.5); border:1px solid #d4af37; color:#ffeaa7; border-radius:6px; padding:4px 10px; font-size:0.85rem; cursor:pointer;" title="잠시 접어두기">
         ✕ 닫기
@@ -10,14 +28,16 @@ export function mountPathLink(root, { onDone, onClose }) {
 
       <div style="margin-bottom: 10px;">
         <span style="background:#d4af37; color:#1c1308; font-weight:800; font-size:0.85rem; padding:3px 10px; border-radius:4px;">🚂 광맥 갱도 한붓그리기</span>
-        <p class="dice-hint" style="color:#bdc3c7; font-size:0.95rem; margin-top:6px;">시작점을 하나 고른 뒤, 이어진 5색 광맥 선로를 중복 없이 한 획으로 전부 연결하시오.</p>
+        <p class="dice-hint" style="color:#bdc3c7; font-size:0.95rem; margin-top:6px;">
+          반드시 <strong style="color:#ffd152;">출발점(원형 노드)</strong>을 먼저 클릭하여 시작한 뒤, 이어진 5색 선로를 중복 없이 한 획으로 전부 연결하시오.
+        </p>
       </div>
 
       <svg id="path-svg" viewBox="16 4 350 160" style="width:100%; height:280px; background:#0f0b07; border-radius:8px; border:1px solid #5c4324;"></svg>
 
       <div style="margin-top: 12px; display:flex; justify-content:space-between; align-items:center;">
         <div style="display:flex; align-items:center; gap:10px;">
-          <span id="path-count" style="font-weight:700; color:#ffeaa7; font-size:1.05rem;">시작 점을 누르시오.</span>
+          <span id="path-count" style="font-weight:700; color:#ffeaa7; font-size:1.05rem;">📍 출발할 시작 점(원)을 클릭하시오.</span>
           <button type="button" id="path-reset" style="background:#3a2a1c; color:#ffeaa7; border:1px solid #d4af37; border-radius:6px; padding:4px 12px; font-weight:700; cursor:pointer;">
             처음부터 다시
           </button>
@@ -39,11 +59,11 @@ export function mountPathLink(root, { onDone, onClose }) {
 
   // 5색 링 (오륜기 광맥)
   const rings = [
-    { name: '청옥 광맥', x: 70, y: 58, r: 46, color: '#1565C0' },
-    { name: '흑철 광맥', x: 178, y: 58, r: 46, color: '#7f8c8d' },
-    { name: '루비 광맥', x: 286, y: 58, r: 46, color: '#E74C3C' },
-    { name: '황금 광맥', x: 124, y: 104, r: 46, color: '#F39C12' },
-    { name: '비취 광맥', x: 232, y: 104, r: 46, color: '#27AE60' },
+    { name: '청옥 광맥', x: 70, y: 58, r: 46, color: '#2980b9' },
+    { name: '흑철 광맥', x: 178, y: 58, r: 46, color: '#95a5a6' },
+    { name: '루비 광맥', x: 286, y: 58, r: 46, color: '#e74c3c' },
+    { name: '황금 광맥', x: 124, y: 104, r: 46, color: '#f39c12' },
+    { name: '비취 광맥', x: 232, y: 104, r: 46, color: '#27ae60' },
   ];
 
   function hits(a, b) {
@@ -113,42 +133,88 @@ export function mountPathLink(root, { onDone, onClose }) {
     return `M ${e.a.x} ${e.a.y} A ${r.r} ${r.r} 0 ${large} 1 ${e.b.x} ${e.b.y}`;
   }
 
+  // 시작점(tip)이 선택되지 않았을 때는 선을 절대 선택할 수 없음!
   function canTake(e) {
     if (e.used) return false;
-    if (!tip) return true;
+    if (!tip) return false;
     return e.a === tip || e.b === tip;
   }
 
-  function draw() {
-    let out = '<defs>';
-    // 화이트/은빛 궤적 화살표 마커
-    out += `
-      <marker id="silver-arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-        <path d="M 0 1 L 10 5 L 0 9 z" fill="#ffffff"/>
-      </marker>
-    </defs>`;
+  // 선로 중간 지점 및 진행 방향 각도 계산
+  function getArrowData(t) {
+    const e = t.edge;
+    const r = rings[e.ring];
+    const midAngle = e.sa + e.span / 2;
+    const mx = r.x + r.r * Math.cos(midAngle);
+    const my = r.y + r.r * Math.sin(midAngle);
 
-    // 1단계: 5색 링 기본 선로
+    // a에서 b로 진행하는 호 방향 (시계방향: 접선각도 midAngle + PI/2)
+    const isClockwise = t.from === e.a;
+    const heading = isClockwise ? (midAngle + Math.PI / 2) : (midAngle - Math.PI / 2);
+    const deg = (heading * 180) / Math.PI;
+
+    return { x: mx, y: my, deg };
+  }
+
+  function draw() {
+    let out = '<defs></defs>';
+
+    // 1단계: 아직 지나지 않은 남은 5색 선로
     edges.forEach((e, i) => {
+      if (e.used) return; // 이미 사용된 선은 2단계/3단계에서 회색/깜빡임으로 그림
       const ok = canTake(e);
       const stroke = e.ringColor;
-      const w = ok ? 5 : 3;
-      const opacity = e.used ? 0.2 : (ok ? 0.95 : 0.4);
+      const w = ok ? 4.5 : 2.5;
+      const opacity = ok ? 1.0 : (tip ? 0.35 : 0.85);
       out += `<path d="${arcPath(e)}" fill="none" stroke="${stroke}" stroke-width="${w}" opacity="${opacity}" data-i="${i}" class="arc" style="cursor:${ok ? 'pointer' : 'default'}"/>`;
     });
 
-    // 2단계: 지나온 궤적 — 빨간 링 위에서도 칼같이 보이는 눈부신 화이트 실선 + 화살표!
-    trail.forEach((t) => {
+    // 2단계: 지나온 선들 (회색톤으로 명확히 구별!)
+    trail.forEach((t, idx) => {
       const e = t.edge;
-      out += `<path d="${arcPath(e)}" fill="none" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round" marker-mid="url(#silver-arrow)"/>`;
+      const isLast = idx === trail.length - 1;
+
+      if (isLast && !done) {
+        // 제일 마지막에 선택한 선: 깜빡임(Blink) 효과로 현재 위치 강조!
+        out += `<path d="${arcPath(e)}" fill="none" stroke="#ffd152" stroke-width="5" class="last-edge-blink"/>`;
+      } else {
+        // 이미 지나온 이전 선들: 차분한 회색톤으로 변경!
+        out += `<path d="${arcPath(e)}" fill="none" stroke="#636e72" stroke-width="3.5" opacity="0.85"/>`;
+      }
+
+      // 4단계: 지나온 모든 선에 방향 화살표 마커 표시!
+      const arr = getArrowData(t);
+      const arrFill = isLast ? '#ffd152' : '#ffffff';
+      out += `
+        <g transform="translate(${arr.x}, ${arr.y}) rotate(${arr.deg})">
+          <polygon points="-5,-4 6,0 -5,4 -2,0" fill="${arrFill}" stroke="#1c1308" stroke-width="1"/>
+        </g>
+      `;
     });
 
-    // 3단계: 꼭짓점 점
+    // 3단계: 노드 (꼭짓점 원형 점들)
     pts.forEach((p, i) => {
       const isTip = tip === p;
-      const r = isTip ? 6.5 : 4;
-      const fill = isTip ? '#ffd152' : '#ffffff';
-      out += `<circle cx="${p.x}" cy="${p.y}" r="${r}" fill="${fill}" stroke="#1c1308" stroke-width="2" data-i="${i}" class="pt" style="cursor:pointer"/>`;
+      const hasRings = p.rings.length;
+      let r = 4.5;
+      let fill = '#ffffff';
+      let stroke = '#1c1308';
+      let cls = 'pt';
+
+      if (!tip && !done) {
+        // 시작점 선택 전: 모든 노드가 출발 가능함을 펄스로 안내!
+        r = 6;
+        fill = '#ffd152';
+        stroke = '#d4af37';
+        cls += ' start-node-pulse';
+      } else if (isTip) {
+        // 현재 위치 tip
+        r = 7.5;
+        fill = '#2ecc71';
+        stroke = '#ffffff';
+      }
+
+      out += `<circle cx="${p.x}" cy="${p.y}" r="${r}" fill="${fill}" stroke="${stroke}" stroke-width="2" data-i="${i}" class="${cls}" style="cursor:pointer"/>`;
     });
 
     svg.innerHTML = out;
@@ -156,13 +222,24 @@ export function mountPathLink(root, { onDone, onClose }) {
     if (!done) {
       svg.querySelectorAll('.pt').forEach((c) => {
         c.addEventListener('click', () => {
-          tip = pts[Number(c.dataset.i)];
-          countEl.textContent = '붙어 있는 선로를 누르시오.';
-          draw();
+          if (!tip) {
+            tip = pts[Number(c.dataset.i)];
+            countEl.innerHTML = '✨ 시작점 설정 완료! <strong style="color:#ffd152;">연결할 5색 선로</strong>를 누르시오.';
+            playSfx('click');
+            draw();
+          }
         });
       });
+
       svg.querySelectorAll('.arc').forEach((path) => {
-        path.addEventListener('click', () => take(edges[Number(path.dataset.i)]));
+        path.addEventListener('click', () => {
+          if (!tip) {
+            countEl.innerHTML = '⚠️ <strong style="color:#e74c3c;">출발할 원형 점(노드)</strong>을 먼저 클릭해야 합니다!';
+            playSfx('error');
+            return;
+          }
+          take(edges[Number(path.dataset.i)]);
+        });
       });
     }
   }
@@ -200,12 +277,13 @@ export function mountPathLink(root, { onDone, onClose }) {
 
   root.querySelector('#path-reset').addEventListener('click', () => {
     if (done) return;
+    playSfx('click');
     edges.forEach((e) => { e.used = false; });
     tip = null;
     trail = [];
     used = 0;
     done = false;
-    countEl.textContent = '시작 점을 누르시오.';
+    countEl.textContent = '📍 출발할 시작 점(원)을 클릭하시오.';
     draw();
   });
 
