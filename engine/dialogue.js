@@ -42,7 +42,7 @@ export function formatDialogueHtml(text) {
   return tokens.map(t => t.type === 'math' ? `<span class="dialogue-math">${t.html}</span>` : t.value).join('');
 }
 
-export function createDialogue({ speakerEl, textEl, hintEl, onWaitWidget, onAdvance, onPrev }) {
+export function createDialogue({ speakerEl, textEl, hintEl, onWaitWidget, onAdvance, onPrev, onComplete }) {
   let queue = [];
   let i = 0;
   let typing = false;
@@ -136,7 +136,10 @@ export function createDialogue({ speakerEl, textEl, hintEl, onWaitWidget, onAdva
     }
 
     i += 1;
-    if (i >= queue.length) return;
+    if (i >= queue.length) {
+      if (onComplete) onComplete();
+      return;
+    }
     const step = queue[i];
     if (onAdvance) onAdvance(step, i);
 
@@ -178,6 +181,10 @@ export function createDialogue({ speakerEl, textEl, hintEl, onWaitWidget, onAdva
 
   function updateHint() {
     if (!hintEl) return;
+    if (i >= queue.length - 1) {
+      hintEl.textContent = '클릭하여 다음 단계로 이동 ▶';
+      return;
+    }
     const nxt = queue[i + 1];
     if (nxt && nxt.type === 'widget') {
       hintEl.textContent = '클릭하여 도전 시작 ▼';

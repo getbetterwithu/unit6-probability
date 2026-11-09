@@ -1,13 +1,16 @@
 /**
  * 6단원 <폴리곤과 운명의 주사위 — 경우의 수와 확률> 메인 시나리오
+ * - 케팔로니아 오픈 월드맵 기반 자유 거점 탐험 (소폴로스 상단 / 광맥 갱도 / 다이아 동굴 ➔ 금고 결전)
  * - 9종 교과서 큐레이션 12문항 및 미니게임 4종 완벽 일체형 서사
- * - 중2 타깃 몰입형 스토리 (피타고라스 학당 ➔ 소폴로스 관문 ➔ 광맥 갱도 ➔ 다이아 동굴 ➔ 다이아 금고)
+ * - 중2 타깃 몰입형 스토리 (step당 2~3문장 간결체, KaTeX 수식 적용)
  */
-export const STEPS = [
-  // ==========================================
-  // [1장] 피타고라스 학당의 밀명과 테론의 등장
-  // ==========================================
+
+// ==========================================
+// [인트로] 피타고라스 학당의 밀명과 탐험 지도
+// ==========================================
+export const SCENARIO_INTRO = [
   {
+    chapter: '1장 · 피타고라스 학당의 밀명',
     bg: 'classroom',
     bgm: 'main',
     speaker: '이리스',
@@ -17,6 +20,7 @@ export const STEPS = [
     activeSide: 'right',
   },
   {
+    chapter: '1장 · 피타고라스 학당의 밀명',
     bg: 'classroom',
     bgm: 'main',
     speaker: '나레이션',
@@ -26,46 +30,82 @@ export const STEPS = [
     activeSide: 'right',
   },
   {
+    chapter: '1장 · 피타고라스 학당의 밀명',
     bg: 'classroom',
     bgm: 'main',
     speaker: '테론',
-    text: '학당의 고대 수학 파피루스를 약탈자들로부터 영원히 지킬 불멸의 금고를 설계하고 있소. 이를 위해선 지하 깊은 광맥의 순수한 다이아몬드 결정이 필요하오.',
+    text: '학당의 고대 수학 파피루스를 약탈자들로부터 영원히 지킬 불멸의 금고를 설계하고 있소. 이를 위해선 케팔로니아 전역에 흩어진 3대 순수 원석 결정이 필요하오.',
     left: { name: '테론', emotion: 'neutral' },
     right: { name: '이리스', emotion: 'neutral' },
     activeSide: 'left',
   },
   {
+    chapter: '1장 · 피타고라스 학당의 밀명',
     bg: 'classroom',
     bgm: 'main',
     speaker: '피타고라스',
-    text: '광맥은 복잡한 갈림길과 함정으로 가득하다. 수학적 사고와 확률의 원리를 아는 너희 둘이 원석을 찾아와 주겠느냐?',
+    text: '상단 야영지의 루비, 갱도의 에메랄드, 동굴의 사파이어를 찾아와 주겠느냐? 지도를 건넬 테니 자유롭게 순서를 정해 출발하거라.',
     left: { name: '피타고라스', emotion: 'neutral' },
     right: { name: '폴리곤', emotion: 'thinking' },
     activeSide: 'left',
   },
   {
+    chapter: '1장 · 피타고라스 학당의 밀명',
     bg: 'classroom',
     bgm: 'main',
     speaker: '폴리곤',
-    text: '네, 교장 선생님! 이리스와 함께라면 어떤 미로라도 반드시 풀어내겠습니다.',
+    text: '네, 교장 선생님! 이리스와 함께라면 어떤 험난한 미로라도 반드시 풀어내겠습니다.',
     left: { name: '폴리곤', emotion: 'smile' },
     right: { name: '이리스', emotion: 'smile' },
     activeSide: 'left',
   },
-
-  // ==========================================
-  // [2장] 소폴로스의 관문과 장비 준비
-  // ==========================================
   {
+    chapter: '1장 · 피타고라스 학당의 밀명',
+    bg: 'classroom',
+    bgm: 'main',
+    speaker: '나레이션',
+    text: '피타고라스 교장 선생님에게서 고대 양피지 탐험 지도를 받았다. 가고 싶은 거점을 선택해 모험을 시작하자!',
+    left: { name: '폴리곤', emotion: 'smile' },
+    right: { name: '이리스', emotion: 'smile' },
+    activeSide: 'right',
+  },
+];
+
+// ==========================================
+// [거점 1] 소폴로스의 야영지 (루비 원석)
+// ==========================================
+export const SCENARIO_CAMP = [
+  {
+    chapter: '2장 · 소폴로스의 야영지',
     bg: 'merchant_camp',
     bgm: 'merchant',
     speaker: '소폴로스',
-    text: '어허! 광맥으로 통하는 길목은 내 구역이지. 공짜로는 지나갈 수 없어. 내 시험을 통과해야 지도를 보여주지!',
+    text: '어허! 내 야영지에 온 걸 환영하오. 공짜로는 루비 원석의 행방을 알려줄 수 없지. 먼저 찢어진 안내 지도의 암호 격자를 복원해 보시오!',
     left: { name: '소폴로스', emotion: 'smile' },
     right: { name: '폴리곤', emotion: 'thinking' },
     activeSide: 'left',
   },
   {
+    chapter: '2장 · 소폴로스의 야영지',
+    type: 'widget',
+    widget: 'nonogram',
+    bg: 'merchant_camp',
+    bgm: 'merchant',
+    left: { name: '소폴로스', emotion: 'neutral' },
+    right: { name: '폴리곤', emotion: 'thinking' },
+  },
+  {
+    chapter: '2장 · 소폴로스의 야영지',
+    bg: 'merchant_camp',
+    bgm: 'merchant',
+    speaker: '소폴로스',
+    text: '제법이군! 지도를 복원했으니 협곡 진입로 시험을 치르겠소. 도보 길 3갈래와 뗏목 길 4갈래 중 하나를 선택하는 경우의 수를 맞혀보시오.',
+    left: { name: '소폴로스', emotion: 'smile' },
+    right: { name: '폴리곤', emotion: 'neutral' },
+    activeSide: 'left',
+  },
+  {
+    chapter: '2장 · 소폴로스의 야영지',
     type: 'widget',
     widget: 'problem-board',
     problemId: 'prob-01',
@@ -75,15 +115,17 @@ export const STEPS = [
     right: { name: '폴리곤', emotion: 'thinking' },
   },
   {
+    chapter: '2장 · 소폴로스의 야영지',
     bg: 'merchant_camp',
     bgm: 'merchant',
     speaker: '소폴로스',
-    text: '제법이군! 합의 법칙을 단번에 꿰뚫다니. 하지만 갱도는 낙석과 바위투성이요. 안전모와 덧신을 갖추지 않으면 들어갈 수 없지.',
-    left: { name: '소폴로스', emotion: 'smile' },
-    right: { name: '이리스', emotion: 'neutral' },
+    text: '놀랍군! 합의 법칙을 단번에 꿰뚫었어. 하지만 진짜 관문은 야영지 뒤편 정오각형 제단 룬의 이동 확률이오!',
+    left: { name: '소폴로스', emotion: 'surprised' },
+    right: { name: '이리스', emotion: 'thinking' },
     activeSide: 'left',
   },
   {
+    chapter: '2장 · 소폴로스의 야영지',
     type: 'widget',
     widget: 'problem-board',
     problemId: 'prob-02',
@@ -93,36 +135,43 @@ export const STEPS = [
     right: { name: '이리스', emotion: 'smile' },
   },
   {
+    chapter: '2장 · 소폴로스의 야영지',
     bg: 'merchant_camp',
     bgm: 'merchant',
     speaker: '소폴로스',
-    text: '완벽한 조합이오! 약속대로 갱도 안내 지도를 건네주겠소. 다만 세월이 오래되어 지도의 일부 격자 암호가 손상되었으니 직접 복원해 보시오.',
+    text: '주사위 두 눈의 합으로 꼭짓점 C에 도달하는 확률이 $\\frac{7}{36}$임을 단번에 밝혀내다니! 약속대로 붉은 루비 원석을 넘겨주겠소!',
     left: { name: '소폴로스', emotion: 'smile' },
-    right: { name: '폴리곤', emotion: 'thinking' },
+    right: { name: '폴리곤', emotion: 'smile' },
     activeSide: 'left',
   },
   {
-    type: 'widget',
-    widget: 'nonogram',
+    chapter: '2장 · 소폴로스의 야영지',
     bg: 'merchant_camp',
     bgm: 'merchant',
-    left: { name: '소폴로스', emotion: 'neutral' },
-    right: { name: '폴리곤', emotion: 'thinking' },
+    speaker: '나레이션',
+    text: '찬란한 붉은빛을 뿜는 🔴 루비 원석을 손에 넣었다! 케팔로니아 탐험 지도로 돌아가 다음 행선지를 정하자.',
+    left: { name: '폴리곤', emotion: 'smile' },
+    right: { name: '이리스', emotion: 'smile' },
+    activeSide: 'right',
   },
+];
 
-  // ==========================================
-  // [3장] 어두운 광맥 갱도와 문지기 석문
-  // ==========================================
+// ==========================================
+// [거점 2] 어두운 광맥 갱도 (에메랄드 원석)
+// ==========================================
+export const SCENARIO_MINE = [
   {
+    chapter: '3장 · 어두운 광맥 갱도',
     bg: 'mine_shaft',
     bgm: 'cave',
     speaker: '광부',
-    text: '외지인들이 여긴 웬일인가? 깊은 갱도로 가려거든 끊어진 레일을 이어야 하네. 선로 스위치를 한 번에 연결해 주게!',
+    text: '외지인들이 여긴 웬일인가? 깊은 갱도 끝의 에메랄드 광맥으로 가려거든 끊어진 선로 스위치를 한 번에 이어주게!',
     left: { name: '광부', emotion: 'neutral' },
     right: { name: '이리스', emotion: 'thinking' },
     activeSide: 'left',
   },
   {
+    chapter: '3장 · 어두운 광맥 갱도',
     type: 'widget',
     widget: 'path-link',
     bg: 'mine_shaft',
@@ -131,46 +180,92 @@ export const STEPS = [
     right: { name: '폴리곤', emotion: 'smile' },
   },
   {
+    chapter: '3장 · 어두운 광맥 갱도',
     bg: 'mine_shaft',
     bgm: 'cave',
     speaker: '이리스',
-    text: '레일이 연결되었어요! 저 앞을 보세요. 거대한 석문에 고대 문지기 표식이 새겨져 있어요.',
+    text: '레일이 완벽히 이어졌어요! 저 앞을 보세요. 거대한 석문에 고대 일차방정식 봉인 수식이 빛나고 있어요!',
     left: { name: '폴리곤', emotion: 'neutral' },
     right: { name: '이리스', emotion: 'surprised' },
     activeSide: 'right',
   },
   {
+    chapter: '3장 · 어두운 광맥 갱도',
     type: 'widget',
     widget: 'problem-board',
     problemId: 'prob-03',
     bg: 'mine_shaft',
     bgm: 'cave',
-    left: { name: '폴리곤', emotion: 'thinking' },
-    right: { name: '이리스', emotion: 'thinking' },
+    left: { name: '광부', emotion: 'thinking' },
+    right: { name: '폴리곤', emotion: 'thinking' },
   },
-
-  // ==========================================
-  // [4장] 빛나는 다이아 방과 정령 피캐스의 시험
-  // ==========================================
   {
+    chapter: '3장 · 어두운 광맥 갱도',
+    bg: 'mine_shaft',
+    bgm: 'cave',
+    speaker: '광부',
+    text: '허허! $2x + y = 10$을 만족하는 순서쌍이 4개가 아닌 5개라는 걸 찾아내다니 대단하네. 약속대로 에메랄드 원석을 자네들에게 주겠네!',
+    left: { name: '광부', emotion: 'smile' },
+    right: { name: '폴리곤', emotion: 'smile' },
+    activeSide: 'left',
+  },
+  {
+    chapter: '3장 · 어두운 광맥 갱도',
+    bg: 'mine_shaft',
+    bgm: 'cave',
+    speaker: '나레이션',
+    text: '깊고 맑은 녹색을 머금은 🟢 에메랄드 원석을 획득했다! 탐험 지도로 돌아가 여정을 이어가자.',
+    left: { name: '폴리곤', emotion: 'smile' },
+    right: { name: '이리스', emotion: 'smile' },
+    activeSide: 'right',
+  },
+];
+
+// ==========================================
+// [거점 3] 빛나는 다이아 동굴 (사파이어 원석)
+// ==========================================
+export const SCENARIO_CAVE = [
+  {
+    chapter: '4장 · 빛나는 다이아 동굴',
     bg: 'diamond_cave',
     bgm: 'cave',
     speaker: '나레이션',
-    text: '석문이 웅장한 소리를 내며 열리자, 눈부신 청옥빛과 붉은빛의 다이아몬드 결정들이 동굴 가득 빛을 뿜어낸다.',
+    text: '동굴 깊은 곳으로 들어서자 환상적인 청옥빛 결정들이 사방을 비춘다. 그 중심에서 작은 요정이 날아온다.',
     left: { name: '폴리곤', emotion: 'smile' },
     right: { name: '이리스', emotion: 'smile' },
     activeSide: 'right',
   },
   {
+    chapter: '4장 · 빛나는 다이아 동굴',
     bg: 'diamond_cave',
     bgm: 'cave',
     speaker: '피캐스',
-    text: '안녕? 난 광맥의 수호 요정 피캐스야! 다이아몬드를 가져가려면 내 주머니 퀴즈를 풀어야 해~',
+    text: '안녕? 난 광맥의 수호 요정 피캐스야! 푸른 사파이어 원석을 얻으려면 내 신비한 정령들을 먼저 빠르게 잡아봐~',
     left: { name: '피캐스', emotion: 'smile' },
     right: { name: '폴리곤', emotion: 'surprised' },
     activeSide: 'left',
   },
   {
+    chapter: '4장 · 빛나는 다이아 동굴',
+    type: 'widget',
+    widget: 'pecas-pick',
+    bg: 'diamond_cave',
+    bgm: 'cave',
+    left: { name: '피캐스', emotion: 'smile' },
+    right: { name: '폴리곤', emotion: 'smile' },
+  },
+  {
+    chapter: '4장 · 빛나는 다이아 동굴',
+    bg: 'diamond_cave',
+    bgm: 'cave',
+    speaker: '피캐스',
+    text: '손놀림이 정말 날렵하네! 그럼 이번엔 내 주머니 속 두 주사위의 곱이 짝수가 될 확률을 맞혀봐!',
+    left: { name: '피캐스', emotion: 'smile' },
+    right: { name: '이리스', emotion: 'thinking' },
+    activeSide: 'left',
+  },
+  {
+    chapter: '4장 · 빛나는 다이아 동굴',
     type: 'widget',
     widget: 'problem-board',
     problemId: 'prob-04',
@@ -180,15 +275,17 @@ export const STEPS = [
     right: { name: '이리스', emotion: 'thinking' },
   },
   {
+    chapter: '4장 · 빛나는 다이아 동굴',
     bg: 'diamond_cave',
     bgm: 'cave',
     speaker: '피캐스',
-    text: '우와, 단번에 맞히다니 대단해! 저 천장에 매달린 파피루스 상자에는 최고급 원석이 들어 있어. 두 다이얼의 합을 맞춰봐!',
+    text: '우와! 홀수×홀수의 여사건을 이용해 $\\frac{3}{4}$을 금방 계산했구나! 마지막으로 천장에 매달린 회전 룬 다이얼의 합 8을 맞춰봐!',
     left: { name: '피캐스', emotion: 'surprised' },
     right: { name: '폴리곤', emotion: 'smile' },
     activeSide: 'left',
   },
   {
+    chapter: '4장 · 빛나는 다이아 동굴',
     type: 'widget',
     widget: 'problem-board',
     problemId: 'prob-05',
@@ -198,45 +295,53 @@ export const STEPS = [
     right: { name: '폴리곤', emotion: 'thinking' },
   },
   {
+    chapter: '4장 · 빛나는 다이아 동굴',
     bg: 'diamond_cave',
     bgm: 'cave',
     speaker: '이리스',
-    text: '파피루스 상자가 열렸어요! 찬란한 영롱함을 뿜는 순도 100% 다이아몬드 원석이에요!',
+    text: '룬 다이얼 상자가 열렸어요! 차갑고 투명한 푸른빛의 순수한 사파이어 원석이에요!',
     left: { name: '피캐스', emotion: 'smile' },
     right: { name: '이리스', emotion: 'smile' },
     activeSide: 'right',
   },
   {
+    chapter: '4장 · 빛나는 다이아 동굴',
     bg: 'diamond_cave',
     bgm: 'cave',
     speaker: '피캐스',
-    text: '너희 정말 멋진 아이들이구나! 나도 너희와 함께 갈래! 가기 전에 내 보물 뽑기 기계 한번 돌려볼래?',
+    text: '너희 정말 똑똑하고 멋지다! 나도 너희와 함께 다이아 금고로 갈래!',
     left: { name: '피캐스', emotion: 'smile' },
     right: { name: '폴리곤', emotion: 'smile' },
     activeSide: 'left',
   },
   {
-    type: 'widget',
-    widget: 'pecas-pick',
+    chapter: '4장 · 빛나는 다이아 동굴',
     bg: 'diamond_cave',
     bgm: 'cave',
-    left: { name: '피캐스', emotion: 'smile' },
-    right: { name: '폴리곤', emotion: 'smile' },
+    speaker: '나레이션',
+    text: '영롱한 푸른빛을 뿜는 🔵 사파이어 원석을 획득했다! 피캐스가 든든한 동료로 합류했다.',
+    left: { name: '폴리곤', emotion: 'smile' },
+    right: { name: '이리스', emotion: 'smile' },
+    activeSide: 'right',
   },
+];
 
-  // ==========================================
-  // [5장] 학당 서고의 결전 준비와 탈레스의 교훈
-  // ==========================================
+// ==========================================
+// [최종 관문] 테론의 다이아몬드 금고 결전
+// ==========================================
+export const SCENARIO_VAULT = [
   {
+    chapter: '5장 · 학당 서고의 결전 준비',
     bg: 'classroom',
     bgm: 'main',
     speaker: '탈레스',
-    text: '원석을 무사히 구해왔구나, 장하다! 서고의 파피루스 보관함은 암산 자물쇠로 굳게 잠겨 있다. 신속하게 곱셈 문제를 통과해 자물쇠를 열어보아라!',
+    text: '3대 원석을 모두 구해왔구나, 장하다! 서고의 파피루스 보관함은 암산 자물쇠로 잠겨 있다. 신속하게 곱셈 10문제를 통과해 보아라!',
     left: { name: '탈레스', emotion: 'neutral' },
     right: { name: '폴리곤', emotion: 'neutral' },
     activeSide: 'left',
   },
   {
+    chapter: '5장 · 학당 서고의 결전 준비',
     type: 'widget',
     widget: 'gugu-speed',
     bg: 'classroom',
@@ -245,15 +350,17 @@ export const STEPS = [
     right: { name: '폴리곤', emotion: 'thinking' },
   },
   {
+    chapter: '5장 · 학당 서고의 결전 준비',
     bg: 'classroom',
     bgm: 'main',
     speaker: '이리스',
-    text: '자물쇠가 풀렸어요! 보관함 안을 보니 번호가 적힌 서랍들이 잔뜩 있어요. 어떤 서랍에 파피루스가 들어 있을까요?',
+    text: '자물쇠가 풀렸어요! 보관함 안을 보니 20개의 번호 서랍이 있어요. 7의 배수 서랍에 든 파피루스를 찾아볼까요?',
     left: { name: '폴리곤', emotion: 'smile' },
     right: { name: '이리스', emotion: 'smile' },
     activeSide: 'right',
   },
   {
+    chapter: '5장 · 학당 서고의 결전 준비',
     type: 'widget',
     widget: 'problem-board',
     problemId: 'prob-07',
@@ -263,6 +370,7 @@ export const STEPS = [
     right: { name: '이리스', emotion: 'thinking' },
   },
   {
+    chapter: '5장 · 학당 서고의 결전 준비',
     bg: 'classroom',
     bgm: 'main',
     speaker: '테론',
@@ -272,6 +380,7 @@ export const STEPS = [
     activeSide: 'left',
   },
   {
+    chapter: '5장 · 학당 서고의 결전 준비',
     type: 'widget',
     widget: 'problem-board',
     problemId: 'prob-08',
@@ -281,15 +390,17 @@ export const STEPS = [
     right: { name: '폴리곤', emotion: 'thinking' },
   },
   {
+    chapter: '5장 · 학당 서고의 결전 준비',
     bg: 'classroom',
     bgm: 'main',
     speaker: '피캐스',
-    text: '히히! 절대로 일어날 수 없는 사건은 확률이 얼마인지 알지? 내 다이아 주머니에서 석탄이 나올 확률 말이야!',
+    text: '히히! 서고에서 발견한 고대 정육면체 전개도 파피루스야! 마주 보는 면의 곱이 2 또는 4가 될 확률을 맞춰봐!',
     left: { name: '피캐스', emotion: 'smile' },
     right: { name: '이리스', emotion: 'smile' },
     activeSide: 'left',
   },
   {
+    chapter: '5장 · 학당 서고의 결전 준비',
     type: 'widget',
     widget: 'problem-board',
     problemId: 'prob-09',
@@ -299,10 +410,9 @@ export const STEPS = [
     right: { name: '이리스', emotion: 'smile' },
   },
 
-  // ==========================================
-  // [6장] 다이아몬드 금고의 진실과 결전
-  // ==========================================
+  // 6장 결전 안치실
   {
+    chapter: '6장 · 다이아 금고 결전',
     bg: 'diamond_vault',
     bgm: 'tense',
     speaker: '테론',
@@ -312,15 +422,17 @@ export const STEPS = [
     activeSide: 'left',
   },
   {
+    chapter: '6장 · 다이아 금고 결전',
     bg: 'diamond_vault',
     bgm: 'tense',
     speaker: '이리스',
-    text: '잠깐만요, 테론 님! 그 주사위는 정육면체가 아니에요. 직접 손으로 돌려보며 세 모서리의 길이를 재어보세요!',
+    text: '잠깐만요, 테론 님! 그 주사위는 정육면체가 아니에요. 직접 겨냥도의 세 모서리 길이를 재어보세요!',
     left: { name: '테론', emotion: 'surprised' },
     right: { name: '이리스', emotion: 'thinking' },
     activeSide: 'right',
   },
   {
+    chapter: '6장 · 다이아 금고 결전',
     type: 'widget',
     widget: 'dice-inspector',
     bg: 'diamond_vault',
@@ -329,6 +441,7 @@ export const STEPS = [
     right: { name: '폴리곤', emotion: 'thinking' },
   },
   {
+    chapter: '6장 · 다이아 금고 결전',
     bg: 'diamond_vault',
     bgm: 'tense',
     speaker: '폴리곤',
@@ -339,6 +452,7 @@ export const STEPS = [
     refute: true,
   },
   {
+    chapter: '6장 · 다이아 금고 결전',
     bg: 'diamond_vault',
     bgm: 'tense',
     speaker: '테론',
@@ -348,6 +462,7 @@ export const STEPS = [
     activeSide: 'left',
   },
   {
+    chapter: '6장 · 다이아 금고 결전',
     type: 'widget',
     widget: 'problem-board',
     problemId: 'prob-06',
@@ -357,15 +472,17 @@ export const STEPS = [
     right: { name: '폴리곤', emotion: 'thinking' },
   },
   {
+    chapter: '6장 · 다이아 금고 결전',
     bg: 'diamond_vault',
     bgm: 'tense',
     speaker: '테론',
-    text: '500번 던진 상대도수가 정확히 $\\frac{1}{4}$이 나오는군! 내 착각을 완벽히 인정하오. 이제 금고를 정밀한 다중 확률 잠금장치로 영구 봉인하겠소. 3개의 청동 증기 밸브를 풀어주시오!',
+    text: '500번 던진 상대도수가 정확히 $\\frac{1}{4}$이 나오는군! 내 착각을 인정하오. 이제 금고를 정밀한 다중 확률 잠금장치로 영구 봉인하겠소. 3개의 청동 증기 밸브를 풀어주시오!',
     left: { name: '테론', emotion: 'smile' },
     right: { name: '폴리곤', emotion: 'smile' },
     activeSide: 'left',
   },
   {
+    chapter: '6장 · 다이아 금고 결전',
     type: 'widget',
     widget: 'problem-board',
     problemId: 'prob-10',
@@ -375,6 +492,7 @@ export const STEPS = [
     right: { name: '이리스', emotion: 'thinking' },
   },
   {
+    chapter: '6장 · 다이아 금고 결전',
     bg: 'diamond_vault',
     bgm: 'tense',
     speaker: '테론',
@@ -384,6 +502,7 @@ export const STEPS = [
     activeSide: 'left',
   },
   {
+    chapter: '6장 · 다이아 금고 결전',
     type: 'widget',
     widget: 'problem-board',
     problemId: 'prob-11',
@@ -393,6 +512,7 @@ export const STEPS = [
     right: { name: '폴리곤', emotion: 'thinking' },
   },
   {
+    chapter: '6장 · 다이아 금고 결전',
     bg: 'diamond_vault',
     bgm: 'merchant',
     speaker: '소폴로스',
@@ -402,6 +522,7 @@ export const STEPS = [
     activeSide: 'left',
   },
   {
+    chapter: '6장 · 다이아 금고 결전',
     bg: 'diamond_vault',
     bgm: 'tense',
     speaker: '이리스',
@@ -411,6 +532,7 @@ export const STEPS = [
     activeSide: 'right',
   },
   {
+    chapter: '6장 · 다이아 금고 결전',
     type: 'widget',
     widget: 'problem-board',
     problemId: 'prob-12',
@@ -420,10 +542,9 @@ export const STEPS = [
     right: { name: '이리스', emotion: 'smile' },
   },
 
-  // ==========================================
-  // [에필로그] 황금빛 완성과 새로운 지평
-  // ==========================================
+  // 에필로그
   {
+    chapter: '에필로그 · 새로운 지평',
     bg: 'diamond_vault',
     bgm: 'ending',
     speaker: '나레이션',
@@ -433,6 +554,7 @@ export const STEPS = [
     activeSide: 'right',
   },
   {
+    chapter: '에필로그 · 새로운 지평',
     bg: 'diamond_vault',
     bgm: 'ending',
     speaker: '테론',
@@ -442,6 +564,7 @@ export const STEPS = [
     activeSide: 'left',
   },
   {
+    chapter: '에필로그 · 새로운 지평',
     bg: 'classroom',
     bgm: 'ending',
     speaker: '피타고라스',
@@ -451,6 +574,7 @@ export const STEPS = [
     activeSide: 'left',
   },
   {
+    chapter: '에필로그 · 새로운 지평',
     bg: 'classroom',
     bgm: 'ending',
     speaker: '피캐스',
@@ -460,6 +584,7 @@ export const STEPS = [
     activeSide: 'left',
   },
   {
+    chapter: '에필로그 · 새로운 지평',
     bg: 'classroom',
     bgm: 'ending',
     speaker: '이리스',
@@ -469,6 +594,7 @@ export const STEPS = [
     activeSide: 'right',
   },
   {
+    chapter: '에필로그 · 새로운 지평',
     bg: 'classroom',
     bgm: 'ending',
     speaker: '폴리곤',
@@ -478,6 +604,7 @@ export const STEPS = [
     activeSide: 'left',
   },
   {
+    chapter: '에필로그 · 새로운 지평',
     bg: 'classroom',
     bgm: 'ending',
     speaker: '나레이션',
@@ -486,4 +613,22 @@ export const STEPS = [
     right: { name: '이리스', emotion: 'smile' },
     activeSide: 'right',
   },
+];
+
+// 거점별 맵 매핑
+export const SCENARIOS = {
+  intro: SCENARIO_INTRO,
+  camp: SCENARIO_CAMP,
+  mine: SCENARIO_MINE,
+  cave: SCENARIO_CAVE,
+  vault: SCENARIO_VAULT,
+};
+
+// 기존 전체 선형 스텝 호환용 배열
+export const STEPS = [
+  ...SCENARIO_INTRO,
+  ...SCENARIO_CAMP,
+  ...SCENARIO_MINE,
+  ...SCENARIO_CAVE,
+  ...SCENARIO_VAULT,
 ];
