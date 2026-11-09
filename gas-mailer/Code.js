@@ -12,6 +12,20 @@ function doGet(e) {
   })).setMimeType(ContentService.MimeType.JSON);
 }
 
+/**
+ * Apps Script 권한 최초 1회 승인 및 발송 테스트용 함수
+ * Apps Script 편집기에서 이 함수를 선택하고 [실행]을 누르면 권한 승인 창이 뜹니다.
+ */
+function testSend() {
+  const email = Session.getActiveUser().getEmail() || 'june_wook@snu.ms.kr';
+  GmailApp.sendEmail(
+    email,
+    '[피타고라스 학당] 권한 승인 및 메일 발송 테스트',
+    '축하합니다! 이 메일이 도착했다면 피타고라스 학당 수료증 발송 권한이 정상 승인된 것입니다.\n이제 웹앱에서 학생들이 수료증을 자신의 이메일로 정상 수신할 수 있습니다!'
+  );
+  Logger.log('테스트 메일 발송 성공: ' + email);
+}
+
 function doPost(e) {
   try {
     let payload = {};

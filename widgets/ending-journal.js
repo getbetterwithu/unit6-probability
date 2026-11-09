@@ -13,7 +13,7 @@
 import { playSfx } from '../engine/sound.js';
 
 // Google Apps Script clasp 배포 Web App URL
-const GAS_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbxT5_FPxPV-9dzGtXhaV3VIp8Nhv_XwKEla6ixOtU9CMjD2gfMi-9CBQe6SgnkUwMEmcw/exec';
+const GAS_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwsR5bLJWUh7g4y280t2bU_lKYjKYlfYQccx6X7-1OXZZ5WzGAVdvfDzth44G8Hj1lKhA/exec';
 
 /**
  * 순수 HTML5 Canvas를 이용해 1200x850 해상도의 고화질 가로형 황금 상장 이미지를 실시간 렌더링하여 다운로드합니다.
