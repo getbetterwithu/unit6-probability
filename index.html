@@ -577,13 +577,23 @@
         bottom: -15px;
         transform-origin: 50% 25%;
       }
-      .character.left { left: -4%; }
-      .character.right { right: -4%; }
-      .character.active {
-        transform: scale(1.15) translateY(10px) !important;
+      .character.left, .character.right {
+        left: 50% !important;
+        right: auto !important;
+        transform: translateX(-50%) !important;
       }
-      .character.inactive {
-        transform: scale(0.92) translateY(24px) !important;
+      .character.active {
+        display: block !important;
+        left: 50% !important;
+        right: auto !important;
+        transform: translateX(-50%) scale(1.18) translateY(10px) !important;
+        z-index: 4 !important;
+        opacity: 1 !important;
+      }
+      .character.inactive, .character.hidden {
+        display: none !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
       }
 
       /* 3. 대화창 레이어 */
@@ -852,6 +862,6 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
-  <script type="module" src="engine/app.js?v=20261110_v5"></script>
+  <script type="module" src="engine/app.js?v=20261110_v6"></script>
 </body>
 </html>

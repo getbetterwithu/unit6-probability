@@ -1,16 +1,16 @@
 import { SCENARIOS, STEPS } from '../data/scenario.js?v=84';
 import { createDialogue } from './dialogue.js?v=8';
 import { setTension, refute } from './director.js?v=12';
-import { createStage } from './stage.js?v=3';
+import { createStage } from './stage.js?v=20261110_v6';
 import { playBgm, playSfx, toggleMute, isMuted } from './sound.js?v=1';
-import { mountDiceInspector } from '../widgets/dice-inspector.js?v=20261110_v5';
-import { mountProblemBoard } from '../widgets/problem-board.js?v=20261110_v5';
-import { mountPathLink } from '../widgets/path-link.js?v=20261110_v5';
-import { mountPecasPick } from '../widgets/pecas-pick.js?v=20261110_v5';
-import { mountGuguSpeed } from '../widgets/gugu-speed.js?v=20261110_v5';
-import { mountNonogram } from '../widgets/nonogram.js?v=20261110_v5';
+import { mountDiceInspector } from '../widgets/dice-inspector.js?v=20261110_v6';
+import { mountProblemBoard } from '../widgets/problem-board.js?v=20261110_v6';
+import { mountPathLink } from '../widgets/path-link.js?v=20261110_v6';
+import { mountPecasPick } from '../widgets/pecas-pick.js?v=20261110_v6';
+import { mountGuguSpeed } from '../widgets/gugu-speed.js?v=20261110_v6';
+import { mountNonogram } from '../widgets/nonogram.js?v=20261110_v6';
 import { createBacklog } from '../widgets/backlog.js?v=1';
-import { mountWorldMap } from '../widgets/world-map.js?v=3';
+import { mountWorldMap } from '../widgets/world-map.js?v=20261110_v6';
 import { mountEndingJournal } from '../widgets/ending-journal.js?v=3';
 
 const speakerEl = document.getElementById('speaker-box');
@@ -870,26 +870,27 @@ function promptPlayerNameModal(onDone) {
     position: absolute; inset: 0; z-index: 68;
     background: rgba(10, 8, 5, 0.94); backdrop-filter: blur(12px);
     display: flex; align-items: center; justify-content: center;
-    animation: fadeIn 0.3s ease;
+    overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 20px 12px;
+    box-sizing: border-box; animation: fadeIn 0.3s ease;
   `;
 
   modal.innerHTML = `
-    <div style="width:min(440px, 92%); background:#1e1610; border:2.5px solid #d4af37; border-radius:14px; padding:28px 24px; text-align:center; box-shadow:0 12px 48px rgba(0,0,0,0.85); color:#f5eedb;">
-      <div style="font-size:42px; margin-bottom:8px;">⚔️</div>
-      <h2 style="font-size:1.4rem; font-weight:800; color:#ffd152; margin:0 0 10px; letter-spacing:0.5px;">탐험 대원 등록</h2>
-      <p style="font-size:0.95rem; line-height:1.5; color:#bdc3c7; margin:0 0 20px; word-break:keep-all;">
+    <div style="width:min(440px, 94%); max-height:92dvh; background:#1e1610; border:2.5px solid #d4af37; border-radius:14px; padding:22px 18px; text-align:center; box-shadow:0 12px 48px rgba(0,0,0,0.85); color:#f5eedb; box-sizing:border-box; margin:auto;">
+      <div style="font-size:38px; margin-bottom:6px;">⚔️</div>
+      <h2 style="font-size:1.35rem; font-weight:800; color:#ffd152; margin:0 0 8px; letter-spacing:0.5px;">탐험 대원 등록</h2>
+      <p style="font-size:0.92rem; line-height:1.45; color:#bdc3c7; margin:0 0 16px; word-break:keep-all;">
         피타고라스 학당의 밀명을 수행할 대원의 이름을 입력해 주세요.<br>
-        (완결 시 공식 수료증에 학생의 이름이 새겨집니다.)
+        <span style="font-size:0.82rem; color:#f39c12;">(입력하지 않고 시작하면 '용감한 탐험가'로 자동 등록됩니다)</span>
       </p>
       <input type="text" id="input-player-name" placeholder="대원 이름 (예: 홍길동)" maxlength="12" style="
-        width: 80%; padding: 10px 14px; font-size: 1.1rem; font-weight: 700; text-align: center;
+        width: 86%; max-width: 280px; padding: 10px 14px; font-size: 1.1rem; font-weight: 700; text-align: center;
         background: #0d0a07; border: 1.5px solid #d4af37; border-radius: 8px; color: #ffd152;
-        margin-bottom: 20px; outline: none;
+        margin-bottom: 16px; outline: none; box-sizing: border-box;
       "/>
       <div>
         <button type="button" id="btn-save-name" style="
           background:linear-gradient(135deg, #d4af37, #f39c12); color:#1c1308;
-          border:none; border-radius:8px; padding:10px 28px; font-weight:800; font-size:1.05rem; cursor:pointer;
+          border:none; border-radius:8px; padding:12px 32px; font-weight:800; font-size:1.05rem; cursor:pointer;
           box-shadow:0 4px 14px rgba(245,176,65,0.4);
         ">
           모험 시작하기 ▶
@@ -902,7 +903,12 @@ function promptPlayerNameModal(onDone) {
 
   const inputEl = modal.querySelector('#input-player-name');
   const btnSave = modal.querySelector('#btn-save-name');
-  inputEl.focus();
+
+  const isMobile = window.matchMedia('(max-width: 768px)').matches || ('ontouchstart' in window);
+  // 데스크톱에서는 바로 타이핑할 수 있게 포커스, 모바일에서는 가상 키보드가 카드를 가리지 않도록 자동 포커스 제외!
+  if (!isMobile) {
+    inputEl.focus();
+  }
 
   const handleSave = () => {
     let name = inputEl.value.trim();

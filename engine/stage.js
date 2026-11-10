@@ -42,6 +42,7 @@ export function createStage(containerEl) {
   const rightImg = rightCharEl?.querySelector('img');
 
   let currentBg = '';
+  let activeCharKey = ''; // 현재 표시 중인 캐릭터 이름+감정 키
 
   function setBg(bgKey) {
     if (!bgKey || currentBg === bgKey) return;
@@ -52,27 +53,16 @@ export function createStage(containerEl) {
     }
   }
 
-  function setActor(charEl, imgEl, charConfig, isActive) {
-    if (!charEl || !imgEl) return;
-    if (!charConfig || !charConfig.name) {
-      charEl.classList.add('hidden');
-      return;
+  function hideAllActors() {
+    if (leftCharEl) {
+      leftCharEl.classList.add('hidden');
+      leftCharEl.classList.remove('active', 'inactive');
     }
-    const src = getCharSrc(charConfig.name, charConfig.emotion || 'neutral');
-    if (src) {
-      imgEl.src = src;
-      imgEl.alt = charConfig.name;
-      charEl.classList.remove('hidden');
-      if (isActive) {
-        charEl.classList.add('active');
-        charEl.classList.remove('inactive');
-      } else {
-        charEl.classList.remove('active');
-        charEl.classList.add('inactive');
-      }
-    } else {
-      charEl.classList.add('hidden');
+    if (rightCharEl) {
+      rightCharEl.classList.add('hidden');
+      rightCharEl.classList.remove('active', 'inactive');
     }
+    activeCharKey = '';
   }
 
   function update(step) {
@@ -81,12 +71,81 @@ export function createStage(containerEl) {
       setBg(step.bg);
     }
 
-    const left = step.left;
-    const right = step.right;
-    const activeSide = step.activeSide || (step.speaker === (right?.name) ? 'right' : 'left');
+    const speaker = (step.speaker || '').trim();
 
-    setActor(leftCharEl, leftImg, left, activeSide === 'left');
-    setActor(rightCharEl, rightImg, right, activeSide === 'right');
+    // 1. 나레이션이거나 화자가 없는 경우: 캐릭터 전원 깔끔하게 퇴장 (배경 및 대사 집중)
+    if (!speaker || speaker === '나레이션' || speaker === '시스템') {
+      hideAllActors();
+      return;
+    }
+
+    // 2. 화자 정보 추출: step.left 또는 step.right 중 화자와 일치하는 설정 우선 탐색
+    let speakerConfig = null;
+    let preferredSide = 'left';
+
+    if (step.left && step.left.name === speaker) {
+      speakerConfig = step.left;
+      preferredSide = 'left';
+    } else if (step.right && step.right.name === speaker) {
+      speakerConfig = step.right;
+      preferredSide = 'right';
+    } else if (CHAR_KEYS[speaker]) {
+      // step에 명시되지 않았더라도 정본 화자 키가 있는 경우
+      speakerConfig = { name: speaker, emotion: 'neutral' };
+      preferredSide = 'left';
+    }
+
+    if (!speakerConfig) {
+      hideAllActors();
+      return;
+    }
+
+    const emotion = speakerConfig.emotion || 'neutral';
+    const targetSrc = getCharSrc(speakerConfig.name, emotion);
+    if (!targetSrc) {
+      hideAllActors();
+      return;
+    }
+
+    // 사용자 핵심 요구사항: "정확하게 대사를 치는 인물만 나와야 함 (비화자 잔상 및 잦은 인물 교체 혼란 제거)"
+    const targetEl = (preferredSide === 'right') ? rightCharEl : leftCharEl;
+    const targetImg = (preferredSide === 'right') ? rightImg : leftImg;
+    const otherEl = (preferredSide === 'right') ? leftCharEl : rightCharEl;
+
+    // 비화자 엘리먼트는 무조건 즉시 숨김
+    if (otherEl) {
+      otherEl.classList.add('hidden');
+      otherEl.classList.remove('active', 'inactive');
+    }
+
+    if (targetEl && targetImg) {
+      const nextKey = `${speakerConfig.name}_${emotion}`;
+      const isCharSwapping = (activeCharKey && !activeCharKey.startsWith(speakerConfig.name + '_'));
+      activeCharKey = nextKey;
+
+      if (isCharSwapping) {
+        // 인물 자체가 다른 캐릭터로 바뀔 때: 이전 인물의 형태가 남아 찌그러지는 잔상 모핑 방지
+        targetEl.style.opacity = '0';
+        targetEl.style.transition = 'none';
+        targetImg.src = targetSrc;
+        targetImg.alt = speakerConfig.name;
+
+        // 한 프레임 대기 후 부드럽게 등장
+        requestAnimationFrame(() => {
+          targetEl.style.transition = 'opacity 0.22s ease, transform 0.28s ease';
+          targetEl.classList.remove('hidden', 'inactive');
+          targetEl.classList.add('active');
+          targetEl.style.opacity = '1';
+        });
+      } else {
+        // 동일 인물이거나 최초 등장 시
+        targetImg.src = targetSrc;
+        targetImg.alt = speakerConfig.name;
+        targetEl.classList.remove('hidden', 'inactive');
+        targetEl.classList.add('active');
+        targetEl.style.opacity = '1';
+      }
+    }
   }
 
   return { update, setBg };
