@@ -502,6 +502,10 @@
         align-items: center !important;
         justify-content: space-between !important;
         gap: 6px !important;
+        touch-action: manipulation !important;
+        user-select: none !important;
+        -webkit-user-select: none !important;
+        -webkit-touch-callout: none !important;
       }
       .hud-left {
         flex-shrink: 0 !important;
@@ -522,6 +526,10 @@
         border-radius: 8px !important;
         box-shadow: 0 2px 8px rgba(0,0,0,0.5) !important;
         cursor: pointer !important;
+        touch-action: manipulation !important;
+        user-select: none !important;
+        -webkit-user-select: none !important;
+        -webkit-touch-callout: none !important;
       }
       .hud-title-full { display: none !important; }
       .hud-title-short { display: inline !important; font-weight: 800; }
@@ -544,6 +552,10 @@
         text-overflow: ellipsis !important;
         display: inline-block !important;
         cursor: pointer !important;
+        touch-action: manipulation !important;
+        user-select: none !important;
+        -webkit-user-select: none !important;
+        -webkit-touch-callout: none !important;
       }
       .hud-right {
         flex-shrink: 0 !important;
@@ -705,9 +717,40 @@
       .board-illustration-frame {
         height: 140px;
       }
+      .answer-input-row {
+        display: flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+      }
+      .answer-input-label {
+        white-space: nowrap !important;
+        flex-shrink: 0 !important;
+        font-size: 0.95rem !important;
+      }
+      .math-input-wrapper {
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+      }
       .board-text-input {
-        font-size: 1.1rem;
-        padding: 6px 10px;
+        width: 100% !important;
+        min-width: 0 !important;
+        box-sizing: border-box !important;
+        font-size: 1.05rem !important;
+        padding: 6px 8px !important;
+      }
+      .board-answer-unit {
+        white-space: nowrap !important;
+        flex-shrink: 0 !important;
+        font-size: 0.95rem !important;
+        padding: 0 2px !important;
+      }
+      #inline-btn-submit {
+        white-space: nowrap !important;
+        flex-shrink: 0 !important;
+        padding: 6px 12px !important;
+        font-size: 0.92rem !important;
       }
       .k-btn {
         font-size: 1.1rem;
@@ -809,6 +852,6 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
-  <script type="module" src="engine/app.js?v=20261110_v3"></script>
+  <script type="module" src="engine/app.js?v=20261110_v5"></script>
 </body>
 </html>
