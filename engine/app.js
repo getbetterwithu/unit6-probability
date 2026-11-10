@@ -577,7 +577,7 @@ function triggerAdminCheat() {
   openAdminModal();
 }
 
-// 1. PC: 백틱( ` ) 5회 연속 연타 감지기
+// 1. PC: 키보드 이벤트 리스너 (백틱 치트 및 단축키)
 let backtickTimes = [];
 window.addEventListener('keydown', (ev) => {
   if (ev.key === '`' || ev.code === 'Backquote') {
@@ -593,39 +593,6 @@ window.addEventListener('keydown', (ev) => {
       return;
     }
   }
-});
-
-// 2. 모바일/터치: 최상단 타이틀 또는 챕터 배지 5회 연속 탭 감지기 (관리자 치트)
-let hudTapTimes = [];
-function onAdminTap(e) {
-  if (e.button && e.button !== 0) return;
-  const now = Date.now();
-  hudTapTimes.push(now);
-  hudTapTimes = hudTapTimes.filter((t) => now - t <= 2500);
-
-  const target = e.currentTarget;
-  if (target) {
-    target.style.transition = 'transform 0.1s';
-    target.style.transform = 'scale(0.92)';
-    setTimeout(() => { if (target) target.style.transform = 'none'; }, 100);
-  }
-
-  if (hudTapTimes.length >= 5) {
-    hudTapTimes = [];
-    e.preventDefault();
-    e.stopPropagation();
-    triggerAdminCheat();
-  }
-}
-
-const hudTitleEl = document.getElementById('hud-game-title') || document.querySelector('.hud-game-title');
-if (hudTitleEl) {
-  hudTitleEl.addEventListener('pointerdown', onAdminTap);
-}
-const hudChapterEl = document.getElementById('hud-chapter');
-if (hudChapterEl) {
-  hudChapterEl.addEventListener('pointerdown', onAdminTap);
-}
 
   // ESC 키로 백로그, 월드맵 또는 관리자 모달 닫기
   if (ev.key === 'Escape') {
@@ -687,6 +654,38 @@ if (hudChapterEl) {
     dlg.prev();
   }
 }, true);
+
+// 2. 모바일/터치: 최상단 타이틀 또는 챕터 배지 5회 연속 탭 감지기 (관리자 치트)
+let hudTapTimes = [];
+function onAdminTap(e) {
+  if (e.button && e.button !== 0) return;
+  const now = Date.now();
+  hudTapTimes.push(now);
+  hudTapTimes = hudTapTimes.filter((t) => now - t <= 2500);
+
+  const target = e.currentTarget;
+  if (target) {
+    target.style.transition = 'transform 0.1s';
+    target.style.transform = 'scale(0.92)';
+    setTimeout(() => { if (target) target.style.transform = 'none'; }, 100);
+  }
+
+  if (hudTapTimes.length >= 5) {
+    hudTapTimes = [];
+    e.preventDefault();
+    e.stopPropagation();
+    triggerAdminCheat();
+  }
+}
+
+const hudTitleEl = document.getElementById('hud-game-title') || document.querySelector('.hud-game-title');
+if (hudTitleEl) {
+  hudTitleEl.addEventListener('pointerdown', onAdminTap);
+}
+const hudChapterEl = document.getElementById('hud-chapter');
+if (hudChapterEl) {
+  hudChapterEl.addEventListener('pointerdown', onAdminTap);
+}
 
 // ==========================================
 // 관리자 / 치트 패널 모달
