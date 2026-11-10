@@ -13,9 +13,9 @@ export function mountPecasPick(root, { onDone, onClose }) {
         <p class="dice-hint" id="pup-hint" style="color:#bdc3c7; font-size:0.95rem; margin-top:6px;">움직이는 정령들 중 색이 다른 한 마리를 찾아 클릭하시오.</p>
       </div>
 
-      <div id="pup-yard" style="position:relative; height:340px; background:#f7f1e6; border-radius:10px; overflow:hidden; border:2px solid #5c4324;"></div>
+      <div id="pup-yard" style="position:relative; height:clamp(220px, 40vh, 340px); background:#f7f1e6; border-radius:10px; overflow:hidden; border:2px solid #5c4324;"></div>
 
-      <div style="margin-top: 14px; display:flex; justify-content:space-between; align-items:center;">
+      <div style="margin-top: 14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
         <div style="display:flex; align-items:center; gap:10px;">
           <span id="pup-msg" style="font-weight:700; color:#ffeaa7; font-size:1.05rem;">움직이는 주황 정령을 찾아보시오.</span>
           <button type="button" id="pup-btn" style="background:#3a2a1c; color:#ffeaa7; border:1px solid #d4af37; border-radius:6px; padding:4px 12px; font-weight:700; cursor:pointer;">

@@ -30,10 +30,10 @@ export function mountProblemBoard(root, problemId, { onSolved, onClose }) {
         <div class="toolbar-group">
           <span class="problem-tag-badge">문제 ${problem.num || ''}</span>
           <button type="button" class="tool-btn active" id="btn-tool-pen">
-            <span>🖊️</span> 펜
+            <span>🖊️</span> <span class="tool-label">펜</span>
           </button>
           <button type="button" class="tool-btn" id="btn-tool-eraser">
-            <span>🧹</span> 지우개
+            <span>🧹</span> <span class="tool-label">지우개</span>
           </button>
           
           <div class="color-swatch-group">
@@ -44,21 +44,25 @@ export function mountProblemBoard(root, problemId, { onSolved, onClose }) {
           </div>
 
           <button type="button" class="btn-undo" id="btn-tool-undo" title="실행취소">
-            ↩️ 취소
+            ↩️ <span class="tool-label">취소</span>
           </button>
           <button type="button" class="btn-clear-all" id="btn-tool-clear" title="전체 지우기">
-            🗑️ 지우기
+            🗑️ <span class="tool-label">지우기</span>
           </button>
         </div>
 
         <div class="toolbar-group">
+          <!-- 모바일 전용 탭 전환 버튼 [✏️ 연습장] <-> [📝 문제] -->
+          <button type="button" class="tool-btn mobile-tab-btn" id="btn-mobile-toggle-view" style="display:none;" title="연습장 / 문제 전환">
+            ✏️ <span id="mobile-tab-text">연습장</span>
+          </button>
           ${onClose ? `
           <button type="button" class="btn-board-close" id="btn-board-close" title="잠시 문제 접어두기" style="background:#2a1f14; border:1px solid #d4af37; color:#ffd152; border-radius:6px; padding:6px 12px; font-weight:800; font-size:0.9rem; cursor:pointer; margin-right:8px;">
             ✕ 잠시 닫기
           </button>
           ` : ''}
           <button type="button" class="btn-board-submit" id="top-btn-submit">
-            ✨ 정답 확인
+            ✨ <span class="submit-label">정답 확인</span>
           </button>
         </div>
       </div>
@@ -161,6 +165,9 @@ export function mountProblemBoard(root, problemId, { onSolved, onClose }) {
 
         <!-- 우측 패널: 광활한 양피지 모눈 풀이 캔버스 -->
         <div class="board-right-panel" id="canvas-container">
+          <button type="button" class="btn-canvas-back-to-problem" id="btn-canvas-back">
+            📝 문제로 돌아가기
+          </button>
           <canvas id="full-drawing-canvas"></canvas>
         </div>
       </div>
@@ -556,6 +563,40 @@ export function mountProblemBoard(root, problemId, { onSolved, onClose }) {
     btnClose.addEventListener('click', () => {
       playSfx('click');
       if (onClose) onClose();
+    });
+  }
+
+  // 모바일 탭 토글 [✏️ 연습장] <-> [📝 문제]
+  const btnMobileToggle = root.querySelector('#btn-mobile-toggle-view');
+  const btnCanvasBack = root.querySelector('#btn-canvas-back');
+  const boardEl = root.querySelector('.full-problem-board');
+  const mobileTabText = root.querySelector('#mobile-tab-text');
+
+  function setMobileView(showCanvas) {
+    if (showCanvas) {
+      boardEl.classList.add('show-canvas');
+      if (mobileTabText) mobileTabText.textContent = '문제';
+      if (btnMobileToggle) btnMobileToggle.classList.add('active');
+      setTimeout(resizeCanvas, 60);
+    } else {
+      boardEl.classList.remove('show-canvas');
+      if (mobileTabText) mobileTabText.textContent = '연습장';
+      if (btnMobileToggle) btnMobileToggle.classList.remove('active');
+    }
+  }
+
+  if (btnMobileToggle && boardEl) {
+    btnMobileToggle.addEventListener('click', () => {
+      playSfx('click');
+      const isShowing = boardEl.classList.contains('show-canvas');
+      setMobileView(!isShowing);
+    });
+  }
+
+  if (btnCanvasBack) {
+    btnCanvasBack.addEventListener('click', () => {
+      playSfx('click');
+      setMobileView(false);
     });
   }
 

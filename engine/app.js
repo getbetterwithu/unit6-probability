@@ -556,8 +556,28 @@ stageContainer.addEventListener('click', (e) => {
 });
 
 // ==========================================
-// 백틱( ` ) 5회 연속 연타 감지기 (관리자 치트 모달 / 현재 단계 정답 처리)
+// 관리자 치트 발동 공통 함수 (PC 백틱 5회 / 모바일 상단 타이틀 5회 탭)
 // ==========================================
+function triggerAdminCheat() {
+  // [핵심 기능] 현재 풀고 있는 스테이지나 미니게임이 있다면 즉시 정답 처리(Pass)!
+  if (currentActiveDoneFn) {
+    const passFn = currentActiveDoneFn;
+    currentActiveDoneFn = null;
+    currentActiveMountFn = null;
+    currentActiveReopenLabel = '';
+    playSfx('correct');
+    showToast('⚡ [치트 발동] 현재 진행 중인 과제를 즉시 정답 처리하고 통과합니다!', true);
+    const adminModal = document.getElementById('admin-cheat-modal');
+    if (adminModal) adminModal.remove();
+    passFn();
+    return;
+  }
+
+  // 진행 중인 과제가 없는 일반 대사 구간인 경우: 관리자 챕터 워프 모달 열기
+  openAdminModal();
+}
+
+// 1. PC: 백틱( ` ) 5회 연속 연타 감지기
 let backtickTimes = [];
 window.addEventListener('keydown', (ev) => {
   if (ev.key === '`' || ev.code === 'Backquote') {
@@ -569,26 +589,30 @@ window.addEventListener('keydown', (ev) => {
     if (backtickTimes.length >= 5) {
       backtickTimes = [];
       ev.preventDefault();
-
-      // [핵심 기능] 현재 풀고 있는 스테이지나 미니게임이 있다면 즉시 정답 처리(Pass)!
-      if (currentActiveDoneFn) {
-        const passFn = currentActiveDoneFn;
-        currentActiveDoneFn = null;
-        currentActiveMountFn = null;
-        currentActiveReopenLabel = '';
-        playSfx('correct');
-        showToast('⚡ [치트 발동] 현재 진행 중인 과제를 즉시 정답 처리하고 통과합니다!', true);
-        const adminModal = document.getElementById('admin-cheat-modal');
-        if (adminModal) adminModal.remove();
-        passFn();
-        return;
-      }
-
-      // 진행 중인 과제가 없는 일반 대사 구간인 경우: 관리자 챕터 워프 모달 열기
-      openAdminModal();
+      triggerAdminCheat();
       return;
     }
   }
+});
+
+// 2. 모바일/터치: 최상단 타이틀 5회 연속 탭 감지기 (관리자 치트)
+let hudTitleTapTimes = [];
+const hudTitleEl = document.getElementById('hud-game-title') || document.querySelector('.hud-game-title');
+if (hudTitleEl) {
+  hudTitleEl.addEventListener('pointerdown', (e) => {
+    if (e.button && e.button !== 0) return;
+    const now = Date.now();
+    hudTitleTapTimes.push(now);
+    hudTitleTapTimes = hudTitleTapTimes.filter((t) => now - t <= 2500);
+
+    if (hudTitleTapTimes.length >= 5) {
+      hudTitleTapTimes = [];
+      e.preventDefault();
+      e.stopPropagation();
+      triggerAdminCheat();
+    }
+  });
+}
 
   // ESC 키로 백로그, 월드맵 또는 관리자 모달 닫기
   if (ev.key === 'Escape') {
@@ -669,25 +693,26 @@ function openAdminModal() {
   `;
 
   modal.innerHTML = `
-    <div style="width:min(560px, 94%); max-height:90vh; background:#1e1610; border:2.5px solid #ffd152; border-radius:14px; padding:24px; color:#f5eedb; box-shadow:0 16px 64px rgba(0,0,0,0.95); overflow-y:auto;">
-      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1.5px solid #d4af37; padding-bottom:12px; margin-bottom:18px;">
+    <div style="width:min(560px, 94%); max-height:88vh; background:#1e1610; border:2.5px solid #ffd152; border-radius:14px; padding:18px 20px; color:#f5eedb; box-shadow:0 16px 64px rgba(0,0,0,0.95); overflow-y:auto; -webkit-overflow-scrolling:touch;">
+      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1.5px solid #d4af37; padding-bottom:10px; margin-bottom:14px;">
         <div style="display:flex; align-items:center; gap:8px;">
-          <span style="font-size:24px;">🛠️</span>
-          <h2 style="font-size:1.35rem; font-weight:900; color:#ffd152; margin:0;">관리자 디버그 & 치트 패널</h2>
+          <span style="font-size:22px;">🛠️</span>
+          <h2 style="font-size:1.25rem; font-weight:900; color:#ffd152; margin:0;">관리자 디버그 & 치트 패널</h2>
         </div>
         <button type="button" id="admin-close-btn" style="background:#3a2a1c; border:1px solid #d4af37; color:#ffd152; border-radius:6px; padding:4px 10px; font-weight:800; cursor:pointer;">
           ✕ 닫기
         </button>
       </div>
 
-      <p style="font-size:0.9rem; color:#bdc3c7; margin:0 0 16px;">
-        빠른 검증을 위한 챕터 워프 및 문제 프리패스 도구입니다. 백틱( \` ) 5회 연타 시 현재 풀고 있는 과제를 즉시 통과할 수 있습니다.
+      <p style="font-size:0.88rem; color:#bdc3c7; margin:0 0 14px; line-height:1.45;">
+        빠른 검증을 위한 챕터 워프 및 문제 프리패스 도구입니다.<br>
+        <strong>[발동 키]</strong> PC: 백틱( \` ) 5회 연타 / 모바일: 상단 타이틀 5회 연속 탭
       </p>
 
       <!-- 1. 현재 과제 즉시 정답 처리 -->
-      <div style="margin-bottom:20px; background:rgba(0,0,0,0.3); padding:12px; border-radius:8px; border:1px dashed #ffd152;">
-        <div style="font-size:0.95rem; font-weight:800; color:#ffd152; margin-bottom:8px;">⚡ 현재 과제 원터치 패스</div>
-        <button type="button" id="admin-pass-current" style="width:100%; background:linear-gradient(135deg, #e67e22, #d35400); color:#fff; border:none; padding:10px 14px; border-radius:6px; font-weight:800; font-size:1rem; cursor:pointer; box-shadow:0 4px 12px rgba(230,126,34,0.4);">
+      <div style="margin-bottom:16px; background:rgba(0,0,0,0.3); padding:12px; border-radius:8px; border:1px dashed #ffd152;">
+        <div style="font-size:0.92rem; font-weight:800; color:#ffd152; margin-bottom:6px;">⚡ 현재 과제 원터치 패스</div>
+        <button type="button" id="admin-pass-current" style="width:100%; background:linear-gradient(135deg, #e67e22, #d35400); color:#fff; border:none; padding:10px 14px; border-radius:6px; font-weight:800; font-size:0.95rem; cursor:pointer; box-shadow:0 4px 12px rgba(230,126,34,0.4);">
           ⚡ [치트] 현재 진행 중인 과제/미니게임 즉시 정답 처리 (Pass)
         </button>
       </div>

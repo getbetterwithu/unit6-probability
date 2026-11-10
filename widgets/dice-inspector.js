@@ -61,7 +61,7 @@ export function mountDiceInspector(root, { onEvidence }) {
       </div>
 
       <!-- 판정 설명 및 증거 확보 버튼 -->
-      <div style="margin-top:16px; display:flex; justify-content:space-between; align-items:center;">
+      <div style="margin-top:16px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
         <div>
           <div style="font-size:1.15rem; font-weight:800; color:#ffd152;">
             가로 1 : 세로 1 : 높이 2.5

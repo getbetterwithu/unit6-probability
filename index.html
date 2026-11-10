@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>폴리곤과 운명의 주사위 — 경우의 수와 확률</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
   <style>
@@ -23,13 +23,14 @@
       color: var(--text-main);
       font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Noto Sans KR", sans-serif;
       overflow: hidden;
-      width: 100vw; height: 100vh;
+      width: 100vw; height: 100vh; height: 100dvh;
       display: flex; justify-content: center; align-items: center;
+      touch-action: manipulation;
     }
     #game-container {
       position: relative;
-      width: 100vw; height: 100vh;
-      max-width: 100vw; max-height: 100vh;
+      width: 100vw; height: 100vh; height: 100dvh;
+      max-width: 100vw; max-height: 100dvh;
       background: var(--bg-dark);
       overflow: hidden;
       box-shadow: none;
@@ -469,6 +470,230 @@
     .path-pop { background: #fff; color: #1a1a1a; width: min(980px, 98%); }
     .path-pop svg { width: 100%; height: min(62vh, 520px); }
     .path-pop .dice-hint, .path-pop .dice-readout { color: #1a1a1a; }
+
+    /* 타이틀 모바일/데스크톱 대응 */
+    .hud-game-title {
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .hud-title-short { display: none; }
+
+    /* 모바일 연습장 내 복귀 버튼 */
+    .btn-canvas-back-to-problem {
+      position: absolute; top: 12px; left: 14px; z-index: 10;
+      background: rgba(42, 31, 20, 0.9); border: 1.5px solid #d4af37;
+      color: #ffd152; border-radius: 8px; padding: 6px 14px;
+      font-weight: 800; font-size: 0.95rem; cursor: pointer;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.6);
+      display: none;
+    }
+
+    /* ===== 모바일 최적화 미디어 쿼리 (화면 너비 768px 이하) ===== */
+    @media (max-width: 768px) {
+      /* 1. 최상단 헤더 HUD 바 */
+      #top-hud {
+        height: 42px;
+        padding: 0 8px;
+        padding-top: env(safe-area-inset-top, 0);
+      }
+      .hud-left { gap: 4px; }
+      .hud-game-title { font-size: 0.9rem; letter-spacing: 0; }
+      .hud-title-full { display: none !important; }
+      .hud-title-short { display: inline !important; font-weight: 800; }
+      
+      .hud-center {
+        position: static;
+        transform: none;
+        margin: 0 auto;
+      }
+      .hud-chapter-badge {
+        font-size: 0.78rem;
+        padding: 2px 8px;
+        max-width: 120px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: inline-block;
+      }
+      .hud-right { gap: 5px; }
+      #tension-wrap { display: none !important; }
+      .hud-btn-text { display: none !important; }
+      .hud-btn { padding: 4px 6px; font-size: 0.85rem; }
+      #btn-sound { width: 28px; height: 28px; }
+
+      /* 2. 캐릭터 및 무대 레이어 */
+      #character-layer {
+        inset: 42px 0 115px 0;
+      }
+      .character {
+        max-height: 54vh;
+        bottom: -15px;
+        transform-origin: 50% 25%;
+      }
+      .character.left { left: -4%; }
+      .character.right { right: -4%; }
+      .character.active {
+        transform: scale(1.15) translateY(10px) !important;
+      }
+      .character.inactive {
+        transform: scale(0.92) translateY(24px) !important;
+      }
+
+      /* 3. 대화창 레이어 */
+      #dialogue-layer {
+        bottom: 8px;
+        left: 8px;
+        right: 8px;
+        min-height: 105px;
+        padding: 10px 14px;
+        border-radius: 10px;
+      }
+      .dialogue-top-bar { margin-bottom: 4px; }
+      .speaker-name { font-size: 1.05rem; padding: 2px 10px; }
+      .dialogue-text { font-size: 1.08rem; line-height: 1.48; min-height: 44px; }
+      .btn-nav-prev, .btn-nav-next { padding: 4px 8px; font-size: 0.82rem; }
+
+      /* 4. 위젯 공통 루트 */
+      #widget-root {
+        top: 44px;
+        left: 4px;
+        right: 4px;
+        bottom: 6px;
+        border-radius: 8px;
+      }
+
+      /* 5. 4단원 스타일 전면 문제 풀이 보드 (Problem Board) 모바일 */
+      .full-problem-board {
+        border-width: 1.5px;
+        border-radius: 8px;
+      }
+      .board-top-toolbar {
+        height: auto;
+        min-height: 42px;
+        padding: 4px 8px;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+      .toolbar-group {
+        gap: 4px;
+        flex-wrap: wrap;
+      }
+      .problem-tag-badge {
+        font-size: 0.78rem;
+        padding: 2px 8px;
+      }
+      .tool-btn {
+        padding: 4px 7px;
+        font-size: 0.8rem;
+        gap: 3px;
+      }
+      .tool-btn .tool-label, .btn-undo .tool-label, .btn-clear-all .tool-label {
+        display: none !important;
+      }
+      .color-swatch-group {
+        gap: 3px;
+        margin: 0 2px;
+      }
+      .color-btn {
+        width: 20px;
+        height: 20px;
+      }
+      .btn-undo, .btn-clear-all {
+        padding: 4px 7px;
+        font-size: 0.8rem;
+      }
+      .btn-board-submit {
+        padding: 6px 12px;
+        font-size: 0.9rem;
+      }
+
+      /* 본문: 모바일에서는 2열 대신 문제 / 연습장 전환 구조 */
+      .board-main-container {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        min-height: 0;
+        overflow: hidden;
+      }
+      .board-left-panel {
+        width: 100% !important;
+        max-width: 100% !important;
+        flex: 1;
+        min-height: 0;
+        border-right: none;
+        padding: 8px 10px;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      .board-right-panel {
+        display: none;
+        width: 100%;
+        flex: 1;
+        min-height: 0;
+      }
+
+      /* 모바일 연습장 활성화 시 */
+      .full-problem-board.show-canvas .board-left-panel {
+        display: none !important;
+      }
+      .full-problem-board.show-canvas .board-right-panel {
+        display: block !important;
+      }
+      .full-problem-board.show-canvas .btn-canvas-back-to-problem {
+        display: inline-block !important;
+      }
+
+      /* 모바일 탭 토글 버튼 표시 */
+      .mobile-tab-btn {
+        display: inline-flex !important;
+        background: #4a3520 !important;
+        border: 1px solid #d4af37 !important;
+        color: #ffd152 !important;
+        font-weight: 800;
+      }
+
+      .board-prompt-text {
+        font-size: 1.05rem;
+        line-height: 1.55;
+      }
+      .board-illustration-frame {
+        height: 140px;
+      }
+      .board-text-input {
+        font-size: 1.1rem;
+        padding: 6px 10px;
+      }
+      .k-btn {
+        font-size: 1.1rem;
+        padding: 8px 2px;
+      }
+
+      /* 6. 팝업 및 모달 모바일 반응형 */
+      .popup {
+        width: 98% !important;
+        max-height: 90vh !important;
+        overflow-y: auto !important;
+        padding: 12px 14px !important;
+      }
+      .dice-inspector-container {
+        padding: 12px 14px !important;
+        max-height: 90vh !important;
+        overflow-y: auto !important;
+      }
+      #backlog-overlay > div:first-child {
+        padding: 10px 14px !important;
+      }
+      #backlog-list {
+        padding: 12px 14px !important;
+        gap: 12px !important;
+      }
+      .ancient-world-map-wrapper {
+        width: 98vw !important;
+        height: 94vh !important;
+        border-width: 2px !important;
+        border-radius: 10px !important;
+      }
+    }
   </style>
 </head>
 <body>
@@ -476,7 +701,10 @@
     <!-- 최상단 헤더 HUD 바 -->
     <header id="top-hud">
       <div class="hud-left">
-        <span class="hud-game-title">🎲 폴리곤과 운명의 주사위</span>
+        <span class="hud-game-title" id="hud-game-title" title="🎲 폴리곤과 운명의 주사위 (연속 5회 탭 시 관리자 치트)">
+          <span class="hud-title-full">🎲 폴리곤과 운명의 주사위</span>
+          <span class="hud-title-short">🎲 폴리곤</span>
+        </span>
       </div>
       <div class="hud-center">
         <span class="hud-chapter-badge" id="hud-chapter">1장 · 피타고라스 학당</span>
@@ -530,6 +758,6 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
-  <script type="module" src="engine/app.js?v=100"></script>
+  <script type="module" src="engine/app.js?v=101"></script>
 </body>
 </html>
