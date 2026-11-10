@@ -3,12 +3,12 @@ import { createDialogue } from './dialogue.js?v=8';
 import { setTension, refute } from './director.js?v=12';
 import { createStage } from './stage.js?v=3';
 import { playBgm, playSfx, toggleMute, isMuted } from './sound.js?v=1';
-import { mountDiceInspector } from '../widgets/dice-inspector.js?v=3';
-import { mountProblemBoard } from '../widgets/problem-board.js?v=4';
-import { mountPathLink } from '../widgets/path-link.js?v=21';
-import { mountPecasPick } from '../widgets/pecas-pick.js?v=15';
-import { mountGuguSpeed } from '../widgets/gugu-speed.js?v=3';
-import { mountNonogram } from '../widgets/nonogram.js?v=20';
+import { mountDiceInspector } from '../widgets/dice-inspector.js?v=20261110_v2';
+import { mountProblemBoard } from '../widgets/problem-board.js?v=20261110_v2';
+import { mountPathLink } from '../widgets/path-link.js?v=20261110_v2';
+import { mountPecasPick } from '../widgets/pecas-pick.js?v=20261110_v2';
+import { mountGuguSpeed } from '../widgets/gugu-speed.js?v=20261110_v2';
+import { mountNonogram } from '../widgets/nonogram.js?v=20261110_v2';
 import { createBacklog } from '../widgets/backlog.js?v=1';
 import { mountWorldMap } from '../widgets/world-map.js?v=3';
 import { mountEndingJournal } from '../widgets/ending-journal.js?v=3';
@@ -595,23 +595,36 @@ window.addEventListener('keydown', (ev) => {
   }
 });
 
-// 2. 모바일/터치: 최상단 타이틀 5회 연속 탭 감지기 (관리자 치트)
-let hudTitleTapTimes = [];
+// 2. 모바일/터치: 최상단 타이틀 또는 챕터 배지 5회 연속 탭 감지기 (관리자 치트)
+let hudTapTimes = [];
+function onAdminTap(e) {
+  if (e.button && e.button !== 0) return;
+  const now = Date.now();
+  hudTapTimes.push(now);
+  hudTapTimes = hudTapTimes.filter((t) => now - t <= 2500);
+
+  const target = e.currentTarget;
+  if (target) {
+    target.style.transition = 'transform 0.1s';
+    target.style.transform = 'scale(0.92)';
+    setTimeout(() => { if (target) target.style.transform = 'none'; }, 100);
+  }
+
+  if (hudTapTimes.length >= 5) {
+    hudTapTimes = [];
+    e.preventDefault();
+    e.stopPropagation();
+    triggerAdminCheat();
+  }
+}
+
 const hudTitleEl = document.getElementById('hud-game-title') || document.querySelector('.hud-game-title');
 if (hudTitleEl) {
-  hudTitleEl.addEventListener('pointerdown', (e) => {
-    if (e.button && e.button !== 0) return;
-    const now = Date.now();
-    hudTitleTapTimes.push(now);
-    hudTitleTapTimes = hudTitleTapTimes.filter((t) => now - t <= 2500);
-
-    if (hudTitleTapTimes.length >= 5) {
-      hudTitleTapTimes = [];
-      e.preventDefault();
-      e.stopPropagation();
-      triggerAdminCheat();
-    }
-  });
+  hudTitleEl.addEventListener('pointerdown', onAdminTap);
+}
+const hudChapterEl = document.getElementById('hud-chapter');
+if (hudChapterEl) {
+  hudChapterEl.addEventListener('pointerdown', onAdminTap);
 }
 
   // ESC 키로 백로그, 월드맵 또는 관리자 모달 닫기

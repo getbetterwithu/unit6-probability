@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>폴리곤과 운명의 주사위 — 경우의 수와 확률</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
   <style>
@@ -492,41 +495,73 @@
     @media (max-width: 768px) {
       /* 1. 최상단 헤더 HUD 바 */
       #top-hud {
-        height: 42px;
-        padding: 0 8px;
-        padding-top: env(safe-area-inset-top, 0);
+        height: 44px !important;
+        padding: 0 8px !important;
+        padding-top: env(safe-area-inset-top, 0) !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 6px !important;
       }
-      .hud-left { gap: 4px; }
-      .hud-game-title { font-size: 0.9rem; letter-spacing: 0; }
+      .hud-left {
+        flex-shrink: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+      }
+      #hud-game-title {
+        display: inline-flex !important;
+        align-items: center !important;
+        white-space: nowrap !important;
+        flex-shrink: 0 !important;
+        font-size: 0.92rem !important;
+        font-weight: 800 !important;
+        color: #ffd152 !important;
+        background: rgba(245, 176, 65, 0.22) !important;
+        border: 1.5px solid rgba(245, 176, 65, 0.5) !important;
+        padding: 3px 8px !important;
+        border-radius: 8px !important;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.5) !important;
+        cursor: pointer !important;
+      }
       .hud-title-full { display: none !important; }
       .hud-title-short { display: inline !important; font-weight: 800; }
       
       .hud-center {
-        position: static;
-        transform: none;
-        margin: 0 auto;
+        position: static !important;
+        transform: none !important;
+        flex: 1 !important;
+        min-width: 0 !important;
+        text-align: center !important;
+        display: flex !important;
+        justify-content: center !important;
       }
       .hud-chapter-badge {
-        font-size: 0.78rem;
-        padding: 2px 8px;
-        max-width: 120px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        display: inline-block;
+        font-size: 0.78rem !important;
+        padding: 3px 8px !important;
+        max-width: 135px !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        display: inline-block !important;
+        cursor: pointer !important;
       }
-      .hud-right { gap: 5px; }
+      .hud-right {
+        flex-shrink: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 4px !important;
+      }
       #tension-wrap { display: none !important; }
       .hud-btn-text { display: none !important; }
-      .hud-btn { padding: 4px 6px; font-size: 0.85rem; }
-      #btn-sound { width: 28px; height: 28px; }
+      .hud-btn { padding: 4px 6px !important; font-size: 0.85rem !important; }
+      #btn-sound { width: 28px !important; height: 28px !important; }
 
       /* 2. 캐릭터 및 무대 레이어 */
       #character-layer {
-        inset: 42px 0 115px 0;
+        inset: 44px 0 115px 0;
       }
       .character {
-        max-height: 54vh;
+        max-height: 52vh;
         bottom: -15px;
         transform-origin: 50% 25%;
       }
@@ -553,13 +588,24 @@
       .dialogue-text { font-size: 1.08rem; line-height: 1.48; min-height: 44px; }
       .btn-nav-prev, .btn-nav-next { padding: 4px 8px; font-size: 0.82rem; }
 
-      /* 4. 위젯 공통 루트 */
+      /* 4. 위젯 공통 루트: 모바일에서는 전용 전체화면 창으로 전환 */
       #widget-root {
-        top: 44px;
-        left: 4px;
-        right: 4px;
-        bottom: 6px;
-        border-radius: 8px;
+        position: fixed !important;
+        inset: 0 !important;
+        top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
+        z-index: 85 !important;
+        background: rgba(10, 8, 6, 0.98) !important;
+        backdrop-filter: blur(16px) !important;
+        border-radius: 0 !important;
+        padding: env(safe-area-inset-top, 10px) 8px env(safe-area-inset-bottom, 10px) 8px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+      }
+      #widget-root[hidden] {
+        display: none !important;
       }
 
       /* 5. 4단원 스타일 전면 문제 풀이 보드 (Problem Board) 모바일 */
@@ -668,17 +714,22 @@
         padding: 8px 2px;
       }
 
-      /* 6. 팝업 및 모달 모바일 반응형 */
+      /* 6. 팝업 및 모달 모바일 반응형 전용 창 */
       .popup {
-        width: 98% !important;
-        max-height: 90vh !important;
+        width: 100% !important;
+        max-width: 520px !important;
+        max-height: 94dvh !important;
         overflow-y: auto !important;
-        padding: 12px 14px !important;
+        margin: auto !important;
+        padding: 14px 12px !important;
+        box-sizing: border-box !important;
       }
       .dice-inspector-container {
-        padding: 12px 14px !important;
-        max-height: 90vh !important;
+        width: 100% !important;
+        max-width: 520px !important;
+        max-height: 94dvh !important;
         overflow-y: auto !important;
+        padding: 14px 12px !important;
       }
       #backlog-overlay > div:first-child {
         padding: 10px 14px !important;
@@ -758,6 +809,6 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
-  <script type="module" src="engine/app.js?v=101"></script>
+  <script type="module" src="engine/app.js?v=20261110_v2"></script>
 </body>
 </html>

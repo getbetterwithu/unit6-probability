@@ -29,26 +29,30 @@ function clues(lines) {
 export function mountNonogram(root, { onDone, onClose }) {
   const rowClues = clues(PATTERN);
   const colClues = clues(PATTERN[0].map((_, i) => PATTERN.map((row) => row[i])));
-  const cell = 30;
-  const side = 85;
+  
+  const isMobile = window.innerWidth <= 768;
+  const cell = isMobile ? Math.min(26, Math.max(22, Math.floor((Math.min(window.innerWidth, 400) - 75) / 10))) : 30;
+  const side = isMobile ? 55 : 85;
+  const gap = isMobile ? 2 : 3;
+  const fontSize = isMobile ? '11px' : '13px';
 
   root.innerHTML = `
-    <div class="popup nono-popup" style="position:relative; max-width: 640px; background: #1e1610; border: 2.5px solid #d4af37; border-radius: 14px; padding: 20px;">
+    <div class="popup nono-popup" style="position:relative; width:min(640px, 98%); background: #1e1610; border: 2.5px solid #d4af37; border-radius: 14px; padding: ${isMobile ? '14px 10px' : '20px'}; box-sizing: border-box;">
       <!-- 우측 상단 닫기 (잠시 접기) 버튼 -->
       <button type="button" class="btn-popup-close" id="nono-btn-close" style="position:absolute; top:12px; right:14px; background:rgba(0,0,0,0.5); border:1px solid #d4af37; color:#ffeaa7; border-radius:6px; padding:4px 10px; font-size:0.85rem; cursor:pointer;" title="잠시 접어두기">
         ✕ 닫기
       </button>
 
-      <div style="margin-bottom: 12px;">
+      <div style="margin-bottom: 10px;">
         <span style="background:#d4af37; color:#1c1308; font-weight:800; font-size:0.85rem; padding:3px 10px; border-radius:4px;">🗺️ 갱도 지도 암호 복원</span>
-        <p class="dice-hint" style="color:#bdc3c7; font-size:0.95rem; margin-top:6px;">가로와 세로의 숫자 힌트를 보고 칸을 칠하여 갱도 지도 표식을 복원하시오.</p>
+        <p class="dice-hint" style="color:#bdc3c7; font-size:${isMobile ? '0.85rem' : '0.95rem'}; margin-top:4px;">가로와 세로의 숫자 힌트를 보고 칸을 칠하여 갱도 지도 표식을 복원하시오.</p>
       </div>
 
       <div id="nono-wrap"></div>
 
-      <div style="margin-top: 14px; display:flex; justify-content:space-between; align-items:center;">
-        <p class="dice-readout" id="nono-msg" style="font-weight:700; color:#ffeaa7; font-size:1.05rem;">지도를 복원하는 중...</p>
-        <button type="button" id="nono-btn-complete" style="display:none; background:linear-gradient(135deg, #27ae60, #2ecc71); color:#fff; border:none; border-radius:6px; padding:8px 18px; font-size:1.05rem; font-weight:800; cursor:pointer; box-shadow:0 4px 14px rgba(46,204,113,0.4);">
+      <div style="margin-top: 12px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+        <p class="dice-readout" id="nono-msg" style="margin:0; font-weight:700; color:#ffeaa7; font-size:${isMobile ? '0.95rem' : '1.05rem'};">지도를 복원하는 중...</p>
+        <button type="button" id="nono-btn-complete" style="display:none; background:linear-gradient(135deg, #27ae60, #2ecc71); color:#fff; border:none; border-radius:6px; padding:8px 18px; font-size:1.02rem; font-weight:800; cursor:pointer; box-shadow:0 4px 14px rgba(46,204,113,0.4);">
           ✨ 확인 완료 · 다음으로 ▶
         </button>
       </div>
@@ -61,12 +65,12 @@ export function mountNonogram(root, { onDone, onClose }) {
   });
 
   const wrap = root.querySelector('#nono-wrap');
-  wrap.style.cssText = `display:grid;grid-template-columns:${side}px repeat(10, ${cell}px);gap:3px;justify-content:center;align-items:end;`;
+  wrap.style.cssText = `display:grid;grid-template-columns:${side}px repeat(10, ${cell}px);gap:${gap}px;justify-content:center;align-items:end;`;
   wrap.appendChild(document.createElement('div'));
 
   colClues.forEach((nums) => {
     const d = document.createElement('div');
-    d.style.cssText = `width:${cell}px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;color:#ffeaa7;font-size:13px;font-weight:700;line-height:16px;min-height:36px;`;
+    d.style.cssText = `width:${cell}px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;color:#ffeaa7;font-size:${fontSize};font-weight:700;line-height:${isMobile ? 14 : 16}px;min-height:${isMobile ? 28 : 36}px;`;
     d.innerHTML = nums.map((n) => `<span>${n}</span>`).join('');
     wrap.appendChild(d);
   });
@@ -76,8 +80,8 @@ export function mountNonogram(root, { onDone, onClose }) {
 
   PATTERN.forEach((row, r) => {
     const clue = document.createElement('div');
-    clue.style.cssText = `width:${side}px;color:#ffeaa7;font-size:13px;font-weight:700;text-align:right;line-height:${cell}px;padding-right:8px;white-space:nowrap;`;
-    clue.innerHTML = rowClues[r].map((n) => `<span style="display:inline-block;min-width:14px;text-align:center;">${n}</span>`).join('');
+    clue.style.cssText = `width:${side}px;color:#ffeaa7;font-size:${fontSize};font-weight:700;text-align:right;line-height:${cell}px;padding-right:6px;white-space:nowrap;`;
+    clue.innerHTML = rowClues[r].map((n) => `<span style="display:inline-block;min-width:${isMobile ? 10 : 14}px;text-align:center;">${n}</span>`).join('');
     wrap.appendChild(clue);
 
     row.forEach(() => {
