@@ -12,6 +12,7 @@ import { mountNonogram } from '../widgets/nonogram.js?v=20261110_v6';
 import { createBacklog } from '../widgets/backlog.js?v=1';
 import { mountWorldMap } from '../widgets/world-map.js?v=20261110_v6';
 import { mountEndingJournal } from '../widgets/ending-journal.js?v=3';
+import { KEY, clearProgress } from './progress.js';
 
 const speakerEl = document.getElementById('speaker-box');
 const textEl = document.getElementById('text-box');
@@ -143,6 +144,24 @@ let currentActiveDoneFn = null;
 let currentActiveReopenLabel = '';
 let currentActiveMountFn = null;
 
+// 위젯 인스턴스 생명주기 관리 및 정리 헬퍼
+let currentWidgetCleanup = null;
+function disposeCurrentWidget() {
+  if (typeof currentWidgetCleanup === 'function') {
+    try {
+      currentWidgetCleanup();
+    } catch (e) {
+      console.warn('Widget cleanup error:', e);
+    }
+  }
+  currentWidgetCleanup = null;
+}
+
+function clearWidgetRoot() {
+  disposeCurrentWidget();
+  clearWidgetRoot();
+}
+
 // 토스트 메시지 알림 함수
 function showToast(message, isGold = true) {
   const existing = document.getElementById('u6-toast-msg');
@@ -173,6 +192,17 @@ function markStepCleared(key) {
   try {
     localStorage.setItem('u6_cleared_steps', JSON.stringify([...clearedSteps]));
   } catch (e) {}
+}
+
+function markStepCheatCleared(key) {
+  try {
+    const cheats = JSON.parse(localStorage.getItem('u6_cheat_steps') || '[]');
+    if (!cheats.includes(key)) {
+      cheats.push(key);
+      localStorage.setItem('u6_cheat_steps', JSON.stringify(cheats));
+    }
+  } catch (e) {}
+  markStepCleared(key);
 }
 
 // 거점 완료 축하 알림 배너
@@ -215,13 +245,13 @@ function openWorldMap() {
   if (btnPrev) btnPrev.style.display = 'none';
   if (btnNext) btnNext.style.display = 'none';
   widgetRoot.hidden = false;
-  widgetRoot.innerHTML = '';
+  clearWidgetRoot();
   reopenBtn.style.display = 'none';
   updateChapterBadge();
   stage.update({ bg: 'merchant_camp' });
   playBgm('merchant');
 
-  mountWorldMap(widgetRoot, {
+  currentWidgetCleanup = mountWorldMap(widgetRoot, {
     worldState,
     onSelectLocation: (loc) => {
       startLocation(loc, 0);
@@ -244,7 +274,7 @@ function startLocation(loc, startIndex = 0) {
   } catch (e) {}
 
   widgetRoot.hidden = true;
-  widgetRoot.innerHTML = '';
+  clearWidgetRoot();
   reopenBtn.style.display = 'none';
   if (dialogue) dialogue.style.display = '';
   if (btnPrev) btnPrev.style.display = '';
@@ -262,19 +292,23 @@ const dlg = createDialogue({
   onWaitWidget(step, done) {
     const currentIdx = dlg.getCurrentIndex();
     currentStepIndex = currentIdx;
-    const stepKey = `${currentLocation}_${currentIdx}_${step.widget || ''}_${step.problemId || ''}`;
+    const stepKey = step.problemId ? `prob:${step.problemId}` : `w:${currentLocation}:${step.widget || 'scene'}:${currentIdx}`;
     stage.update(step);
     updateChapterBadge(currentIdx, step);
     if (step.bgm) playBgm(step.bgm);
 
     // 완료 콜백 (클리어 기록 누적)
-    const handleDone = () => {
+    const handleDone = (isCheat = false) => {
       currentActiveDoneFn = null;
       currentActiveMountFn = null;
       currentActiveReopenLabel = '';
-      markStepCleared(stepKey);
+      if (isCheat) {
+        markStepCheatCleared(stepKey);
+      } else {
+        markStepCleared(stepKey);
+      }
       widgetRoot.hidden = true;
-      widgetRoot.innerHTML = '';
+      clearWidgetRoot();
       reopenBtn.style.display = 'none';
       done();
     };
@@ -300,12 +334,12 @@ const dlg = createDialogue({
 
     function mountCurrentWidget() {
       widgetRoot.hidden = false;
-      widgetRoot.innerHTML = '';
+      clearWidgetRoot();
       reopenBtn.style.display = 'none';
       currentActiveMountFn = mountCurrentWidget;
 
       if (step.widget === 'dice-inspector') {
-        mountDiceInspector(widgetRoot, {
+        currentWidgetCleanup = mountDiceInspector(widgetRoot, {
           onEvidence(card) {
             addCard(card);
             handleDone();
@@ -315,7 +349,7 @@ const dlg = createDialogue({
       }
 
       if (step.widget === 'path-link') {
-        mountPathLink(widgetRoot, {
+        currentWidgetCleanup = mountPathLink(widgetRoot, {
           onDone: handleDone,
           onClose: () => handleClose('🚂 광맥 한붓그리기 다시 열기'),
         });
@@ -323,7 +357,7 @@ const dlg = createDialogue({
       }
 
       if (step.widget === 'nonogram') {
-        mountNonogram(widgetRoot, {
+        currentWidgetCleanup = mountNonogram(widgetRoot, {
           onDone: handleDone,
           onClose: () => handleClose('🗺️ 네모로직 지도 다시 열기'),
         });
@@ -331,7 +365,7 @@ const dlg = createDialogue({
       }
 
       if (step.widget === 'pecas-pick') {
-        mountPecasPick(widgetRoot, {
+        currentWidgetCleanup = mountPecasPick(widgetRoot, {
           onDone: handleDone,
           onClose: () => handleClose('✨ 피캐스 정령 잡기 다시 열기'),
         });
@@ -339,7 +373,7 @@ const dlg = createDialogue({
       }
 
       if (step.widget === 'gugu-speed') {
-        mountGuguSpeed(widgetRoot, {
+        currentWidgetCleanup = mountGuguSpeed(widgetRoot, {
           onDone: handleDone,
           onClose: () => handleClose('⚡ 암산 속도 훈련 다시 열기'),
         });
@@ -348,7 +382,7 @@ const dlg = createDialogue({
 
       // 퀴즈 / 문제 풀이 보드
       if (step.widget === 'quiz' || step.widget === 'problem-board') {
-        mountProblemBoard(widgetRoot, step.problemId, {
+        currentWidgetCleanup = mountProblemBoard(widgetRoot, step.problemId, {
           onSolved() {
             setTension(95);
             handleDone();
@@ -362,7 +396,7 @@ const dlg = createDialogue({
     // 이미 한 번 클리어한 스텝인 경우: 다시 풀지 않고 바로 통과 가능!
     if (clearedSteps.has(stepKey)) {
       widgetRoot.hidden = true;
-      widgetRoot.innerHTML = '';
+      clearWidgetRoot();
       reopenBtn.style.display = 'block';
       reopenBtn.innerHTML = '🧩 이미 완료된 과제 다시 열기';
       reopenBtn.onclick = () => {
@@ -375,11 +409,27 @@ const dlg = createDialogue({
     // 처음 도달한 스텝: 위젯 표시
     mountCurrentWidget();
   },
+  onPrev(step, i) {
+    currentStepIndex = i;
+    stage.update(step);
+    updateChapterBadge(i, step);
+    if (!widgetRoot.hidden) {
+      widgetRoot.hidden = true;
+    }
+    if (currentActiveDoneFn) {
+      reopenBtn.style.display = 'block';
+      reopenBtn.innerHTML = currentActiveReopenLabel || '🧩 도전 과제 다시 열기';
+    } else {
+      reopenBtn.style.display = 'none';
+    }
+  },
   onAdvance(step, i) {
     currentStepIndex = i;
     stage.update(step);
     updateChapterBadge(i, step);
-    reopenBtn.style.display = 'none';
+    if (!currentActiveDoneFn) {
+      reopenBtn.style.display = 'none';
+    }
 
     // 대사 히스토리 누적
     if (step.text) {
@@ -470,7 +520,7 @@ function showEndingJournal() {
   if (btnPrev) btnPrev.style.display = 'none';
   if (btnNext) btnNext.style.display = 'none';
   widgetRoot.hidden = false;
-  widgetRoot.innerHTML = '';
+  clearWidgetRoot();
   hudChapter.textContent = '📜 피타고라스 학당 수학 모험록';
 
   mountEndingJournal(widgetRoot, {
@@ -558,7 +608,27 @@ stageContainer.addEventListener('click', (e) => {
 // ==========================================
 // 관리자 치트 발동 공통 함수 (PC 백틱 5회 / 모바일 상단 타이틀 5회 탭)
 // ==========================================
+function isDebugAllowed() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('debug') === 'true' || params.get('admin') === '1' || sessionStorage.getItem('u6_admin') === '1';
+  } catch (e) {
+    return false;
+  }
+}
+
 function triggerAdminCheat() {
+  if (!isDebugAllowed()) {
+    const code = window.prompt('🛠️ 관리자 디버그 모드 접근 코드를 입력하세요:');
+    if (code === 'admin' || code === '1234') {
+      sessionStorage.setItem('u6_admin', '1');
+      showToast('🛠️ 관리자 모드가 활성화되었습니다.', true);
+    } else {
+      if (code !== null) showToast('⚠️ 관리자 코드가 올바르지 않습니다.', false);
+      return;
+    }
+  }
+
   // [핵심 기능] 현재 풀고 있는 스테이지나 미니게임이 있다면 즉시 정답 처리(Pass)!
   if (currentActiveDoneFn) {
     const passFn = currentActiveDoneFn;
@@ -566,10 +636,10 @@ function triggerAdminCheat() {
     currentActiveMountFn = null;
     currentActiveReopenLabel = '';
     playSfx('correct');
-    showToast('⚡ [치트 발동] 현재 진행 중인 과제를 즉시 정답 처리하고 통과합니다!', true);
+    showToast('⚡ [치트 발동] 현재 진행 중인 과제를 통과했습니다! (치트 이력 기록됨)', true);
     const adminModal = document.getElementById('admin-cheat-modal');
     if (adminModal) adminModal.remove();
-    passFn();
+    passFn(true); // isCheat = true
     return;
   }
 
@@ -844,7 +914,8 @@ function openAdminModal() {
 
   modal.querySelector('#admin-reset-all').addEventListener('click', () => {
     if (confirm('모든 진행 상황과 저장 데이터를 완전히 초기화하시겠습니까?')) {
-      localStorage.clear();
+      clearProgress({ keepName: false });
+      clearedSteps.clear();
       location.reload();
     }
   });
@@ -978,9 +1049,8 @@ function promptResumeModal(savedLoc, savedStep, onResume, onRestart) {
 
   modal.querySelector('#btn-resume-no').addEventListener('click', () => {
     playSfx('click');
-    localStorage.removeItem('u6_world_state');
-    localStorage.removeItem('u6_current_location');
-    localStorage.removeItem('u6_location_step');
+    clearProgress({ keepName: true });
+    clearedSteps.clear();
     modal.remove();
     onRestart();
   });
@@ -1045,7 +1115,7 @@ if (demoParam) {
   if (btnWorldMap) btnWorldMap.style.display = 'none';
   if (hudChapter) hudChapter.textContent = '미니게임 특별 체험 모드';
   widgetRoot.hidden = false;
-  widgetRoot.innerHTML = '';
+  clearWidgetRoot();
   reopenBtn.style.display = 'none';
 
   const exitDemo = (msg = '체험을 종료하시겠소?') => {

@@ -40,7 +40,7 @@ export function mountGuguSpeed(root, { onDone, onClose }) {
       <div style="display:flex; gap:14px; align-items:center; background:#24180f; padding:12px 16px; border-radius:10px; border:1.5px solid #5c4324;">
         <div style="flex:1; text-align:center;">
           <p id="gugu-q" style="font-size:46px; font-weight:900; margin:2px 0 8px; color:#ffd152; font-family:'KaTeX_Main', serif; letter-spacing:2px;">2 × 2</p>
-          <input id="gugu-in" autocomplete="off" placeholder="정답 입력" style="width:160px; font-size:24px; font-weight:800; text-align:center; padding:6px 12px; background:#f7f1e6; color:#1c1308; border:2.5px solid #d4af37; border-radius:8px; outline:none;" ${isTouchDevice ? 'readonly inputmode="none" placeholder="키패드 터치"' : 'inputmode="numeric"'}>
+          <input id="gugu-in" autocomplete="off" placeholder="정답 입력" style="width:160px; font-size:24px; font-weight:800; text-align:center; padding:6px 12px; background:#f7f1e6; color:#1c1308; border:2.5px solid #d4af37; border-radius:8px; outline:none;" ${isTouchDevice ? 'readonly inputmode="none" placeholder="키보드/터치"' : 'inputmode="numeric"'}>
           <p id="gugu-score" style="margin:8px 0 0; font-size:0.95rem; font-weight:700; color:#bdc3c7;">맞힌 개수 0 / ${GOAL}</p>
         </div>
         <div style="width:90px; text-align:center; border-left:1.5px solid #4a341c; padding-left:10px;">
@@ -183,13 +183,62 @@ export function mountGuguSpeed(root, { onDone, onClose }) {
     }, 1000);
   }
 
-  // PC 물리 키보드 Enter 입력 (PC 원본 조작성 100% 보존)
-  input.addEventListener('keydown', (ev) => {
-    if (ev.key !== 'Enter') return;
-    ev.preventDefault();
-    ev.stopPropagation();
-    handleAnswerSubmit();
-  });
+  // 물리 키보드 입력 핸들러 (크롬북, 노트북, 데스크톱 전면 지원)
+  // input의 readonly 상태 및 포커스 여부와 무관하게 숫자(0~9), 백스페이스, 엔터 즉시 처리
+  function handlePhysicalKeyDown(ev) {
+    // 1) 실패 화면이 떠 있을 때 Enter/Space 누르면 바로 재시작
+    if (fail && fail.style.display !== 'none' && fail.style.display !== '') {
+      if (ev.key === 'Enter' || ev.key === ' ') {
+        ev.preventDefault();
+        ev.stopPropagation();
+        start();
+        return;
+      }
+    }
+
+    // 2) 성공 완료 버튼이 떠 있을 때 Enter/Space 누르면 바로 다음으로 진행
+    if (completeBtn && completeBtn.style.display === 'block') {
+      if (ev.key === 'Enter' || ev.key === ' ') {
+        ev.preventDefault();
+        ev.stopPropagation();
+        stop();
+        window.removeEventListener('keydown', handlePhysicalKeyDown);
+        if (onDone) onDone();
+        return;
+      }
+    }
+
+    if (over) return;
+
+    // 숫자키 (상단 0-9 및 텐키패드 Numpad0-9)
+    if (/^[0-9]$/.test(ev.key)) {
+      ev.preventDefault();
+      ev.stopPropagation();
+      playSfx('click');
+      if (input.value.length < 3) {
+        input.value += ev.key;
+      }
+      return;
+    }
+
+    // 백스페이스 (지우기)
+    if (ev.key === 'Backspace') {
+      ev.preventDefault();
+      ev.stopPropagation();
+      input.value = input.value.slice(0, -1);
+      return;
+    }
+
+    // 엔터 (제출)
+    if (ev.key === 'Enter') {
+      ev.preventDefault();
+      ev.stopPropagation();
+      handleAnswerSubmit();
+      return;
+    }
+  }
+
+  window.addEventListener('keydown', handlePhysicalKeyDown);
 
   // 모바일 가상 터치 키패드 버튼 이벤트
   root.querySelectorAll('.g-pad-btn').forEach((btn) => {
@@ -228,4 +277,9 @@ export function mountGuguSpeed(root, { onDone, onClose }) {
   });
 
   start();
+
+  return function destroyGuguSpeed() {
+    stop();
+    window.removeEventListener('keydown', handlePhysicalKeyDown);
+  };
 }

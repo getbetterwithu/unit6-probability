@@ -9,6 +9,8 @@ const BGM_FILES = {
   boss:     'assets/audio/bgm_boss.mp3',
   ending:   'assets/audio/bgm_ending.mp3',
   sacred:   'assets/audio/bgm_sacred.mp3',
+  cave:     'assets/audio/bgm_sacred.mp3',
+  tense:    'assets/audio/bgm_boss.mp3',
 };
 
 const BGM_VOL = {
@@ -18,6 +20,8 @@ const BGM_VOL = {
   boss:     0.18,
   sacred:   0.14,
   ending:   0.15,
+  cave:     0.13,
+  tense:    0.17,
 };
 
 let _muted = localStorage.getItem('u6_muted') === '1';

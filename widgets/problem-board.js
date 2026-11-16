@@ -1,4 +1,5 @@
 import { renderMathString, texToHtml } from '../engine/math.js';
+import { validateAnswer } from '../engine/math-validator.js';
 import { PROBLEMS } from '../data/problems.js';
 import { playSfx } from '../engine/sound.js';
 
@@ -233,6 +234,9 @@ export function mountProblemBoard(root, problemId, { onSolved, onClose }) {
     katexDisplay.style.display = 'none';
   }
 
+  if ('ontouchstart' in window || (navigator.maxTouchPoints && navigator.maxTouchPoints > 0)) {
+    inputEl.setAttribute('inputmode', 'none');
+  }
   inputEl.addEventListener('input', updateMathDisplay);
 
   // 가상 키패드
@@ -289,47 +293,6 @@ export function mountProblemBoard(root, problemId, { onSolved, onClose }) {
     });
   }
 
-  // 동치 분수 수치 파서 (6/10 == 3/5 == 0.6)
-  function parseVal(str) {
-    if (!str) return NaN;
-    const clean = str.replace(/\s+/g, '').replace(/가지|개|번/g, '');
-    if (clean.includes('/')) {
-      const [n, d] = clean.split('/').map(Number);
-      if (d === 0 || isNaN(n) || isNaN(d)) return NaN;
-      return n / d;
-    }
-    return Number(clean);
-  }
-
-  // 동치 분수 채점기
-  function isEquivalentAnswer(userStr, targetStr, altList = []) {
-    const uVal = parseVal(userStr);
-    const tVal = parseVal(targetStr);
-
-    if (isNaN(uVal)) return false;
-
-    // 1) 수치적 동치 비교 (오차 0.00001 이내)
-    if (!isNaN(tVal) && Math.abs(uVal - tVal) < 1e-5) {
-      return true;
-    }
-
-    // 2) 대체 정답 목록 비교
-    for (const alt of altList) {
-      const aVal = parseVal(alt);
-      if (!isNaN(aVal) && Math.abs(uVal - aVal) < 1e-5) {
-        return true;
-      }
-      if (userStr.replace(/\s+/g, '') === alt.replace(/\s+/g, '')) {
-        return true;
-      }
-    }
-
-    // 3) 문자열 정규화 비교
-    const uNorm = userStr.replace(/\s+/g, '');
-    const tNorm = targetStr.replace(/\s+/g, '');
-    return uNorm === tNorm;
-  }
-
   function checkAnswer() {
     if (isSolved) return;
 
@@ -341,9 +304,9 @@ export function mountProblemBoard(root, problemId, { onSolved, onClose }) {
       return;
     }
 
-    const correct = isEquivalentAnswer(userRaw, problem.answer, problem.altAnswers);
+    const res = validateAnswer(userRaw, problem);
 
-    if (correct) {
+    if (res.isCorrect) {
       isSolved = true;
       playSfx('correct');
       feedbackBox.style.display = 'block';
@@ -365,7 +328,12 @@ export function mountProblemBoard(root, problemId, { onSolved, onClose }) {
       playSfx('wrong');
       feedbackBox.style.display = 'block';
       feedbackBox.className = 'board-feedback wrong shake-anim';
-      feedbackMsg.innerHTML = `❌ <strong>정답이 아닙니다.</strong> 우측 연습장에서 다시 한번 계산해 보세요! (시도 ${wrongCount}회)`;
+
+      if (res.misconceptionHint) {
+        feedbackMsg.innerHTML = `❌ <strong>오개념 점검 가이드</strong><br>${renderMathString(res.misconceptionHint)}<br><span style="font-size:0.85rem; color:#ffeaa7;">(시도 ${wrongCount}회 - 다시 계산해 보세요!)</span>`;
+      } else {
+        feedbackMsg.innerHTML = `❌ <strong>정답이 아닙니다.</strong> 우측 연습장에서 다시 한번 계산해 보세요! (시도 ${wrongCount}회)`;
+      }
 
       setTimeout(() => {
         feedbackBox.classList.remove('shake-anim');
@@ -398,6 +366,7 @@ export function mountProblemBoard(root, problemId, { onSolved, onClose }) {
   });
 
   nextBtn.addEventListener('click', () => {
+    cleanupListeners();
     if (onSolved) onSolved(problem);
   });
 
@@ -508,6 +477,14 @@ export function mountProblemBoard(root, problemId, { onSolved, onClose }) {
     ctx.restore();
   }
 
+  function cleanupListeners() {
+    window.removeEventListener('mousemove', moveDraw);
+    window.removeEventListener('mouseup', endDraw);
+    window.removeEventListener('touchmove', moveDraw);
+    window.removeEventListener('touchend', endDraw);
+    window.removeEventListener('resize', resizeCanvas);
+  }
+
   canvas.addEventListener('mousedown', startDraw);
   window.addEventListener('mousemove', moveDraw);
   window.addEventListener('mouseup', endDraw);
@@ -562,6 +539,7 @@ export function mountProblemBoard(root, problemId, { onSolved, onClose }) {
   if (btnClose) {
     btnClose.addEventListener('click', () => {
       playSfx('click');
+      cleanupListeners();
       if (onClose) onClose();
     });
   }

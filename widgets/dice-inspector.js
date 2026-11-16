@@ -11,7 +11,7 @@ export function mountDiceInspector(root, { onEvidence }) {
         <span style="color:#bdc3c7; font-size:0.95rem;">테론의 주사위 치수 실측</span>
       </div>
 
-      <!-- 교과서 표준 직육면체 겨냥도 SVG (가로: 1, 세로: 1, 높이: 2.5) -->
+      <!-- 교과서 표준 직육면체 겨냥도 SVG (가로: 2.5, 세로: 2.5, 두께: 1) -->
       <div style="background:#261b12; border-radius:10px; border:1px solid #5c4324; padding:16px; display:flex; justify-content:center; align-items:center;">
         <svg viewBox="0 0 520 320" width="100%" height="280" style="max-height:280px; overflow:visible;">
           <defs>
@@ -48,15 +48,15 @@ export function mountDiceInspector(root, { onEvidence }) {
           <!-- 3. 치수선 (가로 1, 세로 1, 높이 2.5) -->
           <!-- 가로 치수선 (하단) -->
           <line x1="160" y1="275" x2="260" y2="275" stroke="#f1c40f" stroke-width="2" marker-start="url(#arrow)" marker-end="url(#arrow)" />
-          <text x="210" y="296" fill="#ffd152" font-size="16" font-weight="800" text-anchor="middle">가로: 1</text>
+          <text x="210" y="296" fill="#ffd152" font-size="16" font-weight="800" text-anchor="middle">가로: 2.5</text>
 
           <!-- 세로 (깊이) 치수선 (우하단 비스듬히) -->
           <line x1="275" y1="265" x2="325" y2="225" stroke="#f1c40f" stroke-width="2" marker-start="url(#arrow)" marker-end="url(#arrow)" />
-          <text x="325" y="260" fill="#ffd152" font-size="16" font-weight="800" text-anchor="start">세로: 1</text>
+          <text x="325" y="260" fill="#ffd152" font-size="16" font-weight="800" text-anchor="start">세로: 2.5</text>
 
           <!-- 높이 치수선 (좌측 수직) -->
           <line x1="135" y1="105" x2="135" y2="255" stroke="#f1c40f" stroke-width="2" marker-start="url(#arrow)" marker-end="url(#arrow)" />
-          <text x="120" y="185" fill="#ffd152" font-size="16" font-weight="800" text-anchor="end">높이: 2.5</text>
+          <text x="120" y="185" fill="#ffd152" font-size="16" font-weight="800" text-anchor="end">두께: 1</text>
         </svg>
       </div>
 
@@ -64,7 +64,7 @@ export function mountDiceInspector(root, { onEvidence }) {
       <div style="margin-top:16px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
         <div>
           <div style="font-size:1.15rem; font-weight:800; color:#ffd152;">
-            가로 1 : 세로 1 : 높이 2.5
+            가로 2.5 : 세로 2.5 : 두께 1
           </div>
           <div style="font-size:0.95rem; color:#ff7675; font-weight:700; margin-top:3px;">
             모서리 길이가 서로 다른 직육면체 — 모든 면이 나올 가능성이 같지 않음!

@@ -26,6 +26,18 @@ function testSend() {
   Logger.log('테스트 메일 발송 성공: ' + email);
 }
 
+const SECRET_AUTH_TOKEN = 'PYTH_U6_SECURE_TOKEN_2026';
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 function doPost(e) {
   try {
     let payload = {};

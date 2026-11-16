@@ -204,6 +204,7 @@ export function mountPecasPick(root, { onDone, onClose }) {
   });
 
   completeBtn.addEventListener('click', () => {
+    cleanupPecas();
     if (onDone) onDone();
   });
 

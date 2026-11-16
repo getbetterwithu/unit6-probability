@@ -331,6 +331,7 @@ export function mountWorldMap(root, { worldState, onSelectLocation, onClose }) {
   if (btnClose) {
     btnClose.addEventListener('click', () => {
       playSfx('click');
+      cleanupWorldMapListeners();
       if (onClose) onClose();
     });
   }

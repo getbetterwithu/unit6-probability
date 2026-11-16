@@ -26,6 +26,7 @@ const BG_MAP = {
   warehouse: `${BG_BASE}/warehouse.png`,
   title: `${BG_BASE}/title_probability.png`,
   title_probability: `${BG_BASE}/title_probability.png`,
+  safe: `${BG_BASE}/diamond_vault.png`,
 };
 
 function getCharSrc(key, emotion = 'neutral') {

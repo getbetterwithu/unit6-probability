@@ -115,10 +115,10 @@ function downloadCertificateImage(studentName, clearDate, certNumber, siteUrl) {
   ctx.textAlign = 'left';
   ctx.fillStyle = '#ffd152';
   ctx.font = 'bold 14px sans-serif';
-  ctx.fillText('• 제1·2장 · 페르시아 대상 : 사막 갈림길 경로 선택, 비밀번호 암호 해독', 170, 492);
-  ctx.fillText('• 제3·4장 · 알렉산드리아 : 이웃한 자리배치, 자격별 대표 선출', 170, 517);
-  ctx.fillText('• 제5장 · 학당 서고 : 과녁 적중 확률, 특수 전개도 주사위의 곱', 170, 542);
-  ctx.fillText('• 제6장 · 다이아 금고 : 편향 주사위 복합 확률, 다중 빗장 핀 잠금', 170, 567);
+  ctx.fillText('• 제1·2장 · 케팔로니아 광장 : 합·곱의 법칙과 사건의 모든 경우의 수', 170, 492);
+  ctx.fillText('• 제3·4장 · 지하광맥 & 암초 : 기하학적 확률과 독립시행 연속 통과', 170, 517);
+  ctx.fillText('• 제5장 · 트로이의 목마 : 복합 사건 확률과 적어도 하나 여사건 계산', 170, 542);
+  ctx.fillText('• 제6장 · 신전 금고 : 왜곡 주사위 표본공간 검증 및 3연속 밸브 해제', 170, 567);
 
   // 7. 격언 및 스승 서명
   ctx.textAlign = 'center';
@@ -327,19 +327,19 @@ export function mountEndingJournal(container, onRestart, onGoMinigames) {
         ">
           <div>
             <span style="color:#e74c3c; font-weight:800;">• 제1·2장 (경우의 수):</span>
-            <span style="color:#c9d1d9;"> 사막 갈림길 경로 선택, 비밀번호 암호 해독</span>
+            <span style="color:#c9d1d9;"> 합·곱의 법칙과 사건의 모든 경우의 수</span>
           </div>
           <div>
             <span style="color:#3498db; font-weight:800;">• 제3·4장 (순서와 대표):</span>
-            <span style="color:#c9d1d9;"> 이웃한 자리배치, 자격별 대표 선출</span>
+            <span style="color:#c9d1d9;"> 기하학적 확률과 독립시행 연속 통과</span>
           </div>
           <div>
             <span style="color:#f1c40f; font-weight:800;">• 제5장 (확률의 뜻과 성질):</span>
-            <span style="color:#c9d1d9;"> 과녁 적중 확률, 특수 전개도 주사위의 곱</span>
+            <span style="color:#c9d1d9;"> 복합 사건 확률과 적어도 하나 여사건 계산</span>
           </div>
           <div>
             <span style="color:#2ecc71; font-weight:800;">• 제6장 (확률의 계산):</span>
-            <span style="color:#c9d1d9;"> 편향 주사위 복합 확률, 다중 빗장 핀 잠금</span>
+            <span style="color:#c9d1d9;"> 왜곡 주사위 표본공간 검증 및 3연속 밸브 해제</span>
           </div>
         </div>
 
