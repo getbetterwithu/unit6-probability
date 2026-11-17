@@ -623,15 +623,10 @@ stageContainer.addEventListener('click', (e) => {
 // ==========================================
 // 관리자 치트 발동 공통 함수 (PC 백틱 5회 / 모바일 상단 타이틀 5회 탭)
 // ==========================================
-// 치트(건너뛰기)는 내 컴퓨터에서 실행할 때(localhost)만 허용한다.
-// 배포된 사이트에서는 URL 파라미터·코드 입력 어느 쪽으로도 열리지 않는다.
+// 교사용 치트(백틱 5회 · 타이틀 5회 탭 · ?loc= 바로가기)는 배포 사이트에서도 항상 동작한다.
+// 수업 시연과 점검에 쓰려고 일부러 열어 둔 기능이며, 노출되어도 상관없다는 것이 제작자 결정이다.
 function isDebugAllowed() {
-  try {
-    const host = window.location.hostname;
-    return host === 'localhost' || host === '127.0.0.1' || host === '[::1]' || window.location.protocol === 'file:';
-  } catch (e) {
-    return false;
-  }
+  return true;
 }
 
 function triggerAdminCheat() {
@@ -932,7 +927,7 @@ function openAdminModal() {
 
 document.getElementById('game-container').tabIndex = 0;
 document.getElementById('game-container').focus();
-document.body.dataset.engine = '20261117_fix3';
+document.body.dataset.engine = '20261117_fix4';
 
 // ==========================================
 // 학생 이름 입력 모달
