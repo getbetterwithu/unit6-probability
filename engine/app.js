@@ -1,18 +1,19 @@
 import { SCENARIOS, STEPS } from '../data/scenario.js?v=85';
-import { createDialogue } from './dialogue.js?v=8';
+import { createDialogue } from './dialogue.js?v=9';
 import { setTension, refute } from './director.js?v=12';
 import { createStage } from './stage.js?v=20261110_v6';
-import { playBgm, playSfx, toggleMute, isMuted } from './sound.js?v=1';
+// 위젯들과 같은 주소로 불러와야 한 모듈(음소거 상태 하나)을 공유한다
+import { playBgm, playSfx, toggleMute, isMuted } from './sound.js';
 import { mountDiceInspector } from '../widgets/dice-inspector.js?v=20261117_fix1';
-import { mountProblemBoard } from '../widgets/problem-board.js?v=20261117_fix1';
+import { mountProblemBoard } from '../widgets/problem-board.js?v=20261117_fix2';
 import { mountPathLink } from '../widgets/path-link.js?v=20261110_v6';
 import { mountPecasPick } from '../widgets/pecas-pick.js?v=20261117_fix1';
 import { mountGuguSpeed } from '../widgets/gugu-speed.js?v=20261110_v6';
 import { mountNonogram } from '../widgets/nonogram.js?v=20261110_v6';
 import { createBacklog } from '../widgets/backlog.js?v=1';
 import { mountWorldMap } from '../widgets/world-map.js?v=20261117_fix1';
-import { mountEndingJournal } from '../widgets/ending-journal.js?v=20261117_fix1';
-import { KEY, clearProgress } from './progress.js';
+import { mountEndingJournal } from '../widgets/ending-journal.js?v=20261117_fix2';
+import { clearProgress } from './progress.js';
 
 const speakerEl = document.getElementById('speaker-box');
 const textEl = document.getElementById('text-box');
@@ -275,6 +276,11 @@ function startLocation(loc, startIndex = 0) {
 
   widgetRoot.hidden = true;
   clearWidgetRoot();
+  // 다른 거점(또는 지도에서 복귀)으로 옮기면 하던 과제의 대기 상태를 지운다.
+  // 과제 스텝으로 돌아오면 onWaitWidget이 새로 잡아 준다.
+  currentActiveDoneFn = null;
+  currentActiveMountFn = null;
+  currentActiveReopenLabel = '';
   reopenBtn.style.display = 'none';
   if (dialogue) dialogue.style.display = '';
   if (btnPrev) btnPrev.style.display = '';
@@ -416,13 +422,23 @@ const dlg = createDialogue({
     stage.update(step);
     updateChapterBadge(i, step);
     if (!widgetRoot.hidden) {
+      // 열려 있던 위젯은 숨기면서 타이머·전역 입력도 멈춘다 (다시 열면 새로 마운트)
+      disposeCurrentWidget();
       widgetRoot.hidden = true;
     }
     if (currentActiveDoneFn) {
+      // 과제 대기 중 ◀로 돌아가도 과제로 돌아갈 「다시 열기」 버튼은 남긴다
       reopenBtn.style.display = 'block';
       reopenBtn.innerHTML = currentActiveReopenLabel || '🧩 도전 과제 다시 열기';
+      if (currentActiveMountFn) {
+        const remount = currentActiveMountFn;
+        reopenBtn.onclick = () => remount();
+      }
     } else {
       reopenBtn.style.display = 'none';
+    }
+    if (step.bgm) {
+      playBgm(step.bgm);
     }
   },
   onAdvance(step, i) {
@@ -460,15 +476,6 @@ const dlg = createDialogue({
       refute(stageContainer, bag);
     }
     if (step.speaker === '테론' && step.text?.includes('다시 겨루자')) setTension(60);
-  },
-  onPrev(step, i) {
-    currentStepIndex = i;
-    stage.update(step);
-    updateChapterBadge(i, step);
-    reopenBtn.style.display = 'none';
-    if (step.bgm) {
-      playBgm(step.bgm);
-    }
   },
   onComplete() {
     // 거점 시나리오 종료 콜백
@@ -600,6 +607,8 @@ dialogue.addEventListener('click', (e) => {
 stageContainer.addEventListener('click', (e) => {
   if (backlog.isOpen() || isMapOpen) return;
   if (!widgetRoot.hidden) return;
+  // 위젯 ✕·모달 버튼처럼 클릭 직후 사라지거나 숨겨지는 요소에서 올라온 클릭은 대사 진행으로 치지 않는다
+  if (!e.target.isConnected || e.target.closest('#widget-root') || e.target.closest('button')) return;
   if (e.target.closest('#dialogue-layer') || e.target.closest('#btn-sound') || e.target.closest('#btn-backlog') || e.target.closest('#btn-world-map') || e.target.closest('#evidence-bag') || e.target.closest('#top-hud') || e.target.closest('#btn-reopen-widget')) return;
   if (currentActiveDoneFn && widgetRoot.hidden) {
     playSfx('error');
@@ -820,8 +829,7 @@ function openAdminModal() {
       </div>
 
       <p style="font-size:0.88rem; color:#bdc3c7; margin:0 0 14px; line-height:1.45;">
-        빠른 검증을 위한 챕터 워프 및 문제 프리패스 도구입니다.<br>
-        <strong>[발동 키]</strong> PC: 백틱( \` ) 5회 연타 / 모바일: 상단 타이틀 5회 연속 탭
+        빠른 검증을 위한 챕터 워프 및 문제 프리패스 도구입니다. (내 컴퓨터에서 실행할 때만 열립니다)
       </p>
 
       <!-- 1. 현재 과제 즉시 정답 처리 -->
@@ -878,7 +886,7 @@ function openAdminModal() {
       playSfx('correct');
       showToast('⚡ [치트 발동] 현재 진행 중인 과제를 즉시 통과했습니다!', true);
       modal.remove();
-      passFn();
+      passFn(true); // 치트 통과로 기록 (백틱 경로와 같게)
     } else {
       alert('현재 활성화된(풀고 있는) 과제나 미니게임이 없습니다.');
     }
@@ -923,7 +931,7 @@ function openAdminModal() {
 
 document.getElementById('game-container').tabIndex = 0;
 document.getElementById('game-container').focus();
-document.body.dataset.engine = 'v84';
+document.body.dataset.engine = '20261117_fix2';
 
 // ==========================================
 // 학생 이름 입력 모달
@@ -1049,7 +1057,8 @@ function promptResumeModal(savedLoc, savedStep, onResume, onRestart) {
 
   modal.querySelector('#btn-resume-no').addEventListener('click', () => {
     playSfx('click');
-    clearProgress({ keepName: true });
+    // 기기를 넘겨받은 다른 학생일 수 있으므로 이름도 지운다 (이름 입력 창이 다시 뜸)
+    clearProgress({ keepName: false });
     clearedSteps.clear();
     modal.remove();
     onRestart();
@@ -1119,38 +1128,37 @@ if (demoParam) {
   reopenBtn.style.display = 'none';
 
   const exitDemo = (msg = '체험을 종료하시겠소?') => {
+    // 취소하면 화면을 그대로 둔다 (체험 모드에는 「다시 열기」 대상이 없음)
     if (confirm(`${msg}\n미니게임 목록 페이지로 돌아가시겠습니까?`)) {
       location.href = 'games.html';
-    } else {
-      reopenBtn.style.display = 'block';
     }
   };
 
   if (demoParam === 'nonogram') {
     stage.update({ bg: 'merchant_camp' });
     playBgm('merchant');
-    mountNonogram(widgetRoot, {
+    currentWidgetCleanup = mountNonogram(widgetRoot, {
       onDone: () => exitDemo('🎉 네모로직 지도를 성공적으로 복원했습니다!'),
       onClose: () => exitDemo('네모로직 게임을 종료하시겠소?'),
     });
   } else if (demoParam === 'path') {
     stage.update({ bg: 'mine_shaft' });
     playBgm('cave');
-    mountPathLink(widgetRoot, {
+    currentWidgetCleanup = mountPathLink(widgetRoot, {
       onDone: () => exitDemo('🎉 오륜 레일을 성공적으로 연결했습니다!'),
       onClose: () => exitDemo('오륜 한붓그리기를 종료하시겠소?'),
     });
   } else if (demoParam === 'pecas') {
     stage.update({ bg: 'diamond_cave' });
     playBgm('cave');
-    mountPecasPick(widgetRoot, {
+    currentWidgetCleanup = mountPecasPick(widgetRoot, {
       onDone: () => exitDemo('🎉 피캐스의 신비한 정령 잡기를 모두 마쳤습니다!'),
       onClose: () => exitDemo('정령 잡기 게임을 종료하시겠소?'),
     });
   } else if (demoParam === 'gugu') {
     stage.update({ bg: 'classroom' });
     playBgm('main');
-    mountGuguSpeed(widgetRoot, {
+    currentWidgetCleanup = mountGuguSpeed(widgetRoot, {
       onDone: () => exitDemo('🎉 암산 속도 훈련을 성공적으로 마쳤습니다!'),
       onClose: () => exitDemo('암산 속도 훈련을 종료하시겠소?'),
     });
@@ -1163,8 +1171,8 @@ if (demoParam) {
   const savedLoc = localStorage.getItem('u6_current_location');
   const savedStep = parseInt(localStorage.getItem('u6_location_step') || '0', 10);
 
-  if (locParam && SCENARIOS[locParam]) {
-    // URL에 직접 ?loc=camp 등으로 지정한 경우
+  if (locParam && SCENARIOS[locParam] && isDebugAllowed()) {
+    // URL에 직접 ?loc=camp 등으로 지정한 경우 (거점 건너뛰기라 내 컴퓨터에서 실행할 때만 허용)
     startLocation(locParam, 0);
   } else if (savedLoc && (savedLoc !== 'intro' || savedStep > 0)) {
     // 이전에 플레이하던 기록이 있는 경우

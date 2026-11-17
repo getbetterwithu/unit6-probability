@@ -1,6 +1,6 @@
 import { renderMathString, texToHtml } from '../engine/math.js';
 import { validateAnswer } from '../engine/math-validator.js';
-import { PROBLEMS } from '../data/problems.js';
+import { PROBLEMS } from '../data/problems.js?v=20261117_fix2';
 import { playSfx } from '../engine/sound.js';
 
 /**

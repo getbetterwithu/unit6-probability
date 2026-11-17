@@ -198,8 +198,13 @@ export function createDialogue({ speakerEl, textEl, hintEl, onWaitWidget, onAdva
   }
 
   function start(steps, startIndex = 0) {
+    // 직전 대사의 타자 효과가 남아 있으면 next()가 「완성만 하고 멈춤」으로 빠져
+    // 첫 스텝을 띄우지 못하고 i가 -1로 남는다. 시작 전에 타자 상태를 비운다.
+    if (animId) cancelAnimationFrame(animId);
+    animId = null;
+    typing = false;
     queue = steps;
-    i = startIndex - 1;
+    i = Math.max(0, startIndex) - 1;
     locked = false;
     next();
   }

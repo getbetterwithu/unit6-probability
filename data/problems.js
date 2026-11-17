@@ -208,7 +208,7 @@ export const PROBLEMS = {
     title: '금고 10개 빗장 핀의 선택',
     type: 'short',
     image: 'assets/illustrations/prob_11_lockpins.svg',
-    prompt: '테론이 금고 빗장 핀 10개(1번~10번)를 조작하려 한다. "3의 배수 핀이나 4의 배수 핀 중 하나만 걸려도 금고가 잠기지." 테론의 빗장이 걸려 금고가 잠길 확률을 구하시오.',
+    prompt: '테론이 1번부터 10번까지 번호가 붙은 빗장 핀 10개 중 하나를 임의로 골라 건다. "3의 배수나 4의 배수 핀이 걸리면 금고가 잠기지." 금고가 잠길 확률을 구하시오.',
     answer: '1/2',
     altAnswers: ['5/10', '0.5'],
     unit: '',

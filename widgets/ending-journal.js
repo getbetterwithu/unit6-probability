@@ -112,7 +112,7 @@ function downloadCertificateImage(studentName, clearDate, certNumber, siteUrl) {
   ctx.textAlign = 'left';
   ctx.fillStyle = '#ffd152';
   ctx.font = 'bold 14px sans-serif';
-  ctx.fillText('• 제1·2장 · 소폴로스의 야영지 : 합의 법칙, 두 주사위 눈으로 구하는 확률', 170, 492);
+  ctx.fillText('• 제2장 · 소폴로스의 야영지 :합의 법칙, 두 주사위 눈으로 구하는 확률', 170, 492);
   ctx.fillText('• 제3·4장 · 광맥 갱도와 다이아 동굴 : 방정식을 만족하는 경우, 곱이 짝수일 확률', 170, 517);
   ctx.fillText('• 제5장 · 학당 서고 : 일어나지 않을 확률, 특수 주사위의 곱의 확률', 170, 542);
   ctx.fillText('• 제6장 · 다이아 금고 : 편향 주사위 확률, 적어도 하나일 확률, 겹치는 경우 빼기', 170, 567);
@@ -191,7 +191,7 @@ export function mountEndingJournal(container, onRestart, onGoMinigames) {
   `;
   container.appendChild(root);
 
-  const studentName = localStorage.getItem('u6_player_name') || '67 대원';
+  const studentName = localStorage.getItem('u6_player_name') || '용감한 탐험가';
   const clearDate = new Date().toLocaleDateString('ko-KR', {
     year: 'numeric', month: 'long', day: 'numeric'
   });
@@ -323,7 +323,7 @@ export function mountEndingJournal(container, onRestart, onGoMinigames) {
           display: flex; flex-direction: column; gap: 8px; font-size: 0.88rem;
         ">
           <div>
-            <span style="color:#e74c3c; font-weight:800;">• 제1·2장 (소폴로스의 야영지):</span>
+            <span style="color:#e74c3c; font-weight:800;">• 제2장 (소폴로스의 야영지):</span>
             <span style="color:#c9d1d9;"> 합의 법칙, 두 주사위 눈으로 구하는 확률</span>
           </div>
           <div>
