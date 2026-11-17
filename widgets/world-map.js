@@ -436,14 +436,15 @@ export function mountWorldMap(root, { worldState, onSelectLocation, onClose }) {
     viewport.style.cursor = 'grabbing';
   });
 
-  window.addEventListener('pointermove', (e) => {
+  const onPointerMove = (e) => {
     if (!isDragging) return;
     const dx = e.clientX - startX;
     const dy = e.clientY - startY;
     panX = initialPanX + dx;
     panY = initialPanY + dy;
     updateTransform();
-  });
+  };
+  window.addEventListener('pointermove', onPointerMove);
 
   const endDrag = () => {
     if (isDragging) {
@@ -453,6 +454,16 @@ export function mountWorldMap(root, { worldState, onSelectLocation, onClose }) {
   };
   window.addEventListener('pointerup', endDrag);
   window.addEventListener('pointercancel', endDrag);
+
+  // 창(window)에 붙인 리스너 해제 — 지도를 닫거나 다른 위젯으로 바뀔 때 호출
+  let listenersRemoved = false;
+  function cleanupWorldMapListeners() {
+    if (listenersRemoved) return;
+    listenersRemoved = true;
+    window.removeEventListener('pointermove', onPointerMove);
+    window.removeEventListener('pointerup', endDrag);
+    window.removeEventListener('pointercancel', endDrag);
+  }
 
   // 모바일 2손가락 핀치 줌 지원
   viewport.addEventListener('touchstart', (e) => {
@@ -474,4 +485,6 @@ export function mountWorldMap(root, { worldState, onSelectLocation, onClose }) {
       setZoom(initialScale * ratio);
     }
   }, { passive: false });
+
+  return cleanupWorldMapListeners;
 }

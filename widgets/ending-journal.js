@@ -3,17 +3,14 @@
  * 피타고라스 학당 공식 수료증
  * - PDF / 인쇄: 브라우저 기본값에 맞춘 대한민국 정통 A4 세로(Portrait) 1장 완벽 상장
  * - 이미지(PNG) 저장: 스마트폰/PC 가로 뷰어용 황금 카드(1200x850 Landscape) 다운로드
- * - 내 이메일로 수료증 받기: clasp GAS 웹앱 연동
  * - '여사건' 고교 용어 영구 삭제, TMI 분수(7/36 등) 완전 배제
  * - 하단 재접속 QR코드, 접속 주소, BetterwithU 공식 푸터, 문의 링크 마스킹
  * - PDF 저장 시 학생 이름이 포함된 자동 파일명(document.title) 적용
- * - 선행 저장/발송 시 '처음부터 다시 하기' 잠금 해제 & 완전 초기화
+ * - 이미지·PDF 저장 뒤 '처음부터 다시 하기' 잠금 해제 & 진행 기록 초기화
  */
 
 import { playSfx } from '../engine/sound.js';
-
-// Google Apps Script clasp 배포 Web App URL
-const GAS_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwsR5bLJWUh7g4y280t2bU_lKYjKYlfYQccx6X7-1OXZZ5WzGAVdvfDzth44G8Hj1lKhA/exec';
+import { clearProgress } from '../engine/progress.js';
 
 /**
  * 순수 HTML5 Canvas를 이용해 1200x850 해상도의 고화질 가로형 황금 상장 이미지를 실시간 렌더링하여 다운로드합니다.
@@ -115,10 +112,10 @@ function downloadCertificateImage(studentName, clearDate, certNumber, siteUrl) {
   ctx.textAlign = 'left';
   ctx.fillStyle = '#ffd152';
   ctx.font = 'bold 14px sans-serif';
-  ctx.fillText('• 제1·2장 · 케팔로니아 광장 : 합·곱의 법칙과 사건의 모든 경우의 수', 170, 492);
-  ctx.fillText('• 제3·4장 · 지하광맥 & 암초 : 기하학적 확률과 독립시행 연속 통과', 170, 517);
-  ctx.fillText('• 제5장 · 트로이의 목마 : 복합 사건 확률과 적어도 하나 여사건 계산', 170, 542);
-  ctx.fillText('• 제6장 · 신전 금고 : 왜곡 주사위 표본공간 검증 및 3연속 밸브 해제', 170, 567);
+  ctx.fillText('• 제1·2장 · 소폴로스의 야영지 : 합의 법칙, 두 주사위 눈으로 구하는 확률', 170, 492);
+  ctx.fillText('• 제3·4장 · 광맥 갱도와 다이아 동굴 : 방정식을 만족하는 경우, 곱이 짝수일 확률', 170, 517);
+  ctx.fillText('• 제5장 · 학당 서고 : 일어나지 않을 확률, 특수 주사위의 곱의 확률', 170, 542);
+  ctx.fillText('• 제6장 · 다이아 금고 : 편향 주사위 확률, 적어도 하나일 확률, 겹치는 경우 빼기', 170, 567);
 
   // 7. 격언 및 스승 서명
   ctx.textAlign = 'center';
@@ -326,20 +323,20 @@ export function mountEndingJournal(container, onRestart, onGoMinigames) {
           display: flex; flex-direction: column; gap: 8px; font-size: 0.88rem;
         ">
           <div>
-            <span style="color:#e74c3c; font-weight:800;">• 제1·2장 (경우의 수):</span>
-            <span style="color:#c9d1d9;"> 합·곱의 법칙과 사건의 모든 경우의 수</span>
+            <span style="color:#e74c3c; font-weight:800;">• 제1·2장 (소폴로스의 야영지):</span>
+            <span style="color:#c9d1d9;"> 합의 법칙, 두 주사위 눈으로 구하는 확률</span>
           </div>
           <div>
-            <span style="color:#3498db; font-weight:800;">• 제3·4장 (순서와 대표):</span>
-            <span style="color:#c9d1d9;"> 기하학적 확률과 독립시행 연속 통과</span>
+            <span style="color:#3498db; font-weight:800;">• 제3·4장 (광맥 갱도와 다이아 동굴):</span>
+            <span style="color:#c9d1d9;"> 방정식을 만족하는 경우, 곱이 짝수일 확률</span>
           </div>
           <div>
-            <span style="color:#f1c40f; font-weight:800;">• 제5장 (확률의 뜻과 성질):</span>
-            <span style="color:#c9d1d9;"> 복합 사건 확률과 적어도 하나 여사건 계산</span>
+            <span style="color:#f1c40f; font-weight:800;">• 제5장 (학당 서고):</span>
+            <span style="color:#c9d1d9;"> 일어나지 않을 확률, 특수 주사위의 곱의 확률</span>
           </div>
           <div>
-            <span style="color:#2ecc71; font-weight:800;">• 제6장 (확률의 계산):</span>
-            <span style="color:#c9d1d9;"> 왜곡 주사위 표본공간 검증 및 3연속 밸브 해제</span>
+            <span style="color:#2ecc71; font-weight:800;">• 제6장 (다이아 금고):</span>
+            <span style="color:#c9d1d9;"> 편향 주사위 확률, 적어도 하나일 확률, 겹치는 경우 빼기</span>
           </div>
         </div>
 
@@ -422,11 +419,11 @@ export function mountEndingJournal(container, onRestart, onGoMinigames) {
         padding: 18px 20px;
       ">
         <div style="font-size: 0.95rem; font-weight: 800; color: #ffd152; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
-          <span>📜 수료증 영구 소장 및 본인 사본 수령</span>
+          <span>📜 수료증 영구 소장</span>
           <span style="font-size: 0.78rem; font-weight: normal; color: #8b949e;">(아래 중 하나를 완료하면 다시 하기가 활성화됩니다)</span>
         </div>
         <div style="font-size: 0.84rem; color: #8b949e; margin-bottom: 14px;">
-          A4 세로 규격 상장 PDF 저장, 고화질 이미지(PNG) 다운로드, 또는 학생 본인 이메일로 수료증 사본을 발송하세요.
+          고화질 이미지(PNG)로 내려받거나 A4 세로 규격 상장 PDF로 저장하세요.
         </div>
 
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
@@ -449,16 +446,6 @@ export function mountEndingJournal(container, onRestart, onGoMinigames) {
           ">
             📄 수료증 PDF 저장 / 인쇄
           </button>
-
-          <!-- 3. 내 이메일로 수료증 사본 받기 -->
-          <button type="button" id="journal-btn-mail-modal" class="action-btn" style="
-            background: linear-gradient(135deg, #2980b9, #1f618d); color: #fff;
-            border: 1px solid #5dade2; border-radius: 8px; padding: 11px 14px; font-size: 0.92rem;
-            font-weight: 800; cursor: pointer; box-shadow: 0 3px 10px rgba(41,128,185,0.35);
-            display: flex; align-items: center; justify-content: center; gap: 6px;
-          ">
-            ✉️ 내 이메일로 수료증 받기
-          </button>
         </div>
 
         <!-- 피드백 배너 -->
@@ -473,7 +460,7 @@ export function mountEndingJournal(container, onRestart, onGoMinigames) {
             background:#161b22; color:#7f8c8d; border:1.5px solid #30363d;
             border-radius:8px; padding:12px 22px; font-size:1rem; font-weight:800; cursor:not-allowed;
             opacity: 0.45; transition: all 0.3s ease; flex: 1; max-width: 320px;
-          " title="수료증을 이미지나 PDF로 저장하거나 본인 메일로 수령한 후에 다시 시작할 수 있습니다.">
+          " title="수료증을 이미지나 PDF로 저장한 후에 다시 시작할 수 있습니다.">
             🔒 처음부터 다시 하기
           </button>
           <button type="button" id="journal-btn-games" class="action-btn" style="
@@ -485,59 +472,11 @@ export function mountEndingJournal(container, onRestart, onGoMinigames) {
           </button>
         </div>
         <div id="restart-guide-text" style="font-size:0.8rem; color:#8b949e;">
-          ※ 수료증을 이미지/PDF로 저장하거나 이메일로 수령해야 [처음부터 다시 하기]가 활성화됩니다.
+          ※ 수료증을 이미지나 PDF로 저장해야 [처음부터 다시 하기]가 활성화됩니다.
         </div>
       </div>
     </div>
 
-    <!-- [이메일 사본 발송 모달 (인쇄 시 숨김)] -->
-    <div id="email-modal-overlay" class="no-print" style="
-      display: none; position: fixed; inset: 0; z-index: 999;
-      background: rgba(0,0,0,0.75); backdrop-filter: blur(4px);
-      align-items: center; justify-content: center; padding: 16px;
-    ">
-      <div style="
-        background: #161b22; border: 2px solid #58a6ff; border-radius: 14px;
-        max-width: 460px; width: 100%; padding: 24px; box-shadow: 0 12px 36px rgba(0,0,0,0.85);
-        color: #f0f6fc; box-sizing: border-box;
-      ">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-          <h3 style="margin:0; font-size:1.15rem; color:#58a6ff; font-weight:800;">
-            ✉️ 내 이메일로 수료증 사본 받기
-          </h3>
-          <button type="button" id="btn-modal-close" style="
-            background:none; border:none; color:#8b949e; font-size:1.3rem; cursor:pointer; padding:0;
-          ">✕</button>
-        </div>
-
-        <p style="font-size:0.88rem; color:#c9d1d9; line-height:1.5; margin:0 0 16px;">
-          학생 본인의 이메일 주소를 입력하시면, 피타고라스 학당의 <strong>황금 상장 사본(공식 서식 포함)</strong>이 즉시 발송됩니다.
-        </p>
-
-        <div style="margin-bottom:16px;">
-          <label style="display:block; font-size:0.82rem; color:#8b949e; margin-bottom:6px;">수신 이메일 주소</label>
-          <input type="email" id="input-recipient-email" placeholder="student@example.com" style="
-            width:100%; box-sizing:border-box; padding:10px 14px; font-size:0.95rem;
-            background:#0d1117; border:1px solid #30363d; border-radius:6px; color:#fff;
-            outline:none;
-          "/>
-        </div>
-
-        <div id="modal-msg" style="display:none; font-size:0.85rem; padding:8px 12px; border-radius:6px; margin-bottom:14px;"></div>
-
-        <div style="display:flex; gap:10px; justify-content:flex-end;">
-          <button type="button" id="btn-modal-cancel" style="
-            background:#21262d; color:#c9d1d9; border:1px solid #30363d; border-radius:6px;
-            padding:8px 16px; font-size:0.9rem; font-weight:600; cursor:pointer;
-          ">취소</button>
-          <button type="button" id="btn-modal-send" style="
-            background:linear-gradient(135deg, #238636, #2ea043); color:#fff;
-            border:none; border-radius:6px; padding:8px 20px; font-size:0.9rem; font-weight:800;
-            cursor:pointer; box-shadow:0 2px 8px rgba(46,160,67,0.4);
-          ">🚀 즉시 발송</button>
-        </div>
-      </div>
-    </div>
   `;
 
   // 상태 관리
@@ -589,99 +528,6 @@ export function mountEndingJournal(container, onRestart, onGoMinigames) {
     }, 1500);
   });
 
-  // 3. 내 이메일로 수료증 받기 모달 제어
-  const modalOverlay = root.querySelector('#email-modal-overlay');
-  const inputEmail = root.querySelector('#input-recipient-email');
-  const modalMsg = root.querySelector('#modal-msg');
-  const btnModalSend = root.querySelector('#btn-modal-send');
-
-  root.querySelector('#journal-btn-mail-modal').addEventListener('click', () => {
-    playSfx('click');
-    modalOverlay.style.display = 'flex';
-    inputEmail.focus();
-  });
-
-  const closeModal = () => {
-    modalOverlay.style.display = 'none';
-    modalMsg.style.display = 'none';
-  };
-  root.querySelector('#btn-modal-close').addEventListener('click', closeModal);
-  root.querySelector('#btn-modal-cancel').addEventListener('click', closeModal);
-
-  // 이메일 즉시 발송 (GAS 웹앱 연동)
-  btnModalSend.addEventListener('click', async () => {
-    const email = inputEmail.value.trim();
-    if (!email || !email.includes('@')) {
-      modalMsg.style.display = 'block';
-      modalMsg.style.background = 'rgba(231, 76, 60, 0.2)';
-      modalMsg.style.border = '1px solid #e74c3c';
-      modalMsg.style.color = '#e74c3c';
-      modalMsg.textContent = '올바른 이메일 주소를 입력해 주세요.';
-      return;
-    }
-
-    playSfx('click');
-    btnModalSend.disabled = true;
-    btnModalSend.textContent = '발송 중... ⏳';
-
-    modalMsg.style.display = 'block';
-    modalMsg.style.background = 'rgba(88, 166, 255, 0.15)';
-    modalMsg.style.border = '1px solid #58a6ff';
-    modalMsg.style.color = '#58a6ff';
-    modalMsg.textContent = '황금 상장 사본을 발송하고 있습니다...';
-
-    const payload = {
-      email: email,
-      studentName: studentName,
-      certNumber: certNumber,
-      clearDate: clearDate,
-      siteUrl: currentUrl
-    };
-
-    try {
-      await fetch(GAS_WEBAPP_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-
-      modalMsg.style.background = 'rgba(46, 204, 113, 0.2)';
-      modalMsg.style.border = '1px solid #2ecc71';
-      modalMsg.style.color = '#2ecc71';
-      modalMsg.textContent = `✅ [${email}] 주소로 상장 사본이 성공적으로 발송되었습니다!`;
-      btnModalSend.textContent = '발송 완료 ✓';
-
-      enableRestartButton(`✉️ [${email}] 주소로 상장 사본이 발송되었습니다.`);
-
-      setTimeout(() => {
-        closeModal();
-        btnModalSend.disabled = false;
-        btnModalSend.textContent = '🚀 즉시 발송';
-      }, 1600);
-
-    } catch (err) {
-      console.warn('GAS Mailer fetch fallback:', err);
-      const subject = encodeURIComponent(`[피타고라스 학당 수료증 사본] ${studentName} 대원의 수학 모험 완결`);
-      const body = encodeURIComponent(
-        `[피타고라스 학당 수학 모험 수료증 사본]\n\n` +
-        `■ 수료 대원: ${studentName}\n` +
-        `■ 발급 번호: ${certNumber}\n` +
-        `■ 수료 일자: ${clearDate}\n` +
-        `■ 모험 접속 주소: ${currentUrl}\n\n` +
-        `"수학은 단순한 계산이 아니라, 세상의 거짓과 혼란 속에서 진실의 균형을 찾는 빛이다."\n` +
-        `— 스승 탈레스 & 피타고라스 —\n\n` +
-        `Designed & Developed by BetterwithU`
-      );
-      window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
-
-      enableRestartButton(`✉️ [${email}] 메일 클라이언트로 수료증 사본이 생성되었습니다.`);
-      closeModal();
-      btnModalSend.disabled = false;
-      btnModalSend.textContent = '🚀 즉시 발송';
-    }
-  });
-
   // 제작자 교육 문의 메일 (마스킹 - 화면 주소 미노출)
   root.querySelector('#btn-inquiry-mail').addEventListener('click', () => {
     playSfx('click');
@@ -693,14 +539,18 @@ export function mountEndingJournal(container, onRestart, onGoMinigames) {
   // 처음부터 다시 하기 (완전 데이터 초기화 & 확인 경고 팝업)
   btnRestart.addEventListener('click', () => {
     if (!isSavedOrSent) {
-      alert('⚠️ 먼저 수료증을 이미지나 PDF로 저장하거나 본인 이메일로 수료증 사본을 발송해야 다시 시작할 수 있습니다.');
+      alert('⚠️ 먼저 수료증을 이미지나 PDF로 저장해야 다시 시작할 수 있습니다.');
       return;
     }
     playSfx('click');
     if (confirm('⚠️ 지난 게임의 모든 데이터가 삭제됩니다. 정말로 처음부터 다시 시작하시겠습니까?')) {
-      localStorage.clear();
-      sessionStorage.clear();
-      window.location.reload();
+      // 이 게임의 진행 키만 지운다 (같은 주소의 다른 앱 데이터는 건드리지 않음)
+      if (typeof onRestart === 'function') {
+        onRestart();
+      } else {
+        clearProgress({ keepName: false });
+        window.location.reload();
+      }
     }
   });
 

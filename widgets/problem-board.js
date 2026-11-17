@@ -483,6 +483,9 @@ export function mountProblemBoard(root, problemId, { onSolved, onClose }) {
     window.removeEventListener('touchmove', moveDraw);
     window.removeEventListener('touchend', endDraw);
     window.removeEventListener('resize', resizeCanvas);
+    // 열려 있던 확대 이미지 창이 있으면 닫는다 (body에 붙어 있어 위젯을 비워도 남음)
+    const lb = document.getElementById('board-img-lightbox');
+    if (lb) lb.click();
   }
 
   canvas.addEventListener('mousedown', startDraw);
@@ -584,4 +587,6 @@ export function mountProblemBoard(root, problemId, { onSolved, onClose }) {
   }, 100);
 
   window.addEventListener('resize', resizeCanvas);
+
+  return cleanupListeners;
 }

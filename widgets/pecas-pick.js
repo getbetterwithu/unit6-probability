@@ -203,11 +203,29 @@ export function mountPecasPick(root, { onDone, onClose }) {
     }
   });
 
+  let startTimer = null;
+  let disposed = false;
+
+  function cleanupPecas() {
+    if (disposed) return;
+    disposed = true;
+    stageCleared = true;
+    if (animId) cancelAnimationFrame(animId);
+    animId = null;
+    if (startTimer) clearTimeout(startTimer);
+    startTimer = null;
+  }
+
   completeBtn.addEventListener('click', () => {
-    cleanupPecas();
+    cleanupPecas();
     if (onDone) onDone();
   });
 
   // 시작
-  setTimeout(startStage, 50);
+  startTimer = setTimeout(() => {
+    startTimer = null;
+    if (!disposed) startStage();
+  }, 50);
+
+  return cleanupPecas;
 }

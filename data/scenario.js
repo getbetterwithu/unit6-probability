@@ -482,7 +482,7 @@ export const SCENARIO_VAULT = [
     bg: 'diamond_vault',
     bgm: 'tense',
     speaker: '테론',
-    text: '크윽... 눈으로만 봐선 믿을 수 없소! 500번을 던져 만든 눈별 실측 확률표를 보시오. 이 편향 주사위 2개를 동시에 던져 눈의 합이 12가 될 확률을 맞혀보시오!',
+    text: '크윽... 눈으로만 봐선 믿을 수 없소! 400번을 던져 만든 눈별 실측 확률표를 보시오. 이 편향 주사위 2개를 동시에 던져 눈의 합이 12가 될 확률을 맞혀보시오!',
     left: { name: '테론', emotion: 'neutral' },
     right: { name: '폴리곤', emotion: 'neutral' },
     activeSide: 'left',

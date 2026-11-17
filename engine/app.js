@@ -1,17 +1,17 @@
-import { SCENARIOS, STEPS } from '../data/scenario.js?v=84';
+import { SCENARIOS, STEPS } from '../data/scenario.js?v=85';
 import { createDialogue } from './dialogue.js?v=8';
 import { setTension, refute } from './director.js?v=12';
 import { createStage } from './stage.js?v=20261110_v6';
 import { playBgm, playSfx, toggleMute, isMuted } from './sound.js?v=1';
-import { mountDiceInspector } from '../widgets/dice-inspector.js?v=20261110_v6';
-import { mountProblemBoard } from '../widgets/problem-board.js?v=20261110_v6';
+import { mountDiceInspector } from '../widgets/dice-inspector.js?v=20261117_fix1';
+import { mountProblemBoard } from '../widgets/problem-board.js?v=20261117_fix1';
 import { mountPathLink } from '../widgets/path-link.js?v=20261110_v6';
-import { mountPecasPick } from '../widgets/pecas-pick.js?v=20261110_v6';
+import { mountPecasPick } from '../widgets/pecas-pick.js?v=20261117_fix1';
 import { mountGuguSpeed } from '../widgets/gugu-speed.js?v=20261110_v6';
 import { mountNonogram } from '../widgets/nonogram.js?v=20261110_v6';
 import { createBacklog } from '../widgets/backlog.js?v=1';
-import { mountWorldMap } from '../widgets/world-map.js?v=20261110_v6';
-import { mountEndingJournal } from '../widgets/ending-journal.js?v=3';
+import { mountWorldMap } from '../widgets/world-map.js?v=20261117_fix1';
+import { mountEndingJournal } from '../widgets/ending-journal.js?v=20261117_fix1';
 import { KEY, clearProgress } from './progress.js';
 
 const speakerEl = document.getElementById('speaker-box');
@@ -159,7 +159,7 @@ function disposeCurrentWidget() {
 
 function clearWidgetRoot() {
   disposeCurrentWidget();
-  clearWidgetRoot();
+  widgetRoot.innerHTML = '';
 }
 
 // 토스트 메시지 알림 함수
@@ -318,6 +318,8 @@ const dlg = createDialogue({
     const handleClose = (btnLabel = '🧩 도전 과제 다시 열기') => {
       currentActiveReopenLabel = btnLabel;
       currentActiveMountFn = mountCurrentWidget;
+      // 접어 둔 위젯의 타이머·전역 키 입력·리스너를 멈춘다 (다시 열면 새로 마운트됨)
+      disposeCurrentWidget();
       widgetRoot.hidden = true;
       reopenBtn.style.display = 'block';
       reopenBtn.innerHTML = btnLabel;
@@ -523,16 +525,19 @@ function showEndingJournal() {
   clearWidgetRoot();
   hudChapter.textContent = '📜 피타고라스 학당 수학 모험록';
 
-  mountEndingJournal(widgetRoot, {
-    playerName: localStorage.getItem('u6_player_name') || '용감한 탐험가',
-    onRestart() {
-      localStorage.clear();
+  // mountEndingJournal(container, onRestart, onGoMinigames) 형식에 맞춰 넘긴다
+  mountEndingJournal(
+    widgetRoot,
+    () => {
+      // 끝 화면의 「처음부터 다시 하기」: 다음 학생이 이어받는 경우가 많아 이름까지 지운다
+      clearProgress({ keepName: false });
+      clearedSteps.clear();
       window.location.reload();
     },
-    onGoMinigames() {
+    () => {
       location.href = 'games.html';
     },
-  });
+  );
 }
 
 // 지도 열기/닫기 토글 버튼 이벤트
@@ -608,26 +613,19 @@ stageContainer.addEventListener('click', (e) => {
 // ==========================================
 // 관리자 치트 발동 공통 함수 (PC 백틱 5회 / 모바일 상단 타이틀 5회 탭)
 // ==========================================
+// 치트(건너뛰기)는 내 컴퓨터에서 실행할 때(localhost)만 허용한다.
+// 배포된 사이트에서는 URL 파라미터·코드 입력 어느 쪽으로도 열리지 않는다.
 function isDebugAllowed() {
   try {
-    const params = new URLSearchParams(window.location.search);
-    return params.get('debug') === 'true' || params.get('admin') === '1' || sessionStorage.getItem('u6_admin') === '1';
+    const host = window.location.hostname;
+    return host === 'localhost' || host === '127.0.0.1' || host === '[::1]' || window.location.protocol === 'file:';
   } catch (e) {
     return false;
   }
 }
 
 function triggerAdminCheat() {
-  if (!isDebugAllowed()) {
-    const code = window.prompt('🛠️ 관리자 디버그 모드 접근 코드를 입력하세요:');
-    if (code === 'admin' || code === '1234') {
-      sessionStorage.setItem('u6_admin', '1');
-      showToast('🛠️ 관리자 모드가 활성화되었습니다.', true);
-    } else {
-      if (code !== null) showToast('⚠️ 관리자 코드가 올바르지 않습니다.', false);
-      return;
-    }
-  }
+  if (!isDebugAllowed()) return;
 
   // [핵심 기능] 현재 풀고 있는 스테이지나 미니게임이 있다면 즉시 정답 처리(Pass)!
   if (currentActiveDoneFn) {
@@ -753,6 +751,8 @@ function showTapBadge(count) {
 }
 
 function onAdminTap(e) {
+  // 배포 사이트에서는 탭 횟수 안내 배지도 띄우지 않는다
+  if (!isDebugAllowed()) return;
   if (e.button && e.button !== 0) return;
   const now = Date.now();
   hudTapTimes.push(now);
