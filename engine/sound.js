@@ -24,7 +24,11 @@ const BGM_VOL = {
   tense:    0.17,
 };
 
-let _muted = localStorage.getItem('u6_muted') === '1';
+// 저장소를 쓸 수 없는 환경(시크릿 모드, 차단 설정)에서도 게임이 켜지도록 예외를 막는다
+let _muted = false;
+try {
+  _muted = localStorage.getItem('u6_muted') === '1';
+} catch (e) {}
 let _currentBgmKey = null;
 let _bgmAudio = null;
 
@@ -68,7 +72,9 @@ export function setBgmVolume(vol) {
 
 export function toggleMute() {
   _muted = !_muted;
-  localStorage.setItem('u6_muted', _muted ? '1' : '0');
+  try {
+    localStorage.setItem('u6_muted', _muted ? '1' : '0');
+  } catch (e) {}
   const audio = getAudioEl();
   if (audio) {
     audio.volume = _muted ? 0 : (BGM_VOL[_currentBgmKey] || 0.15);
@@ -134,6 +140,19 @@ export function playSfx(name) {
     case 'click':
       // 가벼운 UI 탭음
       tone(ac, 740.00, 0.04, 0.00, 'triangle', 0.10);
+      break;
+
+    case 'clear':
+      // 거점 완료 팡파르 (도5 - 미5 - 솔5 - 도6)
+      tone(ac, 523.25, 0.14, 0.00, 'triangle', 0.22);
+      tone(ac, 659.25, 0.14, 0.12, 'triangle', 0.22);
+      tone(ac, 783.99, 0.14, 0.24, 'triangle', 0.24);
+      tone(ac, 1046.50, 0.45, 0.36, 'triangle', 0.26);
+      break;
+
+    case 'error':
+      // 짧은 경고음
+      tone(ac, 220.00, 0.12, 0.00, 'sine', 0.16);
       break;
 
     case 'evidence':

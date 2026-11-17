@@ -116,37 +116,46 @@
       overflow: hidden; /* 하반신은 대사창 아래로 자연스럽게 커팅 */
     }
 
-    /* 캐릭터 스프라이트: 화자 1.65배 상반신 줌인 */
+    /* 두 인물 무대: 자리는 고정, 화자만 앞으로 / 상대는 뒤로 / 나레이션은 둘 다 은은하게 */
     .character {
-      position: absolute; bottom: -30px; height: 110%; max-height: 720px;
-      transition: opacity 0.35s ease, transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.35s ease;
+      position: absolute; bottom: -30px; height: 108%; max-height: 760px;
+      transition: opacity 0.3s ease, transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.3s ease;
       pointer-events: none;
-      transform-origin: 50% 18%; /* 얼굴 및 상반신 기준 줌인 */
+      transform-origin: 50% 100%;
+      transform: translateX(-50%);
     }
     .character img {
       height: 100%; width: auto; display: block;
       filter: drop-shadow(0 14px 32px rgba(0,0,0,0.85));
     }
-    .character.left { left: 5%; }
-    .character.right { right: 5%; }
+    .character.left { left: 27%; }
+    .character.right { left: 73%; }
 
-    /* 화자: 상반신 1.6배 줌인 및 스포트라이트 돌출 */
+    /* 화자: 살짝 커지고 밝아지며 앞으로 */
     .character.active {
-      filter: brightness(1.1) drop-shadow(0 0 32px var(--accent-glow));
-      transform: scale(1.6) translateY(24px);
+      filter: brightness(1.08) drop-shadow(0 0 28px var(--accent-glow));
+      transform: translateX(-50%) scale(1.1);
       z-index: 4;
       opacity: 1;
     }
-    /* 비화자: 뒤로 물러나며 톤다운 */
+    /* 상대: 뒤로 물러나며 톤다운 */
     .character.inactive {
       filter: brightness(0.55) grayscale(0.3);
-      transform: scale(1.05) translateY(55px);
+      transform: translateX(-50%) scale(0.92) translateY(24px);
       z-index: 2;
-      opacity: 0.72;
+      opacity: 0.85;
     }
-    .character.hidden {
+    /* 나레이션·위젯 대사: 둘 다 같은 크기로 은은하게 */
+    .character.calm {
+      filter: brightness(0.82);
+      transform: translateX(-50%);
+      z-index: 3;
+      opacity: 1;
+    }
+    /* 빈 자리 */
+    .character.empty {
       opacity: 0;
-      transform: translateY(60px) scale(0.9);
+      transform: translateX(-50%) translateY(40px) scale(0.92);
       pointer-events: none;
     }
     #stage-layer:has(~ #widget-root:not([hidden])) #character-layer {
@@ -572,29 +581,14 @@
       #character-layer {
         inset: 44px 0 115px 0;
       }
+      /* 좁은 화면에서도 두 인물을 모두 보여 준다 (자리는 데스크톱과 같은 규칙) */
       .character {
-        max-height: 52vh;
-        bottom: -15px;
-        transform-origin: 50% 25%;
+        max-height: 50vh;
+        height: 100%;
+        bottom: -10px;
       }
-      .character.left, .character.right {
-        left: 50% !important;
-        right: auto !important;
-        transform: translateX(-50%) !important;
-      }
-      .character.active {
-        display: block !important;
-        left: 50% !important;
-        right: auto !important;
-        transform: translateX(-50%) scale(1.18) translateY(10px) !important;
-        z-index: 4 !important;
-        opacity: 1 !important;
-      }
-      .character.inactive, .character.hidden {
-        display: none !important;
-        opacity: 0 !important;
-        pointer-events: none !important;
-      }
+      .character.left { left: 28%; }
+      .character.right { left: 72%; }
 
       /* 3. 대화창 레이어 */
       #dialogue-layer {
@@ -838,8 +832,8 @@
     <div id="stage-layer">
       <div id="stage-bg"></div>
       <div id="character-layer">
-        <div id="char-left" class="character left hidden"><img src="" alt=""></div>
-        <div id="char-right" class="character right hidden"><img src="" alt=""></div>
+        <div id="char-left" class="character left empty"><img src="" alt=""></div>
+        <div id="char-right" class="character right empty"><img src="" alt=""></div>
       </div>
     </div>
 
@@ -862,6 +856,6 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
-  <script type="module" src="engine/app.js?v=20261117_fix2"></script>
+  <script type="module" src="engine/app.js?v=20261117_fix3"></script>
 </body>
 </html>

@@ -1,7 +1,7 @@
-import { SCENARIOS, STEPS } from '../data/scenario.js?v=85';
-import { createDialogue } from './dialogue.js?v=9';
+import { SCENARIOS, STEPS } from '../data/scenario.js?v=86';
+import { createDialogue } from './dialogue.js?v=10';
 import { setTension, refute } from './director.js?v=12';
-import { createStage } from './stage.js?v=20261110_v6';
+import { createStage, preloadSteps } from './stage.js?v=20261117_fix3';
 // 위젯들과 같은 주소로 불러와야 한 모듈(음소거 상태 하나)을 공유한다
 import { playBgm, playSfx, toggleMute, isMuted } from './sound.js';
 import { mountDiceInspector } from '../widgets/dice-inspector.js?v=20261117_fix1';
@@ -287,6 +287,7 @@ function startLocation(loc, startIndex = 0) {
   if (btnNext) btnNext.style.display = '';
 
   const steps = SCENARIOS[loc] || SCENARIOS.intro;
+  preloadSteps(steps);
   dlg.start(steps, startIndex);
 }
 
@@ -931,13 +932,14 @@ function openAdminModal() {
 
 document.getElementById('game-container').tabIndex = 0;
 document.getElementById('game-container').focus();
-document.body.dataset.engine = '20261117_fix2';
+document.body.dataset.engine = '20261117_fix3';
 
 // ==========================================
 // 학생 이름 입력 모달
 // ==========================================
 function promptPlayerNameModal(onDone) {
-  const existingName = localStorage.getItem('u6_player_name');
+  let existingName = null;
+  try { existingName = localStorage.getItem('u6_player_name'); } catch (e) {}
   if (existingName && existingName.trim().length > 0) {
     onDone(existingName);
     return;
@@ -992,7 +994,7 @@ function promptPlayerNameModal(onDone) {
   const handleSave = () => {
     let name = inputEl.value.trim();
     if (!name) name = '용감한 탐험가';
-    localStorage.setItem('u6_player_name', name);
+    try { localStorage.setItem('u6_player_name', name); } catch (e) {}
     playSfx('click');
     modal.remove();
     onDone(name);
@@ -1024,7 +1026,8 @@ function promptResumeModal(savedLoc, savedStep, onResume, onRestart) {
   };
   const locName = locNames[savedLoc] || '케팔로니아 탐험 지도';
   const gemCount = (worldState.ruby ? 1 : 0) + (worldState.emerald ? 1 : 0) + (worldState.sapphire ? 1 : 0);
-  const studentName = localStorage.getItem('u6_player_name') || '탐험가';
+  let studentName = '탐험가';
+  try { studentName = localStorage.getItem('u6_player_name') || '탐험가'; } catch (e) {}
 
   modal.innerHTML = `
     <div style="width:min(480px, 92%); background:#1e1610; border:2.5px solid #d4af37; border-radius:14px; padding:28px 24px; text-align:center; box-shadow:0 12px 48px rgba(0,0,0,0.85); color:#f5eedb;">
@@ -1168,8 +1171,14 @@ if (demoParam) {
 } else {
   // 일반 시나리오 모드
   const locParam = urlParams.get('loc');
-  const savedLoc = localStorage.getItem('u6_current_location');
-  const savedStep = parseInt(localStorage.getItem('u6_location_step') || '0', 10);
+  let savedLoc = null;
+  let savedStep = 0;
+  try {
+    savedLoc = localStorage.getItem('u6_current_location');
+    savedStep = parseInt(localStorage.getItem('u6_location_step') || '0', 10) || 0;
+  } catch (e) {}
+  // 알 수 없는 거점 이름이 저장돼 있으면 이어하기 대상에서 제외한다
+  if (savedLoc && savedLoc !== 'map' && !SCENARIOS[savedLoc]) savedLoc = null;
 
   if (locParam && SCENARIOS[locParam] && isDebugAllowed()) {
     // URL에 직접 ?loc=camp 등으로 지정한 경우 (거점 건너뛰기라 내 컴퓨터에서 실행할 때만 허용)

@@ -1,10 +1,12 @@
 // ===== 무대(배경 및 캐릭터 스프라이트) 관리 모듈 =====
+// 두 인물 무대: 스텝의 left/right 설정을 그대로 무대에 올린다.
+// 화자는 앞으로(active), 상대는 뒤로(inactive), 나레이션·시스템·위젯 대사는 둘 다 은은하게(calm) 남긴다.
 
 const CHAR_BASE = 'assets/characters';
 const BG_BASE = 'assets/backgrounds';
 
 // 캐릭터 이름 한국어 -> 영문 키
-const CHAR_KEYS = {
+export const CHAR_KEYS = {
   '폴리곤': 'apprentice',
   '이리스': 'companion',
   '테론': 'architect',
@@ -13,6 +15,7 @@ const CHAR_KEYS = {
   '탈레스': 'thales',
   '피캐스': 'pecas',     // 정본 마스코트 굴 생물
   '광부': 'miner',       // 정본 베테랑 광부
+  '라이벌': 'rival',
 };
 
 // 배경 매핑
@@ -29,21 +32,42 @@ const BG_MAP = {
   safe: `${BG_BASE}/diamond_vault.png`,
 };
 
-function getCharSrc(key, emotion = 'neutral') {
-  if (!key) return null;
-  const eng = CHAR_KEYS[key] || key;
+const NON_SPEAKERS = new Set(['', '나레이션', '시스템']);
+
+export function getCharSrc(name, emotion = 'neutral') {
+  if (!name) return null;
+  const eng = CHAR_KEYS[name] || name;
   return `${CHAR_BASE}/${eng}_${emotion}.png`;
+}
+
+// 장면에서 쓸 스프라이트를 미리 내려받아 표정 교체 시 잔상·깜빡임을 없앤다.
+const preloaded = new Set();
+export function preloadSteps(steps) {
+  for (const step of steps || []) {
+    for (const side of ['left', 'right']) {
+      const c = step?.[side];
+      if (!c?.name) continue;
+      const src = getCharSrc(c.name, c.emotion || 'neutral');
+      if (!src || preloaded.has(src)) continue;
+      preloaded.add(src);
+      const img = new Image();
+      img.src = src;
+    }
+  }
 }
 
 export function createStage(containerEl) {
   const bgEl = containerEl.querySelector('#stage-bg');
-  const leftCharEl = containerEl.querySelector('#char-left');
-  const rightCharEl = containerEl.querySelector('#char-right');
-  const leftImg = leftCharEl?.querySelector('img');
-  const rightImg = rightCharEl?.querySelector('img');
+  const slots = {
+    left: makeSlot(containerEl.querySelector('#char-left')),
+    right: makeSlot(containerEl.querySelector('#char-right')),
+  };
 
   let currentBg = '';
-  let activeCharKey = ''; // 현재 표시 중인 캐릭터 이름+감정 키
+
+  function makeSlot(el) {
+    return { el, img: el?.querySelector('img') || null, name: '', key: '', token: 0 };
+  }
 
   function setBg(bgKey) {
     if (!bgKey || currentBg === bgKey) return;
@@ -54,98 +78,87 @@ export function createStage(containerEl) {
     }
   }
 
-  function hideAllActors() {
-    if (leftCharEl) {
-      leftCharEl.classList.add('hidden');
-      leftCharEl.classList.remove('active', 'inactive');
+  function setMood(slot, mood) {
+    slot.el.classList.remove('active', 'inactive', 'calm', 'empty');
+    slot.el.classList.add(mood);
+  }
+
+  function clearSlot(slot) {
+    if (!slot.el) return;
+    slot.token += 1;
+    slot.name = '';
+    slot.key = '';
+    setMood(slot, 'empty');
+  }
+
+  // 스프라이트를 모두 불러온 뒤에 한 번에 교체한다. 없는 표정은 neutral로 대체한다.
+  function showSlot(slot, cfg, mood) {
+    if (!slot.el || !slot.img) return;
+    const emotion = cfg.emotion || 'neutral';
+    const key = `${cfg.name}_${emotion}`;
+
+    if (slot.key === key) {
+      setMood(slot, mood);
+      return;
     }
-    if (rightCharEl) {
-      rightCharEl.classList.add('hidden');
-      rightCharEl.classList.remove('active', 'inactive');
-    }
-    activeCharKey = '';
+
+    const sameChar = slot.name === cfg.name;
+    const token = ++slot.token;
+    const candidates = [getCharSrc(cfg.name, emotion)];
+    if (emotion !== 'neutral') candidates.push(getCharSrc(cfg.name, 'neutral'));
+
+    // 다른 인물로 바뀌면 먼저 투명하게 만들어, 이전 인물이 새 인물 위에 겹쳐 보이지 않게 한다.
+    if (!sameChar) setMood(slot, 'empty');
+
+    const tryLoad = (idx) => {
+      if (token !== slot.token) return;
+      if (idx >= candidates.length) {
+        console.warn('[stage] 스프라이트를 찾지 못했습니다:', cfg.name, emotion);
+        clearSlot(slot);
+        return;
+      }
+      const probe = new Image();
+      probe.onload = () => {
+        if (token !== slot.token) return;
+        slot.img.src = candidates[idx];
+        slot.img.alt = cfg.name;
+        slot.name = cfg.name;
+        slot.key = key;
+        // 한 프레임 뒤 클래스를 바꿔야 페이드인이 동작한다.
+        requestAnimationFrame(() => {
+          if (token === slot.token) setMood(slot, mood);
+        });
+      };
+      probe.onerror = () => tryLoad(idx + 1);
+      probe.src = candidates[idx];
+    };
+    tryLoad(0);
   }
 
   function update(step) {
     if (!step) return;
-    if (step.bg) {
-      setBg(step.bg);
-    }
+    if (step.bg) setBg(step.bg);
+
+    // 인물 설정이 전혀 없는 스텝(배경만 바꾸는 호출 등)은 무대의 인물을 건드리지 않는다.
+    if (!step.left && !step.right) return;
 
     const speaker = (step.speaker || '').trim();
+    const calmAll = NON_SPEAKERS.has(speaker);
+    const speakerOnStage =
+      step.left?.name === speaker || step.right?.name === speaker;
 
-    // 1. 나레이션이거나 화자가 없는 경우: 캐릭터 전원 깔끔하게 퇴장 (배경 및 대사 집중)
-    if (!speaker || speaker === '나레이션' || speaker === '시스템') {
-      hideAllActors();
-      return;
-    }
-
-    // 2. 화자 정보 추출: step.left 또는 step.right 중 화자와 일치하는 설정 우선 탐색
-    let speakerConfig = null;
-    let preferredSide = 'left';
-
-    if (step.left && step.left.name === speaker) {
-      speakerConfig = step.left;
-      preferredSide = 'left';
-    } else if (step.right && step.right.name === speaker) {
-      speakerConfig = step.right;
-      preferredSide = 'right';
-    } else if (CHAR_KEYS[speaker]) {
-      // step에 명시되지 않았더라도 정본 화자 키가 있는 경우
-      speakerConfig = { name: speaker, emotion: 'neutral' };
-      preferredSide = 'left';
-    }
-
-    if (!speakerConfig) {
-      hideAllActors();
-      return;
-    }
-
-    const emotion = speakerConfig.emotion || 'neutral';
-    const targetSrc = getCharSrc(speakerConfig.name, emotion);
-    if (!targetSrc) {
-      hideAllActors();
-      return;
-    }
-
-    // 사용자 핵심 요구사항: "정확하게 대사를 치는 인물만 나와야 함 (비화자 잔상 및 잦은 인물 교체 혼란 제거)"
-    const targetEl = (preferredSide === 'right') ? rightCharEl : leftCharEl;
-    const targetImg = (preferredSide === 'right') ? rightImg : leftImg;
-    const otherEl = (preferredSide === 'right') ? leftCharEl : rightCharEl;
-
-    // 비화자 엘리먼트는 무조건 즉시 숨김
-    if (otherEl) {
-      otherEl.classList.add('hidden');
-      otherEl.classList.remove('active', 'inactive');
-    }
-
-    if (targetEl && targetImg) {
-      const nextKey = `${speakerConfig.name}_${emotion}`;
-      const isCharSwapping = (activeCharKey && !activeCharKey.startsWith(speakerConfig.name + '_'));
-      activeCharKey = nextKey;
-
-      if (isCharSwapping) {
-        // 인물 자체가 다른 캐릭터로 바뀔 때: 이전 인물의 형태가 남아 찌그러지는 잔상 모핑 방지
-        targetEl.style.opacity = '0';
-        targetEl.style.transition = 'none';
-        targetImg.src = targetSrc;
-        targetImg.alt = speakerConfig.name;
-
-        // 한 프레임 대기 후 부드럽게 등장
-        requestAnimationFrame(() => {
-          targetEl.style.transition = 'opacity 0.22s ease, transform 0.28s ease';
-          targetEl.classList.remove('hidden', 'inactive');
-          targetEl.classList.add('active');
-          targetEl.style.opacity = '1';
-        });
-      } else {
-        // 동일 인물이거나 최초 등장 시
-        targetImg.src = targetSrc;
-        targetImg.alt = speakerConfig.name;
-        targetEl.classList.remove('hidden', 'inactive');
-        targetEl.classList.add('active');
-        targetEl.style.opacity = '1';
+    for (const side of ['left', 'right']) {
+      const cfg = step[side];
+      const slot = slots[side];
+      if (!cfg || !cfg.name) {
+        clearSlot(slot);
+        continue;
       }
+      let mood = 'calm';
+      if (!calmAll && speakerOnStage) {
+        mood = cfg.name === speaker ? 'active' : 'inactive';
+      }
+      showSlot(slot, cfg, mood);
     }
   }
 

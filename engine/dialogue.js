@@ -49,6 +49,7 @@ export function createDialogue({ speakerEl, textEl, hintEl, onWaitWidget, onAdva
   let animId = null;
   let currentTokens = [];
   let locked = false;
+  let finished = false;
 
   function renderFull() {
     textEl.innerHTML = '';
@@ -135,8 +136,11 @@ export function createDialogue({ speakerEl, textEl, hintEl, onWaitWidget, onAdva
       return; // 타이핑 중 클릭/엔터 시 완성만 하고 멈춤 (급발진 방지)
     }
 
+    // 마지막 대사 뒤에서 연타해도 완료 처리는 한 번만 실행한다
+    if (finished) return;
     i += 1;
     if (i >= queue.length) {
+      finished = true;
       if (onComplete) onComplete();
       return;
     }
@@ -167,6 +171,7 @@ export function createDialogue({ speakerEl, textEl, hintEl, onWaitWidget, onAdva
     if (i <= 0) return;
 
     // 위젯 직후에서 이전으로 갈 때 안전 처리
+    finished = false;
     i -= 1;
     while (i > 0 && queue[i].type === 'widget') {
       i -= 1;
@@ -204,8 +209,13 @@ export function createDialogue({ speakerEl, textEl, hintEl, onWaitWidget, onAdva
     animId = null;
     typing = false;
     queue = steps;
-    i = Math.max(0, startIndex) - 1;
+    // 저장된 위치가 시나리오 길이를 넘으면(시나리오가 바뀐 경우 등) 마지막 대사로 맞춘다.
+    // 그대로 두면 대사를 하나도 안 보여 주고 거점이 곧바로 완료 처리된다.
+    const last = Math.max(0, steps.length - 1);
+    const safeStart = Number.isFinite(startIndex) ? Math.min(Math.max(0, startIndex), last) : 0;
+    i = safeStart - 1;
     locked = false;
+    finished = false;
     next();
   }
 

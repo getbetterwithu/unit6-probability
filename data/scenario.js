@@ -206,7 +206,7 @@ export const SCENARIO_MINE = [
     text: '거대한 석문의 일차방정식 ax - b = 0의 해가 2 또는 3이 되어 문이 열릴 확률을 신중하게 구해보자!',
     bg: 'mine_shaft',
     bgm: 'cave',
-    left: { name: '광부', emotion: 'thinking' },
+    left: { name: '광부', emotion: 'neutral' },
     right: { name: '폴리곤', emotion: 'thinking' },
   },
   {
@@ -215,7 +215,7 @@ export const SCENARIO_MINE = [
     bgm: 'cave',
     speaker: '광부',
     text: '허허! 일차방정식 $ax - b = 0$의 해가 2 또는 3이 되는 순서쌍이 5개라는 걸 찾아내다니 대단하네. 약속대로 에메랄드 원석을 자네들에게 주겠네!',
-    left: { name: '광부', emotion: 'smile' },
+    left: { name: '광부', emotion: 'neutral' },
     right: { name: '폴리곤', emotion: 'smile' },
     activeSide: 'left',
   },
