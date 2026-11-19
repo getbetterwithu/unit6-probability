@@ -1,6 +1,6 @@
 import { renderMathString, texToHtml } from '../engine/math.js';
 import { validateAnswer } from '../engine/math-validator.js';
-import { PROBLEMS } from '../data/problems.js?v=20261119_v1';
+import { PROBLEMS } from '../data/problems.js?v=20261119_v2';
 import { playSfx } from '../engine/sound.js';
 
 /**
@@ -218,6 +218,12 @@ export function mountProblemBoard(root, problemId, { onSolved, onClose }) {
     const val = inputEl.value.trim();
     const match = val.match(/^(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)$/);
     if (match) {
+      const denom = Number(match[2]);
+      if (!Number.isFinite(denom) || denom === 0) {
+        katexDisplay.style.display = 'flex';
+        katexDisplay.innerHTML = '<span style="font-size:0.78rem; color:#ff7675; font-weight:700;">분모는 0 불가</span>';
+        return;
+      }
       katexDisplay.style.display = 'flex';
       katexDisplay.innerHTML = texToHtml(`\\frac{${match[1]}}{${match[2]}}`);
       return;

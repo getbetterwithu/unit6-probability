@@ -5,14 +5,14 @@ import { createStage, preloadSteps } from './stage.js?v=20261117_fix3';
 // 위젯들과 같은 주소로 불러와야 한 모듈(음소거 상태 하나)을 공유한다
 import { playBgm, playSfx, toggleMute, isMuted } from './sound.js';
 import { mountDiceInspector } from '../widgets/dice-inspector.js?v=20261117_fix1';
-import { mountProblemBoard } from '../widgets/problem-board.js?v=20261119_v1';
+import { mountProblemBoard } from '../widgets/problem-board.js?v=20261119_v2';
 import { mountPathLink } from '../widgets/path-link.js?v=20261110_v6';
 import { mountPecasPick } from '../widgets/pecas-pick.js?v=20261117_fix1';
 import { mountGuguSpeed } from '../widgets/gugu-speed.js?v=20261110_v6';
 import { mountNonogram } from '../widgets/nonogram.js?v=20261110_v6';
 import { createBacklog } from '../widgets/backlog.js?v=1';
 import { mountWorldMap } from '../widgets/world-map.js?v=20261117_fix1';
-import { mountEndingJournal } from '../widgets/ending-journal.js?v=20261119_v1';
+import { mountEndingJournal } from '../widgets/ending-journal.js?v=20261119_v2';
 import { clearProgress } from './progress.js';
 
 const speakerEl = document.getElementById('speaker-box');
@@ -477,13 +477,13 @@ const dlg = createDialogue({
 
     // 이미 한 번 클리어한 스텝인 경우: 다시 풀지 않고 바로 통과 가능!
     if (clearedSteps.has(stepKey)) {
+      currentActiveDoneFn = null;
+      currentActiveMountFn = null;
+      currentActiveReopenLabel = '';
       widgetRoot.hidden = true;
       clearWidgetRoot();
-      reopenBtn.style.display = 'block';
-      reopenBtn.innerHTML = '🧩 이미 완료된 과제 다시 열기';
-      reopenBtn.onclick = () => {
-        mountCurrentWidget();
-      };
+      reopenBtn.style.display = 'none';
+      reopenBtn.onclick = null;
       done();
       return;
     }
@@ -745,6 +745,10 @@ function triggerAdminCheat() {
 let backtickTimes = [];
 window.addEventListener('keydown', (ev) => {
   if (ev.key === '`' || ev.code === 'Backquote') {
+    const tag = ev.target && ev.target.tagName;
+    if (ev.repeat || hasBlockingModal() || tag === 'INPUT' || tag === 'TEXTAREA' || ev.target?.isContentEditable) {
+      return;
+    }
     const now = Date.now();
     backtickTimes.push(now);
     // 4.5초 이내의 입력만 유지
@@ -977,7 +981,7 @@ function openAdminModal() {
 
 document.getElementById('game-container').tabIndex = 0;
 document.getElementById('game-container').focus();
-document.body.dataset.engine = '20261119_v1';
+document.body.dataset.engine = '20261119_v2';
 
 // ==========================================
 // 학생 이름 입력 모달
@@ -1105,8 +1109,11 @@ function promptResumeModal(savedLoc, savedStep, onResume, onRestart) {
 
   modal.querySelector('#btn-resume-no').addEventListener('click', () => {
     playSfx('click');
-    // 기기를 넘겨받은 다른 학생일 수 있으므로 이름도 지운다 (이름 입력 창이 다시 뜸)
+    // 기기를 넘겨받은 다른 학생일 수 있으므로 이름과 메모리 원석 상태까지 모두 지운다 (이름 입력 창이 다시 뜸)
     clearProgress({ keepName: false });
+    worldState.ruby = false;
+    worldState.emerald = false;
+    worldState.sapphire = false;
     clearedSteps.clear();
     modal.remove();
     onRestart();

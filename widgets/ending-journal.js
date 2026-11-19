@@ -402,7 +402,7 @@ export function mountEndingJournal(container, onRestart, onGoMinigames) {
             </div>
           </div>
 
-          <!-- 우측: BetterwithU 제작자 푸터 및 마스킹된 교육 문의 링크 -->
+          <!-- 우측: BetterwithU 제작자 푸터 및 제작자 문의 안내 -->
           <div style="text-align: right;">
             <div style="font-size: 0.85rem; color: #c9d1d9;">
               Designed &amp; Developed by <strong style="color: #ffd152; font-weight: 800;">BetterwithU</strong>
@@ -412,7 +412,7 @@ export function mountEndingJournal(container, onRestart, onGoMinigames) {
                 background: none; border: none; color: #58a6ff; font-size: 0.78rem;
                 cursor: pointer; text-decoration: underline; padding: 0;
               ">
-                📧 교육 문의 및 피드백 보내기
+                💬 제작자에게 문의하기
               </button>
             </div>
           </div>
@@ -553,12 +553,42 @@ export function mountEndingJournal(container, onRestart, onGoMinigames) {
     }, 1500);
   });
 
-  // 제작자 교육 문의 메일 (마스킹 - 화면 주소 미노출)
+  // 제작자 문의 안내 (전체화면 유지를 위한 인게임 모달 · 공개 레포 이메일 미노출)
   root.querySelector('#btn-inquiry-mail').addEventListener('click', () => {
     playSfx('click');
-    const targetEmail = 'june_wook@snu.ms.kr';
-    const subject = encodeURIComponent(`[폴리곤과 운명의 주사위] 교육 문의 및 피드백`);
-    window.location.href = `mailto:${targetEmail}?subject=${subject}`;
+
+    const existingModal = root.querySelector('.u6-dialog-modal');
+    if (existingModal) existingModal.remove();
+
+    const modal = document.createElement('div');
+    modal.className = 'u6-dialog-modal no-print';
+    modal.style.cssText = `
+      position: fixed; inset: 0; z-index: 120;
+      background: rgba(8, 6, 4, 0.86); backdrop-filter: blur(8px);
+      display: flex; align-items: center; justify-content: center;
+      padding: 16px; box-sizing: border-box;
+    `;
+    modal.innerHTML = `
+      <div style="width:min(420px, 94%); background:#1e1610; border:2px solid #d4af37; border-radius:14px; padding:24px 20px; text-align:center; color:#f5eedb; box-shadow:0 16px 48px rgba(0,0,0,0.9);">
+        <h3 style="margin:0 0 12px; font-size:1.2rem; font-weight:900; color:#ffd152;">제작자에게 문의하기</h3>
+        <p style="margin:0 0 20px; font-size:0.95rem; line-height:1.6; color:#e6dfd0; word-break:keep-all;">
+          수업 활용 문의, 오류 제보, 개선 의견은<br>수업 담당 선생님 또는 제작자(<strong style="color:#ffd152;">BetterwithU</strong>)에게 전해 주세요.
+        </p>
+        <div style="display:flex; justify-content:center;">
+          <button type="button" data-action="cancel" style="min-width:120px; background:linear-gradient(135deg, #f5b041, #d4af37); color:#1c1308; border:none; border-radius:8px; padding:10px 20px; font-size:0.95rem; font-weight:800; cursor:pointer;">확인</button>
+        </div>
+      </div>
+    `;
+    root.appendChild(modal);
+
+    const closeModal = () => {
+      playSfx('click');
+      modal.remove();
+    };
+    modal.querySelector('[data-action="cancel"]').addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
   });
 
   // 처음부터 다시 하기 (전체화면 유지를 위한 인게임 확인 모달)
