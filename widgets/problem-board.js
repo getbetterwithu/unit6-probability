@@ -1,6 +1,6 @@
 import { renderMathString, texToHtml } from '../engine/math.js';
 import { validateAnswer } from '../engine/math-validator.js';
-import { PROBLEMS } from '../data/problems.js?v=20261117_fix2';
+import { PROBLEMS } from '../data/problems.js?v=20261119_v1';
 import { playSfx } from '../engine/sound.js';
 
 /**
@@ -213,23 +213,14 @@ export function mountProblemBoard(root, problemId, { onSolved, onClose }) {
   const nextContainer = root.querySelector('#board-next-container');
   const nextBtn = root.querySelector('#btn-board-next');
 
-  // KaTeX Live Math Display (2/5 입력 시 실시간 분수 자동 렌더링)
+  // KaTeX Live Math Display (2/5 같은 유효 분수 입력 시에만 실시간 분수 렌더링)
   function updateMathDisplay() {
     const val = inputEl.value.trim();
-    if (!val) {
-      katexDisplay.style.display = 'none';
+    const match = val.match(/^(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)$/);
+    if (match) {
+      katexDisplay.style.display = 'flex';
+      katexDisplay.innerHTML = texToHtml(`\\frac{${match[1]}}{${match[2]}}`);
       return;
-    }
-
-    if (val.includes('/')) {
-      const parts = val.split('/');
-      const num = parts[0].trim();
-      const den = parts[1].trim();
-      if (num && den) {
-        katexDisplay.style.display = 'flex';
-        katexDisplay.innerHTML = texToHtml(`\\frac{${num}}{${den}}`);
-        return;
-      }
     }
     katexDisplay.style.display = 'none';
   }
@@ -394,8 +385,10 @@ export function mountProblemBoard(root, problemId, { onSolved, onClose }) {
   let penWidth = 2.5;
   let eraserWidth = 24;
   let isDrawing = false;
+  let activePointerId = null;
   let strokes = [];
   let currentStroke = null;
+  canvas.style.touchAction = 'none';
 
   function redrawHistory() {
     const rect = container.getBoundingClientRect();
@@ -428,16 +421,20 @@ export function mountProblemBoard(root, problemId, { onSolved, onClose }) {
 
   function getCanvasPos(e) {
     const rect = canvas.getBoundingClientRect();
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
     return {
-      x: clientX - rect.left,
-      y: clientY - rect.top,
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
     };
   }
 
   function startDraw(e) {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    if (isDrawing) return;
+    e.preventDefault();
     isDrawing = true;
+    activePointerId = e.pointerId;
+    try { canvas.setPointerCapture?.(e.pointerId); } catch (_) {}
+
     const pos = getCanvasPos(e);
     currentStroke = {
       tool: currentTool,
@@ -464,37 +461,37 @@ export function mountProblemBoard(root, problemId, { onSolved, onClose }) {
   }
 
   function moveDraw(e) {
-    if (!isDrawing || !currentStroke) return;
+    if (!isDrawing || !currentStroke || e.pointerId !== activePointerId) return;
+    e.preventDefault();
     const pos = getCanvasPos(e);
     currentStroke.points.push(pos);
     ctx.lineTo(pos.x, pos.y);
     ctx.stroke();
   }
 
-  function endDraw() {
+  function endDraw(e) {
     if (!isDrawing) return;
+    if (e && activePointerId !== null && e.pointerId !== activePointerId) return;
     isDrawing = false;
+    activePointerId = null;
     ctx.restore();
   }
 
   function cleanupListeners() {
-    window.removeEventListener('mousemove', moveDraw);
-    window.removeEventListener('mouseup', endDraw);
-    window.removeEventListener('touchmove', moveDraw);
-    window.removeEventListener('touchend', endDraw);
+    canvas.removeEventListener('pointerdown', startDraw);
+    canvas.removeEventListener('pointermove', moveDraw);
+    canvas.removeEventListener('pointerup', endDraw);
+    canvas.removeEventListener('pointercancel', endDraw);
     window.removeEventListener('resize', resizeCanvas);
     // 열려 있던 확대 이미지 창이 있으면 닫는다 (body에 붙어 있어 위젯을 비워도 남음)
     const lb = document.getElementById('board-img-lightbox');
     if (lb) lb.click();
   }
 
-  canvas.addEventListener('mousedown', startDraw);
-  window.addEventListener('mousemove', moveDraw);
-  window.addEventListener('mouseup', endDraw);
-
-  canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDraw(e); }, { passive: false });
-  window.addEventListener('touchmove', moveDraw, { passive: true });
-  window.addEventListener('touchend', endDraw);
+  canvas.addEventListener('pointerdown', startDraw);
+  canvas.addEventListener('pointermove', moveDraw);
+  canvas.addEventListener('pointerup', endDraw);
+  canvas.addEventListener('pointercancel', endDraw);
 
   // 툴바 버튼 이벤트
   const penBtn = root.querySelector('#btn-tool-pen');

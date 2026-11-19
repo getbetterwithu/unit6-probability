@@ -112,7 +112,7 @@ function downloadCertificateImage(studentName, clearDate, certNumber, siteUrl) {
   ctx.textAlign = 'left';
   ctx.fillStyle = '#ffd152';
   ctx.font = 'bold 14px sans-serif';
-  ctx.fillText('• 제2장 · 소폴로스의 야영지 :합의 법칙, 두 주사위 눈으로 구하는 확률', 170, 492);
+  ctx.fillText('• 제2장 · 소폴로스의 야영지 : 합의 법칙, 두 주사위 눈으로 구하는 확률', 170, 492);
   ctx.fillText('• 제3·4장 · 광맥 갱도와 다이아 동굴 : 방정식을 만족하는 경우, 곱이 짝수일 확률', 170, 517);
   ctx.fillText('• 제5장 · 학당 서고 : 일어나지 않을 확률, 특수 주사위의 곱의 확률', 170, 542);
   ctx.fillText('• 제6장 · 다이아 금고 : 편향 주사위 확률, 적어도 하나일 확률, 겹치는 경우 빼기', 170, 567);
@@ -173,6 +173,15 @@ function downloadCertificateImage(studentName, clearDate, certNumber, siteUrl) {
       URL.revokeObjectURL(url);
     }, 1000);
   }, 'image/png');
+}
+
+function escapeHtml(str) {
+  return String(str ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 /**
@@ -305,7 +314,7 @@ export function mountEndingJournal(container, onRestart, onGoMinigames) {
             명 예 수 학 대 원
           </div>
           <div style="font-size: 2rem; color: #58a6ff; font-weight: 900; letter-spacing: 1px;">
-            ${studentName}
+            ${escapeHtml(studentName)}
           </div>
         </div>
 
@@ -388,7 +397,7 @@ export function mountEndingJournal(container, onRestart, onGoMinigames) {
                 📱 모험 다시 접속 및 출처
               </div>
               <div style="font-size: 0.75rem; color: #8b949e; word-break: break-all;">
-                ${currentUrl}
+                ${escapeHtml(currentUrl)}
               </div>
             </div>
           </div>
@@ -479,6 +488,22 @@ export function mountEndingJournal(container, onRestart, onGoMinigames) {
 
   `;
 
+  // 외부 QR 이미지가 학교 방화벽·오프라인 환경에서 차단될 경우 공식 인증 인장 배지로 깔끔하게 대체
+  const qrImg = root.querySelector('.qr-img');
+  if (qrImg) {
+    qrImg.addEventListener('error', () => {
+      const badge = document.createElement('div');
+      badge.style.cssText = `
+        width: 58px; height: 58px; border: 1.5px solid #d4af37; border-radius: 6px;
+        background: rgba(212,175,55,0.12); color: #ffd152; box-sizing: border-box;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        font-size: 10px; font-weight: 900; line-height: 1.25; text-align: center; flex-shrink: 0;
+      `;
+      badge.innerHTML = '<span>✦</span><span>공식</span><span>인증</span>';
+      qrImg.replaceWith(badge);
+    });
+  }
+
   // 상태 관리
   let isSavedOrSent = false;
   const btnRestart = root.querySelector('#journal-btn-restart');
@@ -536,14 +561,50 @@ export function mountEndingJournal(container, onRestart, onGoMinigames) {
     window.location.href = `mailto:${targetEmail}?subject=${subject}`;
   });
 
-  // 처음부터 다시 하기 (완전 데이터 초기화 & 확인 경고 팝업)
+  // 처음부터 다시 하기 (전체화면 유지를 위한 인게임 확인 모달)
   btnRestart.addEventListener('click', () => {
     if (!isSavedOrSent) {
-      alert('⚠️ 먼저 수료증을 이미지나 PDF로 저장해야 다시 시작할 수 있습니다.');
+      playSfx('error');
+      if (guideText) {
+        guideText.textContent = '⚠️ 먼저 수료증을 이미지나 PDF로 저장해야 다시 시작할 수 있습니다.';
+        guideText.style.color = '#ff7675';
+      }
       return;
     }
     playSfx('click');
-    if (confirm('⚠️ 지난 게임의 모든 데이터가 삭제됩니다. 정말로 처음부터 다시 시작하시겠습니까?')) {
+
+    const existingModal = root.querySelector('.u6-dialog-modal');
+    if (existingModal) existingModal.remove();
+
+    const modal = document.createElement('div');
+    modal.className = 'u6-dialog-modal no-print';
+    modal.style.cssText = `
+      position: fixed; inset: 0; z-index: 120;
+      background: rgba(8, 6, 4, 0.86); backdrop-filter: blur(8px);
+      display: flex; align-items: center; justify-content: center;
+      padding: 16px; box-sizing: border-box;
+    `;
+    modal.innerHTML = `
+      <div style="width:min(420px, 94%); background:#1e1610; border:2px solid #d4af37; border-radius:14px; padding:24px 20px; text-align:center; color:#f5eedb; box-shadow:0 16px 48px rgba(0,0,0,0.9);">
+        <h3 style="margin:0 0 12px; font-size:1.2rem; font-weight:900; color:#ffd152;">처음부터 다시 하기</h3>
+        <p style="margin:0 0 20px; font-size:0.95rem; line-height:1.6; color:#e6dfd0; word-break:keep-all;">
+          지난 게임의 모든 진행 데이터가 초기화됩니다.<br>정말로 처음부터 다시 시작하시겠습니까?
+        </p>
+        <div style="display:flex; gap:10px; justify-content:center;">
+          <button type="button" data-action="cancel" style="flex:1; background:#2a1f14; color:#bdc3c7; border:1px solid #5c4324; border-radius:8px; padding:10px 16px; font-size:0.95rem; font-weight:700; cursor:pointer;">취소</button>
+          <button type="button" data-action="confirm" style="flex:1; background:linear-gradient(135deg, #c0392b, #e74c3c); color:#fff; border:none; border-radius:8px; padding:10px 18px; font-size:0.95rem; font-weight:800; cursor:pointer;">초기화하고 재시작</button>
+        </div>
+      </div>
+    `;
+    root.appendChild(modal);
+
+    modal.querySelector('[data-action="cancel"]').addEventListener('click', () => {
+      playSfx('click');
+      modal.remove();
+    });
+    modal.querySelector('[data-action="confirm"]').addEventListener('click', () => {
+      playSfx('click');
+      modal.remove();
       // 이 게임의 진행 키만 지운다 (같은 주소의 다른 앱 데이터는 건드리지 않음)
       if (typeof onRestart === 'function') {
         onRestart();
@@ -551,7 +612,7 @@ export function mountEndingJournal(container, onRestart, onGoMinigames) {
         clearProgress({ keepName: false });
         window.location.reload();
       }
-    }
+    });
   });
 
   root.querySelector('#journal-btn-games').addEventListener('click', () => {

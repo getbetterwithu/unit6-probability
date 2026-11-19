@@ -479,13 +479,11 @@
       width: min(980px, 98%); background: #24180f; border: 2px solid #e5a93b;
       border-radius: 16px; padding: 18px 20px; box-shadow: 0 16px 40px rgba(0,0,0,0.65);
     }
-    .path-pop { background: #fff; color: #1a1a1a; width: min(980px, 98%); }
     .path-pop svg { width: 100%; height: min(62vh, 520px); }
-    .path-pop .dice-hint, .path-pop .dice-readout { color: #1a1a1a; }
 
     /* 타이틀 모바일/데스크톱 대응 */
     .hud-game-title {
-      cursor: pointer;
+      cursor: default;
       -webkit-tap-highlight-color: transparent;
     }
     .hud-title-short { display: none; }
@@ -534,7 +532,7 @@
         padding: 3px 8px !important;
         border-radius: 8px !important;
         box-shadow: 0 2px 8px rgba(0,0,0,0.5) !important;
-        cursor: pointer !important;
+        cursor: default !important;
         touch-action: manipulation !important;
         user-select: none !important;
         -webkit-user-select: none !important;
@@ -560,7 +558,7 @@
         overflow: hidden !important;
         text-overflow: ellipsis !important;
         display: inline-block !important;
-        cursor: pointer !important;
+        cursor: default !important;
         touch-action: manipulation !important;
         user-select: none !important;
         -webkit-user-select: none !important;
@@ -856,6 +854,6 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
-  <script type="module" src="engine/app.js?v=20261117_fix4"></script>
+  <script type="module" src="engine/app.js?v=20261119_v1"></script>
 </body>
 </html>

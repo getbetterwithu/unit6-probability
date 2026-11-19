@@ -1,18 +1,18 @@
-import { SCENARIOS, STEPS } from '../data/scenario.js?v=86';
+import { SCENARIOS, STEPS } from '../data/scenario.js?v=20261119_v1';
 import { createDialogue } from './dialogue.js?v=10';
 import { setTension, refute } from './director.js?v=12';
 import { createStage, preloadSteps } from './stage.js?v=20261117_fix3';
 // 위젯들과 같은 주소로 불러와야 한 모듈(음소거 상태 하나)을 공유한다
 import { playBgm, playSfx, toggleMute, isMuted } from './sound.js';
 import { mountDiceInspector } from '../widgets/dice-inspector.js?v=20261117_fix1';
-import { mountProblemBoard } from '../widgets/problem-board.js?v=20261117_fix2';
+import { mountProblemBoard } from '../widgets/problem-board.js?v=20261119_v1';
 import { mountPathLink } from '../widgets/path-link.js?v=20261110_v6';
 import { mountPecasPick } from '../widgets/pecas-pick.js?v=20261117_fix1';
 import { mountGuguSpeed } from '../widgets/gugu-speed.js?v=20261110_v6';
 import { mountNonogram } from '../widgets/nonogram.js?v=20261110_v6';
 import { createBacklog } from '../widgets/backlog.js?v=1';
 import { mountWorldMap } from '../widgets/world-map.js?v=20261117_fix1';
-import { mountEndingJournal } from '../widgets/ending-journal.js?v=20261117_fix2';
+import { mountEndingJournal } from '../widgets/ending-journal.js?v=20261119_v1';
 import { clearProgress } from './progress.js';
 
 const speakerEl = document.getElementById('speaker-box');
@@ -206,10 +206,83 @@ function markStepCheatCleared(key) {
   markStepCleared(key);
 }
 
+function escapeHtml(str) {
+  return String(str ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function hasBlockingModal() {
+  return Boolean(
+    document.getElementById('cinematic-intro') ||
+    document.getElementById('player-name-modal') ||
+    document.getElementById('resume-modal') ||
+    document.getElementById('admin-cheat-modal') ||
+    document.getElementById('board-img-lightbox') ||
+    document.getElementById('u6-clear-banner') ||
+    document.querySelector('.u6-dialog-modal')
+  );
+}
+
+// 전체화면 모드를 깨뜨리지 않는 게임 내 확인/알림 모달
+function showInGameDialog({ title = '안내', message = '', confirmText = '확인', cancelText = null, danger = false, onConfirm, onCancel } = {}) {
+  const existing = document.querySelector('.u6-dialog-modal');
+  if (existing) existing.remove();
+
+  const overlay = document.createElement('div');
+  overlay.className = 'u6-dialog-modal';
+  overlay.style.cssText = `
+    position: absolute; inset: 0; z-index: 120;
+    background: rgba(8, 6, 4, 0.86); backdrop-filter: blur(8px);
+    display: flex; align-items: center; justify-content: center;
+    padding: 16px; box-sizing: border-box; animation: fadeIn 0.2s ease;
+  `;
+
+  const confirmBg = danger
+    ? 'linear-gradient(135deg, #c0392b, #e74c3c)'
+    : 'linear-gradient(135deg, #d4af37, #f39c12)';
+  const confirmColor = danger ? '#fff' : '#1c1308';
+
+  overlay.innerHTML = `
+    <div style="width:min(440px, 94%); background:#1e1610; border:2px solid #d4af37; border-radius:14px; padding:24px 20px; text-align:center; color:#f5eedb; box-shadow:0 16px 48px rgba(0,0,0,0.9);">
+      <h3 style="margin:0 0 12px; font-size:1.2rem; font-weight:900; color:#ffd152;">${escapeHtml(title)}</h3>
+      <p style="margin:0 0 20px; font-size:0.96rem; line-height:1.6; color:#e6dfd0; word-break:keep-all;">${message}</p>
+      <div style="display:flex; gap:10px; justify-content:center;">
+        ${cancelText ? `<button type="button" data-action="cancel" style="flex:1; background:#2a1f14; color:#bdc3c7; border:1px solid #5c4324; border-radius:8px; padding:10px 16px; font-size:0.95rem; font-weight:700; cursor:pointer;">${escapeHtml(cancelText)}</button>` : ''}
+        <button type="button" data-action="confirm" style="flex:1; background:${confirmBg}; color:${confirmColor}; border:none; border-radius:8px; padding:10px 18px; font-size:0.96rem; font-weight:800; cursor:pointer;">${escapeHtml(confirmText)}</button>
+      </div>
+    </div>
+  `;
+
+  stageContainer.appendChild(overlay);
+
+  const btnCancel = overlay.querySelector('[data-action="cancel"]');
+  const btnConfirm = overlay.querySelector('[data-action="confirm"]');
+
+  if (btnCancel) {
+    btnCancel.addEventListener('click', () => {
+      playSfx('click');
+      overlay.remove();
+      if (onCancel) onCancel();
+    });
+  }
+  btnConfirm.addEventListener('click', () => {
+    playSfx('click');
+    overlay.remove();
+    if (onConfirm) onConfirm();
+  });
+}
+
 // 거점 완료 축하 알림 배너
 function showLocationClearNotice(title, desc, onNext) {
   playSfx('clear');
+  const existing = document.getElementById('u6-clear-banner');
+  if (existing) existing.remove();
   const banner = document.createElement('div');
+  banner.id = 'u6-clear-banner';
   banner.style.cssText = `
     position: absolute; inset: 0; z-index: 55;
     background: rgba(10, 8, 5, 0.88); backdrop-filter: blur(10px);
@@ -486,8 +559,14 @@ const dlg = createDialogue({
     }
 
     if (currentLocation === 'camp') {
+      const alreadyCleared = Boolean(worldState.ruby);
       worldState.ruby = true;
       saveWorldState();
+      if (alreadyCleared) {
+        showToast('🔴 야영지 복습을 마쳤습니다! 지도로 돌아갑니다.', true);
+        openWorldMap();
+        return;
+      }
       showLocationClearNotice(
         '🔴 루비 원석 획득!',
         '소폴로스의 시험과 정오각형 룬 제단(7/36)을 돌파하고 찬란한 루비 원석을 손에 넣었습니다!',
@@ -497,8 +576,14 @@ const dlg = createDialogue({
     }
 
     if (currentLocation === 'mine') {
+      const alreadyCleared = Boolean(worldState.emerald);
       worldState.emerald = true;
       saveWorldState();
+      if (alreadyCleared) {
+        showToast('🟢 광맥 갱도 복습을 마쳤습니다! 지도로 돌아갑니다.', true);
+        openWorldMap();
+        return;
+      }
       showLocationClearNotice(
         '🟢 에메랄드 원석 획득!',
         '선로 한붓그리기와 광맥 석문의 일차방정식(5/36)을 해제하고 신비로운 에메랄드 원석을 손에 넣었습니다!',
@@ -508,8 +593,14 @@ const dlg = createDialogue({
     }
 
     if (currentLocation === 'cave') {
+      const alreadyCleared = Boolean(worldState.sapphire);
       worldState.sapphire = true;
       saveWorldState();
+      if (alreadyCleared) {
+        showToast('🔵 다이아 동굴 복습을 마쳤습니다! 지도로 돌아갑니다.', true);
+        openWorldMap();
+        return;
+      }
       showLocationClearNotice(
         '🔵 사파이어 원석 획득!',
         '피캐스의 정령 잡기와 두 주사위 곱 짝수 확률(3/4)을 풀어내고 영롱한 사파이어 원석을 손에 넣었습니다!',
@@ -589,7 +680,7 @@ if (btnNext) {
 
 // 대화창 클릭 진행
 dialogue.addEventListener('click', (e) => {
-  if (backlog.isOpen() || isMapOpen) return;
+  if (hasBlockingModal() || backlog.isOpen() || isMapOpen) return;
   if (e.target.closest('button')) return;
   if (currentActiveDoneFn && widgetRoot.hidden) {
     playSfx('error');
@@ -606,7 +697,7 @@ dialogue.addEventListener('click', (e) => {
 
 // 화면 전체(배경) 탭/클릭 시에도 대사 진행 지원
 stageContainer.addEventListener('click', (e) => {
-  if (backlog.isOpen() || isMapOpen) return;
+  if (hasBlockingModal() || backlog.isOpen() || isMapOpen) return;
   if (!widgetRoot.hidden) return;
   // 위젯 ✕·모달 버튼처럼 클릭 직후 사라지거나 숨겨지는 요소에서 올라온 클릭은 대사 진행으로 치지 않는다
   if (!e.target.isConnected || e.target.closest('#widget-root') || e.target.closest('button')) return;
@@ -621,10 +712,12 @@ stageContainer.addEventListener('click', (e) => {
 });
 
 // ==========================================
-// 관리자 치트 발동 공통 함수 (PC 백틱 5회 / 모바일 상단 타이틀 5회 탭)
+// 관리자 치트 발동 공통 함수 (PC 백틱 10회 · 일체의 힌트·안내 UI 없음)
 // ==========================================
-// 교사용 치트(백틱 5회 · 타이틀 5회 탭 · ?loc= 바로가기)는 배포 사이트에서도 항상 동작한다.
-// 수업 시연과 점검에 쓰려고 일부러 열어 둔 기능이며, 노출되어도 상관없다는 것이 제작자 결정이다.
+function isLocalHost() {
+  return ['localhost', '127.0.0.1', ''].includes(location.hostname) || location.protocol === 'file:';
+}
+
 function isDebugAllowed() {
   return true;
 }
@@ -632,14 +725,12 @@ function isDebugAllowed() {
 function triggerAdminCheat() {
   if (!isDebugAllowed()) return;
 
-  // [핵심 기능] 현재 풀고 있는 스테이지나 미니게임이 있다면 즉시 정답 처리(Pass)!
+  // [핵심 기능] 현재 풀고 있는 스테이지나 미니게임이 있다면 별도 힌트/토스트 없이 즉시 통과
   if (currentActiveDoneFn) {
     const passFn = currentActiveDoneFn;
     currentActiveDoneFn = null;
     currentActiveMountFn = null;
     currentActiveReopenLabel = '';
-    playSfx('correct');
-    showToast('⚡ [치트 발동] 현재 진행 중인 과제를 통과했습니다! (치트 이력 기록됨)', true);
     const adminModal = document.getElementById('admin-cheat-modal');
     if (adminModal) adminModal.remove();
     passFn(true); // isCheat = true
@@ -650,16 +741,16 @@ function triggerAdminCheat() {
   openAdminModal();
 }
 
-// 1. PC: 키보드 이벤트 리스너 (백틱 치트 및 단축키)
+// 키보드 이벤트 리스너 (백틱 10회 치트 및 단축키)
 let backtickTimes = [];
 window.addEventListener('keydown', (ev) => {
   if (ev.key === '`' || ev.code === 'Backquote') {
     const now = Date.now();
     backtickTimes.push(now);
-    // 2.5초 이내의 입력만 유지
-    backtickTimes = backtickTimes.filter((t) => now - t <= 2500);
+    // 4.5초 이내의 입력만 유지
+    backtickTimes = backtickTimes.filter((t) => now - t <= 4500);
 
-    if (backtickTimes.length >= 5) {
+    if (backtickTimes.length >= 10) {
       backtickTimes = [];
       ev.preventDefault();
       triggerAdminCheat();
@@ -667,10 +758,25 @@ window.addEventListener('keydown', (ev) => {
     }
   }
 
-  // ESC 키로 백로그, 월드맵 또는 관리자 모달 닫기
+  // ESC 키로 라이트박스, 안내 모달, 관리자 모달, 백로그 순차 닫기
   if (ev.key === 'Escape') {
+    const lightbox = document.getElementById('board-img-lightbox');
+    if (lightbox) {
+      ev.preventDefault();
+      lightbox.click();
+      return;
+    }
+    const dialogModal = document.querySelector('.u6-dialog-modal');
+    if (dialogModal) {
+      ev.preventDefault();
+      const cancelBtn = dialogModal.querySelector('[data-action="cancel"]');
+      if (cancelBtn) cancelBtn.click();
+      else dialogModal.remove();
+      return;
+    }
     const adminModal = document.getElementById('admin-cheat-modal');
     if (adminModal) {
+      ev.preventDefault();
       adminModal.remove();
       return;
     }
@@ -681,10 +787,13 @@ window.addEventListener('keydown', (ev) => {
     }
   }
 
+  // 오프닝·모달·축하 배너 등이 열려 있으면 모든 단축키 차단
+  if (hasBlockingModal()) return;
+
   // M 키로 케팔로니아 탐험 지도 토글
   if (ev.key === 'm' || ev.key === 'M') {
     const tag = ev.target && ev.target.tagName;
-    if (tag !== 'INPUT' && tag !== 'TEXTAREA') {
+    if (tag !== 'INPUT' && tag !== 'TEXTAREA' && !demoParam) {
       ev.preventDefault();
       if (isMapOpen) {
         startLocation(lastLocation, lastStepIndex);
@@ -698,7 +807,7 @@ window.addEventListener('keydown', (ev) => {
   // L 키로 대사 로그(Backlog) 토글
   if (ev.key === 'l' || ev.key === 'L') {
     const tag = ev.target && ev.target.tagName;
-    if (tag !== 'INPUT' && tag !== 'TEXTAREA') {
+    if (tag !== 'INPUT' && tag !== 'TEXTAREA' && !demoParam) {
       ev.preventDefault();
       if (backlog.isOpen()) backlog.close();
       else backlog.open(dialogueHistory);
@@ -706,8 +815,8 @@ window.addEventListener('keydown', (ev) => {
     }
   }
 
-  // 백로그나 월드맵이 열려 있을 때는 다른 키 진행 차단
-  if (backlog.isOpen() || isMapOpen) return;
+  // 백로그, 월드맵, 혹은 활성 위젯이 열려 있을 때는 대사 진행 키 차단
+  if (backlog.isOpen() || isMapOpen || !widgetRoot.hidden) return;
 
   const tag = ev.target && ev.target.tagName;
   if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'BUTTON') return;
@@ -727,73 +836,6 @@ window.addEventListener('keydown', (ev) => {
     dlg.prev();
   }
 }, true);
-
-// 2. 모바일/터치: 최상단 타이틀 또는 챕터 배지 5회 연속 탭 감지기 (관리자 치트)
-let hudTapTimes = [];
-let tapFeedbackTimer = null;
-
-function showTapBadge(count) {
-  let badge = document.getElementById('u6-admin-tap-badge');
-  if (!badge) {
-    badge = document.createElement('div');
-    badge.id = 'u6-admin-tap-badge';
-    badge.style.cssText = `
-      position: absolute; top: 52px; left: 50%; transform: translateX(-50%);
-      background: rgba(20, 15, 10, 0.95); border: 1.5px solid #ffd152;
-      color: #ffd152; padding: 4px 14px; border-radius: 20px;
-      font-size: 0.85rem; font-weight: 800; z-index: 9999;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.7); pointer-events: none;
-      transition: opacity 0.2s;
-    `;
-    stageContainer.appendChild(badge);
-  }
-  badge.innerHTML = `⚡ 관리자 치트 탭 [ ${count} / 5 ]`;
-  badge.style.opacity = '1';
-  clearTimeout(tapFeedbackTimer);
-  tapFeedbackTimer = setTimeout(() => {
-    if (badge) badge.style.opacity = '0';
-  }, 1200);
-}
-
-function onAdminTap(e) {
-  // 배포 사이트에서는 탭 횟수 안내 배지도 띄우지 않는다
-  if (!isDebugAllowed()) return;
-  if (e.button && e.button !== 0) return;
-  const now = Date.now();
-  hudTapTimes.push(now);
-  hudTapTimes = hudTapTimes.filter((t) => now - t <= 3500);
-
-  const target = e.currentTarget;
-  if (target) {
-    target.style.transition = 'transform 0.08s';
-    target.style.transform = 'scale(0.92)';
-    setTimeout(() => { if (target) target.style.transform = 'none'; }, 90);
-  }
-
-  const count = hudTapTimes.length;
-  if (count >= 2 && count < 5) {
-    showTapBadge(count);
-  }
-
-  if (count >= 5) {
-    hudTapTimes = [];
-    const badge = document.getElementById('u6-admin-tap-badge');
-    if (badge) badge.remove();
-    try { navigator.vibrate?.([30, 40, 30]); } catch (e) {}
-    e.preventDefault();
-    e.stopPropagation();
-    triggerAdminCheat();
-  }
-}
-
-const hudTitleEl = document.getElementById('hud-game-title') || document.querySelector('.hud-game-title');
-if (hudTitleEl) {
-  hudTitleEl.addEventListener('pointerdown', onAdminTap);
-}
-const hudChapterEl = document.getElementById('hud-chapter');
-if (hudChapterEl) {
-  hudChapterEl.addEventListener('pointerdown', onAdminTap);
-}
 
 // ==========================================
 // 관리자 / 치트 패널 모달
@@ -825,7 +867,7 @@ function openAdminModal() {
       </div>
 
       <p style="font-size:0.88rem; color:#bdc3c7; margin:0 0 14px; line-height:1.45;">
-        빠른 검증을 위한 챕터 워프 및 문제 프리패스 도구입니다. (내 컴퓨터에서 실행할 때만 열립니다)
+        수업 시연 및 점검을 위한 챕터 이동·과제 통과 도구입니다.
       </p>
 
       <!-- 1. 현재 과제 즉시 정답 처리 -->
@@ -879,12 +921,13 @@ function openAdminModal() {
       currentActiveDoneFn = null;
       currentActiveMountFn = null;
       currentActiveReopenLabel = '';
-      playSfx('correct');
-      showToast('⚡ [치트 발동] 현재 진행 중인 과제를 즉시 통과했습니다!', true);
       modal.remove();
       passFn(true); // 치트 통과로 기록 (백틱 경로와 같게)
     } else {
-      alert('현재 활성화된(풀고 있는) 과제나 미니게임이 없습니다.');
+      showInGameDialog({
+        title: '진행 중인 과제 없음',
+        message: '현재 활성화된(풀고 있는) 과제나 미니게임이 없습니다.',
+      });
     }
   });
 
@@ -906,9 +949,9 @@ function openAdminModal() {
     worldState.sapphire = true;
     saveWorldState();
     playSfx('clear');
-    alert('✨ 3대 원석(루비, 에메랄드, 사파이어)을 모두 획득했습니다! 지도로 이동합니다.');
     modal.remove();
     openWorldMap();
+    showToast('✨ 3대 원석을 모두 획득하여 금고 봉인을 해제했습니다!', true);
   });
 
   modal.querySelector('#admin-jump-ending').addEventListener('click', () => {
@@ -917,17 +960,24 @@ function openAdminModal() {
   });
 
   modal.querySelector('#admin-reset-all').addEventListener('click', () => {
-    if (confirm('모든 진행 상황과 저장 데이터를 완전히 초기화하시겠습니까?')) {
-      clearProgress({ keepName: false });
-      clearedSteps.clear();
-      location.reload();
-    }
+    showInGameDialog({
+      title: '데이터 완전 초기화',
+      message: '모든 진행 상황과 저장 데이터를 완전히 초기화하시겠습니까?',
+      confirmText: '초기화',
+      cancelText: '취소',
+      danger: true,
+      onConfirm: () => {
+        clearProgress({ keepName: false });
+        clearedSteps.clear();
+        location.reload();
+      },
+    });
   });
 }
 
 document.getElementById('game-container').tabIndex = 0;
 document.getElementById('game-container').focus();
-document.body.dataset.engine = '20261117_fix4';
+document.body.dataset.engine = '20261119_v1';
 
 // ==========================================
 // 학생 이름 입력 모달
@@ -1029,7 +1079,7 @@ function promptResumeModal(savedLoc, savedStep, onResume, onRestart) {
       <div style="font-size:42px; margin-bottom:8px;">📜</div>
       <h2 style="font-size:1.4rem; font-weight:800; color:#ffd152; margin:0 0 12px; letter-spacing:0.5px;">이전 모험 기록 발견</h2>
       <p style="font-size:1.02rem; line-height:1.6; color:#bdc3c7; margin:0 0 20px; word-break:keep-all;">
-        <strong style="color:#ffd152;">${studentName}</strong> 대원의 이전 탐험 기록<br>
+        <strong style="color:#ffd152;">${escapeHtml(studentName)}</strong> 대원의 이전 탐험 기록<br>
         <strong style="color:#ffeaa7;">${locName}</strong> (원석: ${gemCount} / 3개)이 남아 있습니다.<br>
         이어서 모험을 계속하시겠습니까?
       </p>
@@ -1125,11 +1175,17 @@ if (demoParam) {
   clearWidgetRoot();
   reopenBtn.style.display = 'none';
 
-  const exitDemo = (msg = '체험을 종료하시겠소?') => {
+  const exitDemo = (msg = '체험을 종료하시겠습니까?') => {
     // 취소하면 화면을 그대로 둔다 (체험 모드에는 「다시 열기」 대상이 없음)
-    if (confirm(`${msg}\n미니게임 목록 페이지로 돌아가시겠습니까?`)) {
-      location.href = 'games.html';
-    }
+    showInGameDialog({
+      title: '미니게임 체험',
+      message: `${escapeHtml(msg)}<br>미니게임 목록 페이지로 돌아가시겠습니까?`,
+      confirmText: '목록으로 이동',
+      cancelText: '계속하기',
+      onConfirm: () => {
+        location.href = 'games.html';
+      },
+    });
   };
 
   if (demoParam === 'nonogram') {
@@ -1175,8 +1231,8 @@ if (demoParam) {
   // 알 수 없는 거점 이름이 저장돼 있으면 이어하기 대상에서 제외한다
   if (savedLoc && savedLoc !== 'map' && !SCENARIOS[savedLoc]) savedLoc = null;
 
-  if (locParam && SCENARIOS[locParam] && isDebugAllowed()) {
-    // URL에 직접 ?loc=camp 등으로 지정한 경우 (거점 건너뛰기라 내 컴퓨터에서 실행할 때만 허용)
+  if (locParam && SCENARIOS[locParam] && isLocalHost()) {
+    // URL에 직접 ?loc=camp 등으로 지정한 경우 (로컬 테스트 환경에서만 허용, 배포 시 3원석 잠금 우회 차단)
     startLocation(locParam, 0);
   } else if (savedLoc && (savedLoc !== 'intro' || savedStep > 0)) {
     // 이전에 플레이하던 기록이 있는 경우
